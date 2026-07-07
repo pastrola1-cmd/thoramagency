@@ -3,6 +3,7 @@ import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { AuthProvider } from "@/context/AuthContext";
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -36,11 +37,14 @@ export default function RootLayout({
   return (
     <html lang="en" className={`dark ${outfit.variable} ${inter.variable}`}>
       <body className="font-body antialiased bg-void text-ice min-h-screen overflow-x-hidden flex flex-col justify-between">
-        <Navbar />
-        <div className="flex-grow">{children}</div>
-        <Footer />
+        <AuthProvider>
+          <Navbar />
+          <div className="flex-grow">{children}</div>
+          <Footer />
+        </AuthProvider>
       </body>
     </html>
   );
 }
+
 
