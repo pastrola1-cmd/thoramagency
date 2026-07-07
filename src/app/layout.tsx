@@ -1,5 +1,20 @@
 import type { Metadata } from "next";
+import { Outfit, Inter } from "next/font/google";
 import "./globals.css";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-body",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "Thoram Group — Growth, Engineered.",
@@ -19,10 +34,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="dark">
-      <body className="font-body antialiased bg-void text-ice min-h-screen overflow-x-hidden">
-        {children}
+    <html lang="en" className={`dark ${outfit.variable} ${inter.variable}`}>
+      <body className="font-body antialiased bg-void text-ice min-h-screen overflow-x-hidden flex flex-col justify-between">
+        <Navbar />
+        <div className="flex-grow">{children}</div>
+        <Footer />
       </body>
     </html>
   );
 }
+
