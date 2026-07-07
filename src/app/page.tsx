@@ -4,6 +4,7 @@ import DashboardMockup from "@/components/DashboardMockup";
 import Products from "@/components/Products";
 import Outcomes from "@/components/Outcomes";
 import CaseStudies from "@/components/CaseStudies";
+import ContactForm from "@/components/ContactForm";
 import AIAssistant from "@/components/AIAssistant";
 
 export default function Home() {
@@ -15,10 +16,12 @@ export default function Home() {
       <Products />
       <Outcomes />
       <CaseStudies />
+      <ContactForm />
       <AIAssistant />
     </main>
   );
 }
+
 
 
 
