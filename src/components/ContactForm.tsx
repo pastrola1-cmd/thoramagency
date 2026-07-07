@@ -4,6 +4,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import { CheckCircle2, ChevronRight, ChevronLeft, ArrowRight, ShieldCheck } from "lucide-react";
 
+import { collection, addDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
 // ─── Step Steps ───
 const steps = [
   { id: 1, title: "Company Profile" },
@@ -22,6 +25,8 @@ export default function ContactForm() {
     budget: "",
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -44,11 +49,40 @@ export default function ContactForm() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, log to console (wired to Firestore in Loop 17)
-    console.log("Selective Application Submitted:", formData);
-    setIsSubmitted(true);
+    setSubmitError("");
+    setSubmitting(true);
+
+    try {
+      const isMock = process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.startsWith("mock-");
+
+      if (isMock) {
+        // Mock Firestore fallback (Local Storage)
+        const currentApps = localStorage.getItem("thoram_mock_applications") || "[]";
+        const appsList = JSON.parse(currentApps);
+        appsList.push({
+          ...formData,
+          id: `mock-app-${Math.random().toString(36).substr(2, 9)}`,
+          timestamp: new Date().toISOString(),
+        });
+        localStorage.setItem("thoram_mock_applications", JSON.stringify(appsList));
+        console.log("Mock Firestore App Saved:", formData);
+      } else {
+        // Real Firestore sync
+        await addDoc(collection(db, "applications"), {
+          ...formData,
+          timestamp: new Date().toISOString(),
+        });
+        console.log("Real Firestore App Saved:", formData);
+      }
+      setIsSubmitted(true);
+    } catch (err: any) {
+      console.error("Application submit error:", err);
+      setSubmitError(err?.message || "Submit failed. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -268,12 +302,19 @@ export default function ContactForm() {
                   ) : (
                     <button
                       type="submit"
-                      className="btn btn-primary px-6 py-3 rounded-lg flex items-center gap-1.5 text-body-sm font-semibold shadow-glow animate-pulse"
+                      disabled={submitting}
+                      className="btn btn-primary px-6 py-3 rounded-lg flex items-center gap-1.5 text-body-sm font-semibold shadow-glow"
                     >
-                      Apply for Strategy Call <ArrowRight className="w-4 h-4" />
+                      {submitting ? "Submitting..." : "Apply for Strategy Call"} <ArrowRight className="w-4 h-4" />
                     </button>
                   )}
                 </div>
+
+                {submitError && (
+                  <div className="mt-4 p-3 rounded-lg border border-danger/25 bg-danger/10 text-danger text-[10px] font-mono text-center">
+                    {submitError}
+                  </div>
+                )}
 
               </form>
             ) : (
