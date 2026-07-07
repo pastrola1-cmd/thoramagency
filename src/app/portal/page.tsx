@@ -2,11 +2,13 @@
 
 import { useAuth } from "@/context/AuthContext";
 import LoopTracker from "@/components/portal/LoopTracker";
-import { ArrowUpRight, Zap, RefreshCw, CreditCard } from "lucide-react";
+import BillingConsole from "@/components/portal/BillingConsole";
+import { ArrowUpRight, Zap, RefreshCw, CreditCard, LayoutDashboard } from "lucide-react";
 import { useState } from "react";
 
 export default function PortalPage() {
   const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<"workspace" | "billing">("workspace");
   const [requestStatus, setRequestStatus] = useState("");
 
   const handleRequestNextLoop = () => {
@@ -46,18 +48,45 @@ export default function PortalPage() {
             </div>
           )}
 
-          <a
-            href="#"
+          <button
+            onClick={() => setActiveTab("billing")}
             className="btn btn-secondary py-2.5 px-4 rounded-xl text-body-xs font-mono font-bold flex items-center gap-1.5"
           >
             <CreditCard className="w-3.5 h-3.5" /> Billing Console <ArrowUpRight className="w-3.5 h-3.5 text-mist" />
-          </a>
+          </button>
         </div>
       </div>
 
-      {/* Main Loop Tracker Widget */}
-      <LoopTracker />
+      {/* Tabs Selector */}
+      <div className="flex border-b border-steel/30 gap-6">
+        <button
+          onClick={() => setActiveTab("workspace")}
+          className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
+            activeTab === "workspace"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-mist hover:text-frost"
+          }`}
+        >
+          <LayoutDashboard className="w-4 h-4" /> Workspace
+        </button>
+        <button
+          onClick={() => setActiveTab("billing")}
+          className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
+            activeTab === "billing"
+              ? "border-cyan-500 text-cyan-400"
+              : "border-transparent text-mist hover:text-frost"
+          }`}
+        >
+          <CreditCard className="w-4 h-4" /> Billing & Invoices
+        </button>
+      </div>
+
+      {/* Conditional Sub-Widgets */}
+      <div>
+        {activeTab === "workspace" ? <LoopTracker /> : <BillingConsole />}
+      </div>
 
     </div>
   );
 }
+
