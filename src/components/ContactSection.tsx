@@ -2,18 +2,26 @@
 
 import { useState } from "react";
 import { MessageCircle, Mail, Send, CheckCircle2, ArrowRight, Clock } from "lucide-react";
+import { submitLeadViaWhatsApp, mailtoFallback } from "@/lib/lead";
 
 export default function ContactSection() {
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    company: "",
+    interest: "AI Agents & Digital Workers",
+    message: "",
+  });
+
+  const update = (field: keyof typeof form) => (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+  ) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      setFormSubmitted(true);
-    }, 1000);
+    submitLeadViaWhatsApp(form);
+    setFormSubmitted(true);
   };
 
   return (
@@ -22,12 +30,12 @@ export default function ContactSection() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
           {/* Left Column: Direct Call-to-Action & WhatsApp */}
           <div className="lg:col-span-5 space-y-6">
-            <div className="pill-badge">Let's Build</div>
+            <div className="pill-badge">Start a Project</div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-              Ready to build something <span className="cyan-gradient">remarkable?</span>
+              Tell us what you're building.
             </h2>
             <p className="text-base text-zinc-400 leading-relaxed">
-              Book a free 30-minute discovery session. We’ll analyze your bottlenecks, identify high-impact AI/software opportunities, and outline exactly how we’d build it.
+              We'll tell you honestly if and how we can help — and send a scoped proposal within 48 hours.
             </p>
             <p className="text-sm font-mono text-cyan-400">
               No sales pitch. Zero pressure. Just clarity.
@@ -84,19 +92,28 @@ export default function ContactSection() {
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">Discovery Request Received</h3>
+                <h3 className="text-2xl font-bold text-white">Inquiry Ready to Send</h3>
                 <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-                  Thank you for reaching out. Our engineering director will review your requirements and reach out within 24 hours with next steps.
+                  WhatsApp opened with your project details pre-filled. Press <strong className="text-white">Send</strong> and our team will reply within one business day.
                 </p>
-                <div className="pt-2">
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
-                    href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20just%20submitted%20a%20project%20inquiry."
+                    href={`https://wa.me/2349067914511?text=${encodeURIComponent(
+                      `NEW PROJECT INQUIRY — Thoram Group\n\nName: ${form.name}\nEmail: ${form.email}${form.company ? `\nCompany: ${form.company}` : ""}\nInterest: ${form.interest}\n\nDetails:\n${form.message}`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 text-emerald-400 text-xs font-semibold"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
-                    <span>Follow up on WhatsApp</span>
+                    <span>Open WhatsApp Again</span>
+                  </a>
+                  <a
+                    href={mailtoFallback(form)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-200 text-xs font-semibold"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Send via Email Instead</span>
                   </a>
                 </div>
               </div>
@@ -110,6 +127,8 @@ export default function ContactSection() {
                     <input
                       required
                       type="text"
+                      value={form.name}
+                      onChange={update("name")}
                       placeholder="e.g. Alex Oladimeji"
                       className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
                     />
@@ -121,6 +140,8 @@ export default function ContactSection() {
                     <input
                       required
                       type="email"
+                      value={form.email}
+                      onChange={update("email")}
                       placeholder="alex@company.com"
                       className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
                     />
@@ -134,6 +155,8 @@ export default function ContactSection() {
                     </label>
                     <input
                       type="text"
+                      value={form.company}
+                      onChange={update("company")}
                       placeholder="e.g. Acme Health"
                       className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
                     />
@@ -142,11 +165,15 @@ export default function ContactSection() {
                     <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
                       Primary Interest
                     </label>
-                    <select className="w-full bg-[#0E0E14] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors">
-                      <option value="ai">AI Agents & Digital Workers</option>
-                      <option value="web">Web & Cloud Engineering</option>
-                      <option value="mobile">Native Mobile Application</option>
-                      <option value="strategy">Strategy & Technical Advisory</option>
+                    <select
+                      value={form.interest}
+                      onChange={update("interest")}
+                      className="w-full bg-[#0E0E14] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors"
+                    >
+                      <option value="AI Agents & Digital Workers">AI Agents & Digital Workers</option>
+                      <option value="Web & Cloud Engineering">Web & Cloud Engineering</option>
+                      <option value="Native Mobile Application">Native Mobile Application</option>
+                      <option value="Strategy & Technical Advisory">Strategy & Technical Advisory</option>
                     </select>
                   </div>
                 </div>
@@ -158,6 +185,8 @@ export default function ContactSection() {
                   <textarea
                     required
                     rows={4}
+                    value={form.message}
+                    onChange={update("message")}
                     placeholder="Briefly describe your product goals, team bottlenecks, or existing tech stack..."
                     className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors resize-none"
                   />
@@ -165,17 +194,12 @@ export default function ContactSection() {
 
                 <button
                   type="submit"
-                  disabled={loading}
                   className="w-full btn-solid text-sm py-3.5 font-bold"
                 >
-                  {loading ? (
-                    <span>Submitting Discovery Request...</span>
-                  ) : (
-                    <span className="flex items-center justify-center gap-2">
-                      <span>Request Discovery Session</span>
-                      <Send className="w-4 h-4" />
-                    </span>
-                  )}
+                  <span className="flex items-center justify-center gap-2">
+                    <span>Request Discovery Session</span>
+                    <Send className="w-4 h-4" />
+                  </span>
                 </button>
               </form>
             )}

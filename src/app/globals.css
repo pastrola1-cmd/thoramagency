@@ -22,6 +22,19 @@
     --brand-cyan: #06B6D4;
     --brand-cyan-light: #22D3EE;
     --brand-indigo: #6366F1;
+
+    /* Design-system aliases used by token-based components */
+    --bg-obsidian: #050507;
+    --bg-void: #070709;
+    --bg-graphite: #0E0E12;
+    --bg-slate: #14141A;
+    --border-steel: rgba(255, 255, 255, 0.07);
+    --text-ice: #F4F4F6;
+    --text-frost: #9E9EA8;
+    --text-mist: #62626D;
+    --glass-bg: rgba(18, 18, 24, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.07);
+    --glass-hover: rgba(255, 255, 255, 0.15);
   }
 
   html {
@@ -138,5 +151,40 @@
 
   .btn-ghost {
     @apply inline-flex items-center justify-center gap-2 bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.1] hover:border-white/[0.2] text-zinc-200 px-6 py-3 rounded-lg transition-all duration-200 active:scale-[0.98];
+  }
+
+  /* Token-based glass surface (used by legacy token components) */
+  .glass {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase bg-white/[0.05] border border-white/[0.08] text-cyan-400 text-[11px] font-mono;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 active:scale-[0.98];
+  }
+
+  .btn-primary {
+    background: #06B6D4;
+    color: #050507;
+    @apply hover:bg-cyan-400;
+  }
+
+  .btn-secondary {
+    color: #0F172A;
+    background: linear-gradient(135deg, #22D3EE 0%, #06B6D4 100%);
+    @apply hover:opacity-90;
+  }
+
+  .btn-outline {
+    border: 1px solid var(--border-steel);
+    color: var(--text-ice);
+    background: rgba(255, 255, 255, 0.04);
+    @apply hover:bg-white/[0.08];
   }
 }

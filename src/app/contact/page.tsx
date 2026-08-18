@@ -3,12 +3,13 @@
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { Send, MessageCircle, Mail, CheckCircle2, Clock, ArrowRight } from "lucide-react";
+import { submitLeadViaWhatsApp, mailtoFallback } from "@/lib/lead";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [company, setCompany] = useState("");
-  const [service, setService] = useState("ai-agents");
+  const [service, setService] = useState("AI Agents & Digital Workers");
   const [message, setMessage] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -17,10 +18,11 @@ export default function ContactPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    submitLeadViaWhatsApp({ name, email, company, interest: service, message });
     setTimeout(() => {
       setIsSubmitting(false);
       setSubmitSuccess(true);
-    }, 1000);
+    }, 600);
   };
 
   return (
@@ -28,12 +30,12 @@ export default function ContactPage() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         {/* Page Title */}
         <div className="max-w-3xl mb-16">
-          <div className="pill-badge mb-3">Let's Build</div>
+          <div className="pill-badge mb-3">Start a Project</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
-            Ready to build something <span className="cyan-gradient">remarkable?</span>
+            Tell us what you're building.
           </h1>
           <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
-            Book a free 30-minute discovery call. We'll identify your highest-impact opportunity, review technical feasibility, and outline exactly how we'd build it. No sales pitch. Just clarity.
+            We'll tell you honestly if and how we can help — and send a scoped proposal within 48 hours. No sales pitch. Just clarity.
           </p>
         </div>
 
@@ -98,19 +100,28 @@ export default function ContactPage() {
                 <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">Discovery Request Received</h3>
+                <h3 className="text-2xl font-bold text-white">Inquiry Ready to Send</h3>
                 <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-                  Thank you for reaching out. Our engineering director will review your project parameters and contact you within 24 hours with an actionable roadmap.
+                  WhatsApp opened with your project details pre-filled. Press <strong className="text-white">Send</strong> and our team will reply within one business day.
                 </p>
-                <div className="pt-4">
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
-                    href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20just%20submitted%20a%20project%20inquiry."
+                    href={`https://wa.me/2349067914511?text=${encodeURIComponent(
+                      `NEW PROJECT INQUIRY — Thoram Group\n\nName: ${name}\nEmail: ${email}${company ? `\nCompany: ${company}` : ""}\nInterest: ${service}\n\nDetails:\n${message}`
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold hover:bg-emerald-500/20 transition-colors"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold"
                   >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>Follow up instantly on WhatsApp</span>
+                    <MessageCircle className="w-3.5 h-3.5" />
+                    <span>Open WhatsApp Again</span>
+                  </a>
+                  <a
+                    href={mailtoFallback({ name, email, company, interest: service, message })}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-200 text-xs font-semibold"
+                  >
+                    <Mail className="w-3.5 h-3.5" />
+                    <span>Send via Email Instead</span>
                   </a>
                 </div>
               </div>
@@ -167,10 +178,10 @@ export default function ContactPage() {
                       onChange={(e) => setService(e.target.value)}
                       className="w-full bg-[#0E0E14] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors"
                     >
-                      <option value="ai-agents">AI Agents & Autonomous Digital Workers</option>
-                      <option value="web-engineering">Product Design & Web Engineering</option>
-                      <option value="mobile-apps">Native Mobile App Development</option>
-                      <option value="strategy-advisory">Strategy & Technical Advisory</option>
+                      <option value="AI Agents & Digital Workers">AI Agents & Digital Workers</option>
+                      <option value="Web & Cloud Engineering">Product Design & Web Engineering</option>
+                      <option value="Native Mobile Application">Native Mobile App Development</option>
+                      <option value="Strategy & Technical Advisory">Strategy & Technical Advisory</option>
                     </select>
                   </div>
                 </div>
