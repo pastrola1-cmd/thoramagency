@@ -37,6 +37,19 @@ export default function ContactForm() {
 
   const handleNext = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (currentStep === 1) {
+      if (!formData.companyName.trim() || !formData.revenueRange) {
+        setSubmitError("Please fill out all fields on this step before proceeding.");
+        return;
+      }
+    }
+    if (currentStep === 2) {
+      if (!formData.primaryGoal || !formData.biggestChallenge.trim()) {
+        setSubmitError("Please fill out all fields on this step before proceeding.");
+        return;
+      }
+    }
+    setSubmitError("");
     if (currentStep < 3) {
       setCurrentStep(currentStep + 1);
     }
@@ -44,6 +57,7 @@ export default function ContactForm() {
 
   const handlePrev = (e: React.MouseEvent) => {
     e.preventDefault();
+    setSubmitError("");
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -52,34 +66,50 @@ export default function ContactForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitError("");
+    
+    // Final validations
+    if (!formData.timeline || !formData.budget) {
+      setSubmitError("Please complete all budget and timeline fields.");
+      return;
+    }
+
     setSubmitting(true);
 
     try {
       const isMock = process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.startsWith("mock-");
+      const appTimestamp = new Date().toISOString();
 
       if (isMock) {
         // Mock Firestore fallback (Local Storage)
         const currentApps = localStorage.getItem("thoram_mock_applications") || "[]";
-        const appsList = JSON.parse(currentApps);
+        let appsList = [];
+        try {
+          appsList = JSON.parse(currentApps);
+        } catch (err) {
+          console.error("Failed to parse mock applications, resetting list", err);
+          appsList = [];
+        }
+        
+        const appId = `mock-app-${Math.random().toString(36).substring(2, 11)}`;
         appsList.push({
           ...formData,
-          id: `mock-app-${Math.random().toString(36).substr(2, 9)}`,
-          timestamp: new Date().toISOString(),
+          id: appId,
+          timestamp: appTimestamp,
         });
         localStorage.setItem("thoram_mock_applications", JSON.stringify(appsList));
-        console.log("Mock Firestore App Saved:", formData);
+        console.log(`Mock App Saved: ${appId}`);
       } else {
         // Real Firestore sync
         await addDoc(collection(db, "applications"), {
           ...formData,
-          timestamp: new Date().toISOString(),
+          timestamp: appTimestamp,
         });
-        console.log("Real Firestore App Saved:", formData);
+        console.log("App Saved successfully to database");
       }
       setIsSubmitted(true);
-    } catch (err: any) {
-      console.error("Application submit error:", err);
-      setSubmitError(err?.message || "Submit failed. Please try again.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setSubmitError(message);
     } finally {
       setSubmitting(false);
     }
@@ -151,29 +181,31 @@ export default function ContactForm() {
                     className="space-y-6"
                   >
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-company-name" className="block text-caption text-mist uppercase font-mono mb-2">
                         Company Name
                       </label>
                       <input
+                        id="contact-company-name"
                         type="text"
                         name="companyName"
                         value={formData.companyName}
                         onChange={handleInputChange}
                         placeholder="e.g. Acme Corporation"
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
                         required
                       />
                     </div>
 
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-revenue-range" className="block text-caption text-mist uppercase font-mono mb-2">
                         Current Annual Revenue Range
                       </label>
                       <select
+                        id="contact-revenue-range"
                         name="revenueRange"
                         value={formData.revenueRange}
                         onChange={handleInputChange}
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
                         required
                       >
                         <option value="">Select current range...</option>
@@ -197,14 +229,15 @@ export default function ContactForm() {
                     className="space-y-6"
                   >
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-primary-goal" className="block text-caption text-mist uppercase font-mono mb-2">
                         Primary Growth Objective
                       </label>
                       <select
+                        id="contact-primary-goal"
                         name="primaryGoal"
                         value={formData.primaryGoal}
                         onChange={handleInputChange}
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
                         required
                       >
                         <option value="">Select your main goal...</option>
@@ -216,16 +249,17 @@ export default function ContactForm() {
                     </div>
 
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-bottleneck" className="block text-caption text-mist uppercase font-mono mb-2">
                         What is your biggest current bottleneck?
                       </label>
                       <textarea
+                        id="contact-bottleneck"
                         name="biggestChallenge"
                         value={formData.biggestChallenge}
                         onChange={handleInputChange}
                         rows={3}
                         placeholder="e.g. Sales reps spending 10h/week on CRM entries, cold outreach conversion is below 1%..."
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors resize-none"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors resize-none"
                         required
                       />
                     </div>
@@ -243,14 +277,15 @@ export default function ContactForm() {
                     className="space-y-6"
                   >
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-timeline" className="block text-caption text-mist uppercase font-mono mb-2">
                         Target Timeline
                       </label>
                       <select
+                        id="contact-timeline"
                         name="timeline"
                         value={formData.timeline}
                         onChange={handleInputChange}
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
                         required
                       >
                         <option value="">Select target window...</option>
@@ -261,14 +296,15 @@ export default function ContactForm() {
                     </div>
 
                     <div>
-                      <label className="block text-caption text-mist uppercase font-mono mb-2">
+                      <label htmlFor="contact-budget" className="block text-caption text-mist uppercase font-mono mb-2">
                         Target Monthly Growth Budget
                       </label>
                       <select
+                        id="contact-budget"
                         name="budget"
                         value={formData.budget}
                         onChange={handleInputChange}
-                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                        className="w-full bg-void border border-steel rounded-xl px-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
                         required
                       >
                         <option value="">Select monthly range...</option>
@@ -311,7 +347,7 @@ export default function ContactForm() {
                 </div>
 
                 {submitError && (
-                  <div className="mt-4 p-3 rounded-lg border border-danger/25 bg-danger/10 text-danger text-[10px] font-mono text-center">
+                  <div role="alert" className="mt-4 p-3 rounded-lg border border-danger/25 bg-danger/10 text-danger text-[10px] font-mono text-center">
                     {submitError}
                   </div>
                 )}

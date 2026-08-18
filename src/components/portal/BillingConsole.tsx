@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { CreditCard, CheckCircle2, ShieldCheck, HelpCircle, Loader2, ArrowUpRight, Zap } from "lucide-react";
+import { CreditCard, CheckCircle2, ShieldCheck, HelpCircle, Loader2, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Invoice {
@@ -13,6 +13,8 @@ interface Invoice {
   status: "Paid" | "Pending";
   ref: string;
 }
+
+const LOOP_PRICE = 2500;
 
 export default function BillingConsole() {
   const { user } = useAuth();
@@ -59,21 +61,24 @@ export default function BillingConsole() {
       const handler = (window as any).PaystackPop.setup({
         key: publicKey,
         email: user?.email || "billing@company.com",
-        amount: 2500 * 100, // $2,500 in kobo/cents
+        amount: LOOP_PRICE * 100,
         currency: "USD",
         ref: "thoram-" + Math.floor(Math.random() * 1000000000 + 1),
         callback: (response: any) => {
           setLoadingPaystack(false);
           const newInvoice: Invoice = {
-            id: `INV-2026-00${invoices.length + 1}`,
+            id: `INV-2026-${String(invoices.length + 1).padStart(3, '0')}`,
             item: "Loop 15: Firestore Database & Sync Release",
-            amount: "$2,500.00",
+            amount: `$${LOOP_PRICE.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
             date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
             status: "Paid",
             ref: response.reference,
           };
           setInvoices([newInvoice, ...invoices]);
           setSuccessToast("Loop funded successfully! Release scheduled.");
+          setTimeout(() => {
+            setSuccessToast('');
+          }, 4000);
         },
         onClose: () => {
           setLoadingPaystack(false);
@@ -91,9 +96,9 @@ export default function BillingConsole() {
     setMockModalOpen(false);
     const mockRef = "mock-payref-" + Math.floor(Math.random() * 100000000);
     const newInvoice: Invoice = {
-      id: `INV-2026-00${invoices.length + 1}`,
+      id: `INV-2026-${String(invoices.length + 1).padStart(3, '0')}`,
       item: "Loop 15: Firestore Database & Sync Release",
-      amount: "$2,500.00",
+      amount: `$${LOOP_PRICE.toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
       date: new Date().toLocaleDateString("en-US", { month: "short", day: "2-digit", year: "numeric" }),
       status: "Paid",
       ref: mockRef,
@@ -145,7 +150,7 @@ export default function BillingConsole() {
               </div>
 
               <div className="text-left sm:text-right space-y-2">
-                <div className="text-display-sm font-bold text-ice">$2,500<span className="text-body-xs text-frost font-normal"> / loop</span></div>
+                <div className="text-display-sm font-bold text-ice">${LOOP_PRICE.toLocaleString()}<span className="text-body-xs text-frost font-normal"> / loop</span></div>
                 <button
                   onClick={handlePaystackPayment}
                   disabled={loadingPaystack}
@@ -242,7 +247,7 @@ export default function BillingConsole() {
       {/* Paystack Mock Checkout Popup Overlay */}
       <AnimatePresence>
         {mockModalOpen && (
-          <div className="fixed inset-0 bg-void/90 backdrop-blur-md z-50 flex items-center justify-center p-6">
+          <div className="fixed inset-0 bg-void/90 backdrop-blur-md z-50 flex items-center justify-center p-6" role="dialog" aria-modal="true" onKeyDown={(e) => e.key === 'Escape' && setMockModalOpen(false)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -268,7 +273,7 @@ export default function BillingConsole() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-frost">Payable:</span>
-                  <span className="text-cyan-400 font-bold">$2,500.00</span>
+                  <span className="text-cyan-400 font-bold">${`${LOOP_PRICE.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-frost">User Email:</span>

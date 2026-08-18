@@ -3,7 +3,7 @@
 import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Bot, LogOut, LayoutDashboard, Settings } from "lucide-react";
+import { Bot, LogOut, LayoutDashboard } from "lucide-react";
 import Link from "next/link";
 
 export default function PortalLayout({ children }: { children: React.ReactNode }) {
@@ -48,7 +48,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           {/* Header */}
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-obsidian">
-              <Bot className="w-4.5 h-4.5" />
+              <Bot className="w-[18px] h-[18px]" />
             </div>
             <span className="font-display text-body-md font-bold text-ice">
               Console <span className="text-cyan-400">v1.0</span>

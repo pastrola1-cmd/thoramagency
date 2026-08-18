@@ -1,29 +1,36 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { articles } from "@/data/articles";
-import { ArrowLeft, BookOpen, Clock, Calendar, ArrowRight } from "lucide-react";
+import { ArrowLeft, BookOpen, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { notFound } from "next/navigation";
 
-export default function ArticlePage() {
-  const params = useParams();
-  const slug = params?.slug as string;
+interface PageProps {
+  params: {
+    slug: string;
+  };
+}
 
+export function generateStaticParams() {
+  return articles.map((art) => ({
+    slug: art.slug,
+  }));
+}
+
+export async function generateMetadata({ params }: PageProps) {
+  const article = articles.find((art) => art.slug === params.slug);
+  if (!article) return {};
+  return {
+    title: `${article.title} — Thoram Insights`,
+    description: article.excerpt,
+  };
+}
+
+export default function ArticlePage({ params }: PageProps) {
+  const slug = params.slug;
   const article = articles.find((art) => art.slug === slug);
-  const relatedArticles = articles.filter((art) => art.slug !== slug);
+  const relatedArticles = articles.filter((art) => art.slug !== slug).slice(0, 3);
 
   if (!article) {
-    return (
-      <div className="min-h-screen bg-void flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="font-display text-display-sm font-bold text-ice mb-4">Article Not Found</h2>
-          <Link href="/insights" className="btn btn-primary">
-            ← Back to Insights
-          </Link>
-        </div>
-      </div>
-    );
+    notFound();
   }
 
   // Parse paragraphs/markdown simply for presentation
@@ -48,12 +55,7 @@ export default function ArticlePage() {
 
       <div className="max-w-6xl mx-auto relative z-10 flex flex-col lg:flex-row gap-12 items-start">
         {/* Main Article Content */}
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          className="flex-1 max-w-3xl glass rounded-2xl p-6 md:p-10 border border-steel/60"
-        >
+        <article className="flex-1 max-w-3xl glass rounded-2xl p-6 md:p-10 border border-steel/60">
           {/* Metadata */}
           <div className="flex items-center gap-4 text-body-xs text-mist font-mono mb-6">
             <span className="text-caption px-2.5 py-1 rounded bg-cyan-glow border border-cyan-border/30 text-cyan-400">
@@ -79,26 +81,26 @@ export default function ArticlePage() {
             {paragraphs.map((p, idx) => {
               const text = p.trim();
 
-              // Custom simple parser headings/lists/code blocks
-              if (text.startsWith("# ")) {
+              // Custom simple parser check order (most specific first)
+              if (text.startsWith("### ")) {
                 return (
-                  <h2 key={idx} className="font-display text-body-lg md:text-display-sm font-bold text-ice pt-4 mb-2">
-                    {text.replace("# ", "")}
-                  </h2>
+                  <h4 key={idx} className="font-display text-body-md font-semibold text-ice pt-2 mb-1">
+                    {text.replace(/^###\s+/, "")}
+                  </h4>
                 );
               }
               if (text.startsWith("## ")) {
                 return (
                   <h3 key={idx} className="font-display text-body-lg font-bold text-ice pt-4 mb-2">
-                    {text.replace("## ", "")}
+                    {text.replace(/^##\s+/, "")}
                   </h3>
                 );
               }
-              if (text.startsWith("### ")) {
+              if (text.startsWith("# ")) {
                 return (
-                  <h4 key={idx} className="font-display text-body-md font-semibold text-ice pt-2 mb-1">
-                    {text.replace("### ", "")}
-                  </h4>
+                  <h2 key={idx} className="font-display text-body-lg md:text-display-sm font-bold text-ice pt-4 mb-2">
+                    {text.replace(/^#\s+/, "")}
+                  </h2>
                 );
               }
               if (text.startsWith("`")) {
@@ -122,15 +124,10 @@ export default function ArticlePage() {
               return <p key={idx} className="text-frost">{text}</p>;
             })}
           </div>
-        </motion.article>
+        </article>
 
         {/* Related Articles Sidebar */}
-        <motion.aside
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="w-full lg:w-80 flex-shrink-0 space-y-6"
-        >
+        <aside className="w-full lg:w-80 flex-shrink-0 space-y-6">
           <div className="glass rounded-xl p-5 border border-steel/60">
             <h3 className="font-display text-body-md font-bold text-ice mb-4 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-cyan-500" />
@@ -156,7 +153,7 @@ export default function ArticlePage() {
               ))}
             </div>
           </div>
-        </motion.aside>
+        </aside>
       </div>
     </div>
   );

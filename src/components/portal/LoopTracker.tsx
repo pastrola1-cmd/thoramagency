@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { CheckCircle2, Play, Lock, Award, ArrowRight } from "lucide-react";
+import { CheckCircle2, Play, Lock, Award } from "lucide-react";
 
 // ─── Loops Data ───
 const loops = [
@@ -90,7 +90,7 @@ export default function LoopTracker() {
                 <div>
                   <div className="flex items-center justify-between mb-2">
                     <span className="text-[10px] text-ice font-bold font-mono">
-                      LOOP_0{loop.id}
+                      LOOP_{String(loop.id).padStart(2, "0")}
                     </span>
 
                     {/* Badge */}

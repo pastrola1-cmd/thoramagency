@@ -122,7 +122,7 @@ export default function DashboardMockup() {
           <h2 className="font-display text-display-md md:text-display-lg font-bold text-ice mb-4">
             Measure Every Step of Your Growth
           </h2>
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-yellow-500/20 bg-warningGlow text-warning text-body-xs font-mono">
+          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-yellow-500/20 bg-warning-glow text-warning text-body-xs font-mono">
             <ShieldCheck className="w-3.5 h-3.5" />
             Sample Growth Report — illustrative data
           </div>

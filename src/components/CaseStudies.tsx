@@ -6,13 +6,30 @@ import {
   ShieldAlert,
   ChevronDown,
   Building2,
-  TrendingUp,
   Quote,
   Sparkles,
+  Cpu,
+  Trophy,
 } from "lucide-react";
 
-// ─── Case Studies Data ───
-const caseStudies = [
+interface CaseStudy {
+  id: string;
+  category: string;
+  title: string;
+  metrics: { label: string; value: string }[];
+  problem: string;
+  solution: string;
+  technology: string[];
+  result: string;
+  testimonial: {
+    quote: string;
+    author: string;
+    company: string;
+  };
+  accent: string;
+}
+
+const caseStudies: CaseStudy[] = [
   {
     id: "logistics-saas",
     category: "Logistics SaaS",
@@ -24,7 +41,10 @@ const caseStudies = [
     problem:
       "A B2B logistics SaaS platform relied entirely on manual outbound sales agents, resulting in inconsistent pipeline velocity and high acquisition costs.",
     solution:
-      "Deployed the AI Sales Engine to dynamically scrape target leads, qualify profile fit, and trigger personalized email sequences. Integrated real-time tracking via Growth OS.",
+      "Deployed autonomous AI agents to dynamically scrape target leads, qualify profile fit, and trigger personalized outbound email sequences.",
+    technology: ["Gemini Pro", "Next.js", "PostgreSQL", "Resend API"],
+    result:
+      "Successfully scaled pipeline generation, creating over $3.4 million in qualified pipeline opportunities while reducing customer acquisition costs by 42%.",
     testimonial: {
       quote:
         "The automated sourcing pipeline completely changed our outbound strategy. We generated more pipeline value in 3 months than the entire previous year.",
@@ -44,7 +64,10 @@ const caseStudies = [
     problem:
       "A high-volume financial transaction company was driving massive traffic but struggling with a low conversion rate on their onboarding forms.",
     solution:
-      "Implemented Conversion Lab's visual heatmapping and programmatic copy matching. Deployed contextual A/B variations based on visitor traffic sources.",
+      "Implemented a customized visual layout system with programmatic copy matching and dynamic A/B landing variations based on traffic sources.",
+    technology: ["Next.js", "Tailwind CSS", "A/B Testing", "Mixpanel Analytics"],
+    result:
+      "Onboarding conversions multiplied by 3.8x, boosting active registration rates by 180% within 30 days of deployment.",
     testimonial: {
       quote:
         "We saw conversion rates double within 30 days of deploying the optimized layouts. The intelligence behind the form adjustments is incredible.",
@@ -64,7 +87,10 @@ const caseStudies = [
     problem:
       "An AI-powered medical diagnostics startup struggled to gain market trust and authority online, leading to a long sales cycle.",
     solution:
-      "Leveraged the Brand Visibility Engine to auto-generate high-quality editorial content, optimize semantic keywords, and distribute announcements to medical outlets.",
+      "Leveraged a semantic keyword optimization engine to auto-generate high-quality content, and distribute announcements to medical outlets.",
+    technology: ["Node.js", "Gemini API", "SEO Schema", "Google Search Console"],
+    result:
+      "Boosted organic search visibility by 320%, reducing sales cycles as inbound demo requests multiplied by 2.5x.",
     testimonial: {
       quote:
         "The content strategy drove qualified inbound prospects who already trusted our brand. Our demo velocity has never been higher.",
@@ -110,8 +136,9 @@ export default function CaseStudies() {
                 className={`glass rounded-2xl overflow-hidden border transition-all duration-300 ${study.accent}`}
               >
                 {/* Header card view */}
-                <div
-                  className="p-6 md:p-8 cursor-pointer flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-glass-hover/50 transition-colors"
+                <button
+                  className="p-6 md:p-8 w-full text-left flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-glass-hover/50 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 rounded-t-2xl"
+                  aria-expanded={isExpanded}
                   onClick={() => toggleExpand(study.id)}
                 >
                   <div className="flex-1 space-y-2">
@@ -150,7 +177,7 @@ export default function CaseStudies() {
                       <ChevronDown className="w-4 h-4" />
                     </motion.div>
                   </div>
-                </div>
+                </button>
 
                 {/* Expanded Details */}
                 <AnimatePresence initial={false}>
@@ -177,23 +204,52 @@ export default function CaseStudies() {
                       <div className="px-6 pb-8 md:px-8 md:pb-10 border-t border-steel/30 pt-6 space-y-6 bg-void/30">
                         {/* Process columns */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                          <div>
-                            <div className="flex items-center gap-2 text-cyan-400 mb-2 font-mono text-caption uppercase">
-                              <ShieldAlert className="w-3.5 h-3.5" />
-                              The Challenge
+                          {/* Col 1: Problem & Solution */}
+                          <div className="space-y-4">
+                            <div>
+                              <div className="flex items-center gap-2 text-cyan-400 mb-1.5 font-mono text-caption uppercase">
+                                <ShieldAlert className="w-3.5 h-3.5" />
+                                The Challenge
+                              </div>
+                              <p className="text-body-xs md:text-body-sm text-frost leading-relaxed">
+                                {study.problem}
+                              </p>
                             </div>
-                            <p className="text-body-sm text-frost leading-relaxed">
-                              {study.problem}
-                            </p>
+                            <div>
+                              <div className="flex items-center gap-2 text-emerald-400 mb-1.5 font-mono text-caption uppercase">
+                                <Sparkles className="w-3.5 h-3.5" />
+                                The Solution
+                              </div>
+                              <p className="text-body-xs md:text-body-sm text-frost leading-relaxed">
+                                {study.solution}
+                              </p>
+                            </div>
                           </div>
-                          <div>
-                            <div className="flex items-center gap-2 text-emerald-400 mb-2 font-mono text-caption uppercase">
-                              <Sparkles className="w-3.5 h-3.5" />
-                              The Solution
+
+                          {/* Col 2: Technology & Result */}
+                          <div className="space-y-4">
+                            <div>
+                              <div className="flex items-center gap-2 text-cyan-400 mb-1.5 font-mono text-caption uppercase">
+                                <Cpu className="w-3.5 h-3.5" />
+                                Engineered Stack
+                              </div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {study.technology.map((tech) => (
+                                  <span key={tech} className="text-[9px] text-ice bg-steel/40 px-2 py-0.5 rounded font-mono">
+                                    {tech}
+                                  </span>
+                                ))}
+                              </div>
                             </div>
-                            <p className="text-body-sm text-frost leading-relaxed">
-                              {study.solution}
-                            </p>
+                            <div>
+                              <div className="flex items-center gap-2 text-emerald-400 mb-1.5 font-mono text-caption uppercase">
+                                <Trophy className="w-3.5 h-3.5" />
+                                Quantified Result
+                              </div>
+                              <p className="text-body-xs md:text-body-sm text-frost leading-relaxed">
+                                {study.result}
+                              </p>
+                            </div>
                           </div>
                         </div>
 

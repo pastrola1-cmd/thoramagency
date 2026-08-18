@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Sparkles, X, MessageSquare, ArrowRight, Bot } from "lucide-react";
 
 // ─── Conversational Mapping ───
@@ -40,11 +40,19 @@ export default function AIAssistant() {
   ]);
   const [hasInteracted, setHasInteracted] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [usedKeys, setUsedKeys] = useState<string[]>([]);
+  
+  const chatEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isTyping]);
 
   const handleOptionClick = (key: string, label: string) => {
     if (isTyping) return;
 
     setHasInteracted(true);
+    setUsedKeys((prev) => [...prev, key]);
     // Add user message
     setMessages((prev) => [...prev, { sender: "user", text: label }]);
     setIsTyping(true);
@@ -63,6 +71,34 @@ export default function AIAssistant() {
       ]);
     }, 900);
   };
+
+  const handleCtaClick = () => {
+    setIsOpen(false);
+    const el = document.getElementById("apply");
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.location.href = "/#apply";
+    }
+  };
+
+  const handleReset = () => {
+    setUsedKeys([]);
+    setHasInteracted(false);
+    setMessages([
+      {
+        sender: "ai",
+        text: "Hello! I'm Thoram's growth helper. What is your biggest growth hurdle today?",
+      },
+    ]);
+  };
+
+  const availableOptions = [
+    { key: "leads", label: "Leads Sourcing" },
+    { key: "conversion", label: "Site Conversions" },
+    { key: "visibility", label: "Brand Visibility" },
+    { key: "automation", label: "Process Automation" },
+  ].filter((opt) => !usedKeys.includes(opt.key));
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
@@ -117,7 +153,10 @@ export default function AIAssistant() {
                     <p>{msg.text}</p>
                     
                     {msg.action && (
-                      <button className="mt-3 w-full btn btn-primary py-2 px-3 text-[10px] rounded-lg flex items-center justify-center gap-1 font-mono font-bold shadow-sm">
+                      <button
+                        onClick={handleCtaClick}
+                        className="mt-3 w-full btn btn-primary py-2 px-3 text-[10px] rounded-lg flex items-center justify-center gap-1 font-mono font-bold shadow-sm"
+                      >
                         {msg.action}
                         <ArrowRight className="w-3 h-3" />
                       </button>
@@ -136,28 +175,38 @@ export default function AIAssistant() {
                   </div>
                 </div>
               )}
+              
+              <div ref={chatEndRef} />
             </div>
 
-            {/* Action buttons (only show if not user-interacted or after response) */}
+            {/* Action buttons */}
             <div className="p-4 border-t border-steel/50 bg-graphite/20">
-              {!hasInteracted || !isTyping ? (
-                <div className="grid grid-cols-2 gap-2">
-                  {[
-                    { key: "leads", label: "Leads Sourcing" },
-                    { key: "conversion", label: "Site Conversions" },
-                    { key: "visibility", label: "Brand Visibility" },
-                    { key: "automation", label: "Process Automation" },
-                  ].map((opt) => (
-                    <button
-                      key={opt.key}
-                      onClick={() => handleOptionClick(opt.key, opt.label)}
-                      className="p-2 text-[10px] text-left rounded-lg border border-steel/60 hover:border-cyan-border/60 bg-steel/20 hover:bg-cyan-glow/20 text-frost hover:text-cyan-300 font-mono transition-colors duration-300"
-                    >
-                      {opt.label}
-                    </button>
-                  ))}
-                </div>
-              ) : null}
+              {!isTyping && (
+                <>
+                  {availableOptions.length > 0 ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      {availableOptions.map((opt) => (
+                        <button
+                          key={opt.key}
+                          onClick={() => handleOptionClick(opt.key, opt.label)}
+                          className="p-2 text-[10px] text-left rounded-lg border border-steel/60 hover:border-cyan-border/60 bg-steel/20 hover:bg-cyan-glow/20 text-frost hover:text-cyan-300 font-mono transition-colors duration-300"
+                        >
+                          {opt.label}
+                        </button>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-1">
+                      <button
+                        onClick={handleReset}
+                        className="px-4 py-2 text-[10px] rounded-lg border border-cyan-500/30 bg-cyan-glow/10 text-cyan-400 font-mono hover:bg-cyan-glow/20 transition-all duration-300"
+                      >
+                        Ask Another Question
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           </motion.div>
         )}
@@ -168,6 +217,7 @@ export default function AIAssistant() {
         onClick={() => setIsOpen(!isOpen)}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
+        aria-label={isOpen ? "Close chat assistant" : "Open chat assistant"}
         className="p-4 rounded-full bg-cyan-500 hover:bg-cyan-400 text-obsidian shadow-glow hover:shadow-glow-lg transition-all duration-300 border border-cyan-400/20 relative group"
       >
         <div className="absolute inset-0 rounded-full bg-cyan-500/20 blur group-hover:scale-125 transition-transform duration-300" />

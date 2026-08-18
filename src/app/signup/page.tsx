@@ -5,7 +5,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { ArrowRight, Lock, Mail, AlertCircle, Bot, UserPlus } from "lucide-react";
+import { ArrowRight, Lock, Mail, AlertCircle, UserPlus, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const { signup } = useAuth();
@@ -34,8 +34,9 @@ export default function SignupPage() {
     try {
       await signup(email, password);
       router.push("/portal");
-    } catch (err: any) {
-      setError(err?.message || "Registration failed. Try again.");
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : String(err);
+      setError(message);
     } finally {
       setSubmitting(false);
     }
@@ -67,7 +68,7 @@ export default function SignupPage() {
 
         {/* Error alert */}
         {error && (
-          <div className="p-3.5 rounded-xl border border-danger/20 bg-danger/10 text-danger text-body-xs flex items-start gap-2.5 mb-6">
+          <div role="alert" className="p-3.5 rounded-xl border border-danger/20 bg-danger/10 text-danger text-body-xs flex items-start gap-2.5 mb-6">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
             <span>{error}</span>
           </div>
@@ -76,52 +77,55 @@ export default function SignupPage() {
         {/* Form */}
         <form onSubmit={handleSignup} className="space-y-5">
           <div>
-            <label className="block text-caption text-mist uppercase font-mono mb-2">
+            <label htmlFor="signup-email" className="block text-caption text-mist uppercase font-mono mb-2">
               Email Address
             </label>
             <div className="relative">
               <Mail className="absolute left-4 top-3.5 w-4 h-4 text-mist" />
               <input
+                id="signup-email"
                 type="email"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="developer@company.com"
-                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-caption text-mist uppercase font-mono mb-2">
+            <label htmlFor="signup-password" className="block text-caption text-mist uppercase font-mono mb-2">
               Password
             </label>
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 w-4 h-4 text-mist" />
               <input
+                id="signup-password"
                 type="password"
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Minimum 6 characters"
-                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
               />
             </div>
           </div>
 
           <div>
-            <label className="block text-caption text-mist uppercase font-mono mb-2">
+            <label htmlFor="signup-confirm-password" className="block text-caption text-mist uppercase font-mono mb-2">
               Confirm Password
             </label>
             <div className="relative">
               <Lock className="absolute left-4 top-3.5 w-4 h-4 text-mist" />
               <input
+                id="signup-confirm-password"
                 type="password"
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 placeholder="Confirm password"
-                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 outline-none transition-colors"
+                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
               />
             </div>
           </div>
@@ -129,10 +133,11 @@ export default function SignupPage() {
           <button
             type="submit"
             disabled={submitting}
+            aria-busy={submitting}
             className="w-full btn btn-primary py-3.5 rounded-xl text-body-xs font-mono font-bold flex items-center justify-center gap-1.5 shadow-glow"
           >
             {submitting ? "Registering..." : "Create Account"}
-            <ArrowRight className="w-4 h-4" />
+            {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
           </button>
         </form>
 

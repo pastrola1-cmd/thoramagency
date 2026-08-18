@@ -1,27 +1,21 @@
 import Hero from "@/components/Hero";
 import TrustBar from "@/components/TrustBar";
-import DashboardMockup from "@/components/DashboardMockup";
-import Products from "@/components/Products";
-import Outcomes from "@/components/Outcomes";
-import CaseStudies from "@/components/CaseStudies";
-import ContactForm from "@/components/ContactForm";
-import AIAssistant from "@/components/AIAssistant";
+import ServicesSection from "@/components/ServicesSection";
+import SelectedWork from "@/components/SelectedWork";
+import ProcessSection from "@/components/ProcessSection";
+import WhyUsSection from "@/components/WhyUsSection";
+import ContactSection from "@/components/ContactSection";
 
 export default function Home() {
   return (
-    <main>
+    <main className="min-h-screen bg-[#070709] text-white selection:bg-cyan-500/30 selection:text-white">
       <Hero />
       <TrustBar />
-      <DashboardMockup />
-      <Products />
-      <Outcomes />
-      <CaseStudies />
-      <ContactForm />
-      <AIAssistant />
+      <ServicesSection />
+      <SelectedWork />
+      <ProcessSection />
+      <WhyUsSection />
+      <ContactSection />
     </main>
   );
 }
-
-
-
-

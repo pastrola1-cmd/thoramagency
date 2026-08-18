@@ -11,6 +11,7 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 // ─── Products Data ───
 const products = [
@@ -121,6 +122,7 @@ const cardVariants = {
 
 export default function Products() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
+  const router = useRouter();
 
   return (
     <section className="section bg-void relative overflow-hidden" id="products">
@@ -158,15 +160,19 @@ export default function Products() {
               <motion.div
                 key={prod.id}
                 variants={cardVariants}
-                className={`glass rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-500 ${prod.className}`}
+                role="button"
+                tabIndex={0}
+                onClick={() => router.push(`/products/${prod.id}`)}
+                onKeyDown={(e) => e.key === "Enter" && router.push(`/products/${prod.id}`)}
+                className={`glass rounded-2xl p-6 flex flex-col justify-between relative overflow-hidden group cursor-pointer transition-all duration-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 ${prod.className}`}
                 onMouseEnter={() => setHoveredCard(prod.id)}
                 onMouseLeave={() => setHoveredCard(null)}
                 style={{
                   boxShadow: isHovered
                     ? `0 12px 40px -10px ${prod.glow}, inset 0 1px 0 0 rgba(255, 255, 255, 0.05)`
                     : "inset 0 1px 0 0 rgba(255, 255, 255, 0.03)",
-                  transform: isHovered ? "translateY(-4px)" : "translateY(0)",
                 }}
+                whileHover={{ y: -4 }}
               >
                 {/* Accent Background Glow */}
                 <div

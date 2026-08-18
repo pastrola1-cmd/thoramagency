@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: "class",
   content: [
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,17 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Core palette
-        obsidian:    "#050A14",
-        void:        "#080E1C",
-        graphite:    "#0C1425",
-        slate:       "#141E33",
-        steel:       "#1C2A44",
+        // Core palette mapped to dynamic CSS variables
+        obsidian:    "var(--bg-obsidian)",
+        void:        "var(--bg-void)",
+        graphite:    "var(--bg-graphite)",
+        slate:       "var(--bg-slate)",
+        steel:       "var(--border-steel)",
         
-        // Text
-        ice:         "#E8EDF5",
-        frost:       "#A3B1CC",
-        mist:        "#5E6F8A",
+        // Text mapped to dynamic CSS variables
+        ice:         "var(--text-ice)",
+        frost:       "var(--text-frost)",
+        mist:        "var(--text-mist)",
         
         // Accent — Electric Cyan
         cyan: {
@@ -41,10 +42,10 @@ const config: Config = {
         warning:     "#F59E0B",
         danger:      "#EF4444",
         
-        // Glass tokens (for bg-* usage)
-        "glass-white":  "rgba(255, 255, 255, 0.03)",
-        "glass-border": "rgba(255, 255, 255, 0.06)",
-        "glass-hover":  "rgba(255, 255, 255, 0.05)",
+        // Glass tokens (mapped to dynamic CSS variables for bg-* / border-* usage)
+        "glass-white":  "var(--glass-bg)",
+        "glass-border": "var(--glass-border)",
+        "glass-hover":  "var(--glass-hover)",
         "cyan-glow":    "rgba(6, 182, 212, 0.15)",
         "cyan-border":  "rgba(6, 182, 212, 0.25)",
         "success-glow": "rgba(16, 185, 129, 0.15)",

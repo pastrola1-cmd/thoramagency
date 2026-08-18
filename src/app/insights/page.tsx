@@ -1,26 +1,10 @@
-"use client";
-
-import { motion } from "framer-motion";
 import { articles } from "@/data/articles";
-import { ArrowRight, BookOpen, Clock, Calendar } from "lucide-react";
+import { ArrowRight, Clock, Calendar } from "lucide-react";
 import Link from "next/link";
 
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.08,
-    },
-  },
-};
-
-const cardVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.5, ease: [0.16, 1, 0.3, 1] },
-  },
+export const metadata = {
+  title: "Insights & Strategy — Thoram Group",
+  description: "In-depth guides, engineering breakdowns, and tactical strategies to scale pipelines, improve site conversions, and build automated infrastructure.",
 };
 
 export default function InsightsPage() {
@@ -52,19 +36,10 @@ export default function InsightsPage() {
         </div>
 
         {/* Articles Grid */}
-        <motion.div
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((art) => (
-            <Link key={art.slug} href={`/insights/${art.slug}`} className="block h-full">
-              <motion.div
-                variants={cardVariants}
-                whileHover={{ y: -4 }}
-                className="h-full glass rounded-2xl p-6 border border-steel/60 hover:border-cyan-border/60 transition-all duration-300 flex flex-col justify-between hover:shadow-glow/20"
-              >
+            <Link key={art.slug} href={`/insights/${art.slug}`} className="block h-full group">
+              <div className="h-full glass rounded-2xl p-6 border border-steel/60 hover:border-cyan-border/60 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between hover:shadow-glow/20">
                 <div>
                   {/* Category & Date */}
                   <div className="flex items-center justify-between mb-4">
@@ -96,10 +71,10 @@ export default function InsightsPage() {
                     Read Article <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>
-              </motion.div>
+              </div>
             </Link>
           ))}
-        </motion.div>
+        </div>
       </div>
     </div>
   );

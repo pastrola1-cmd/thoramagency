@@ -1,349 +1,138 @@
 "use client";
 
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
-import { ArrowRight, Play } from "lucide-react";
-import { useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { ArrowRight, MessageCircle, Sparkles, CheckCircle2, ShieldCheck, Zap, Bot, Code, Cpu } from "lucide-react";
+import Link from "next/link";
 
-// ─── Animation Variants ───
-const containerVariants = {
-  hidden: {},
-  visible: {
-    transition: {
-      staggerChildren: 0.12,
-      delayChildren: 0.3,
-    },
-  },
-};
-
-const fadeUpVariant = {
-  hidden: { opacity: 0, y: 40, filter: "blur(8px)" },
-  visible: {
-    opacity: 1,
-    y: 0,
-    filter: "blur(0px)",
-    transition: {
-      duration: 0.8,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
-
-const scaleInVariant = {
-  hidden: { opacity: 0, scale: 0.9 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    transition: {
-      duration: 0.6,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
-
-const lineVariant = {
-  hidden: { scaleX: 0 },
-  visible: {
-    scaleX: 1,
-    transition: {
-      duration: 1.2,
-      ease: [0.16, 1, 0.3, 1],
-    },
-  },
-};
-
-// ─── Animated Gradient Mesh Background ───
-function GradientMesh() {
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {/* Primary cyan orb — slow drift */}
-      <motion.div
-        className="absolute w-[800px] h-[800px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(6, 182, 212, 0.12) 0%, transparent 70%)",
-          top: "-10%",
-          right: "-15%",
-        }}
-        animate={{
-          x: [0, 30, -20, 10, 0],
-          y: [0, -25, 15, -10, 0],
-          scale: [1, 1.08, 0.95, 1.03, 1],
-        }}
-        transition={{
-          duration: 18,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Secondary deep blue orb */}
-      <motion.div
-        className="absolute w-[600px] h-[600px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, rgba(20, 30, 51, 0.3) 50%, transparent 70%)",
-          bottom: "-20%",
-          left: "-10%",
-        }}
-        animate={{
-          x: [0, -20, 25, -15, 0],
-          y: [0, 20, -10, 25, 0],
-          scale: [1, 0.96, 1.06, 0.98, 1],
-        }}
-        transition={{
-          duration: 22,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Small accent orb */}
-      <motion.div
-        className="absolute w-[300px] h-[300px] rounded-full"
-        style={{
-          background: "radial-gradient(circle, rgba(34, 211, 238, 0.08) 0%, transparent 70%)",
-          top: "40%",
-          left: "30%",
-        }}
-        animate={{
-          x: [0, 40, -30, 20, 0],
-          y: [0, -30, 20, -15, 0],
-        }}
-        transition={{
-          duration: 15,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
-      />
-
-      {/* Grid lines overlay */}
-      <div
-        className="absolute inset-0 opacity-[0.03]"
-        style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)
-          `,
-          backgroundSize: "80px 80px",
-        }}
-      />
-
-      {/* Top gradient fade */}
-      <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-void to-transparent" />
-      
-      {/* Bottom gradient fade */}
-      <div className="absolute bottom-0 left-0 right-0 h-48 bg-gradient-to-t from-void to-transparent" />
-    </div>
-  );
-}
-
-// ─── Magnetic Button ───
-function MagneticButton({
-  children,
-  className = "",
-  variant = "primary",
-}: {
-  children: React.ReactNode;
-  className?: string;
-  variant?: "primary" | "secondary";
-}) {
-  const ref = useRef<HTMLButtonElement>(null);
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 300, damping: 20 });
-  const springY = useSpring(y, { stiffness: 300, damping: 20 });
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top + rect.height / 2;
-    x.set((e.clientX - centerX) * 0.15);
-    y.set((e.clientY - centerY) * 0.15);
-  };
-
-  const handleMouseLeave = () => {
-    x.set(0);
-    y.set(0);
-  };
-
-  const baseStyles =
-    variant === "primary"
-      ? "btn btn-primary text-base px-8 py-4 rounded-xl"
-      : "btn btn-secondary text-base px-8 py-4 rounded-xl";
-
-  return (
-    <motion.button
-      ref={ref}
-      className={`${baseStyles} ${className}`}
-      style={{ x: springX, y: springY }}
-      onMouseMove={handleMouseMove}
-      onMouseLeave={handleMouseLeave}
-      whileTap={{ scale: 0.97 }}
-    >
-      {children}
-    </motion.button>
-  );
-}
-
-// ─── Floating Particles ───
-function FloatingParticles() {
-  const particles = Array.from({ length: 20 }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 8 + 12,
-    delay: Math.random() * 5,
-  }));
-
-  return (
-    <div className="absolute inset-0 overflow-hidden pointer-events-none">
-      {particles.map((p) => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full bg-cyan-500/20"
-          style={{
-            width: p.size,
-            height: p.size,
-            left: `${p.x}%`,
-            top: `${p.y}%`,
-          }}
-          animate={{
-            y: [0, -30, 10, -20, 0],
-            opacity: [0.2, 0.6, 0.3, 0.5, 0.2],
-          }}
-          transition={{
-            duration: p.duration,
-            repeat: Infinity,
-            delay: p.delay,
-            ease: "easeInOut",
-          }}
-        />
-      ))}
-    </div>
-  );
-}
-
-// ─── Hero Component ───
 export default function Hero() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
-      {/* Animated background */}
-      <GradientMesh />
-      <FloatingParticles />
+    <section className="relative min-h-[90vh] flex flex-col justify-center pt-32 pb-20 overflow-hidden">
+      {/* Background Subtle Radial Gradient */}
+      <div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[450px] bg-cyan-500/[0.07] rounded-full blur-[140px] pointer-events-none" />
 
-      {/* Content */}
-      <motion.div
-        className="relative z-10 max-w-5xl mx-auto px-6 py-32 text-center"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        {/* Eyebrow */}
-        <motion.div variants={fadeUpVariant} className="mb-6">
-          <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-border bg-cyan-glow/50 text-cyan-400 text-body-xs font-semibold tracking-widest uppercase">
-            <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />
-            AI-Powered Growth Engine
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 relative z-10 w-full">
+        {/* Top Eyebrow Badge */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/[0.08] mb-8"
+        >
+          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+          <span className="text-xs font-mono font-medium text-cyan-300">
+            Product Studio & Technology Consulting Firm
           </span>
         </motion.div>
 
-        {/* Headline */}
+        {/* Main Headline */}
         <motion.h1
-          variants={fadeUpVariant}
-          className="font-display text-display-xl md:text-display-2xl font-extrabold tracking-tight mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-white max-w-4xl leading-[1.08] mb-6"
         >
-          <span className="text-ice">Growth,</span>{" "}
-          <span className="text-gradient-cyan">Engineered.</span>
+          We design, engineer, and scale digital products for{" "}
+          <span className="cyan-gradient">ambitious teams.</span>
         </motion.h1>
 
-        {/* Decorative line */}
-        <motion.div
-          variants={lineVariant}
-          className="w-24 h-0.5 bg-gradient-to-r from-transparent via-cyan-500 to-transparent mx-auto mb-8 origin-center"
-        />
-
-        {/* Subheadline */}
+        {/* Subhead Narrative */}
         <motion.p
-          variants={fadeUpVariant}
-          className="text-body-lg md:text-body-xl text-frost max-w-2xl mx-auto mb-12 leading-relaxed"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+          className="text-lg sm:text-xl text-zinc-400 max-w-2xl leading-relaxed mb-10"
         >
-          We combine{" "}
-          <span className="text-ice font-medium">AI, software, automation, and marketing</span>{" "}
-          to help ambitious companies generate more customers, increase revenue,
-          and scale faster.
+          From custom AI agents and enterprise web platforms to high-performance mobile apps. We turn complex operational bottlenecks into reliable, revenue-generating software.
         </motion.p>
 
-        {/* CTA Buttons */}
+        {/* Action CTAs */}
         <motion.div
-          variants={fadeUpVariant}
-          className="flex flex-col sm:flex-row items-center justify-center gap-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+          className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-16"
         >
-          <MagneticButton variant="primary">
-            Book Strategy Call
-            <ArrowRight className="w-4 h-4 ml-1" />
-          </MagneticButton>
+          {/* Primary CTA */}
+          <Link
+            href="/contact"
+            className="btn-solid text-sm font-bold py-3.5 px-6 flex items-center justify-center gap-2 group shadow-lg shadow-cyan-500/20"
+          >
+            <span>Book a Free Discovery Call</span>
+            <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+          </Link>
 
-          <MagneticButton variant="secondary">
-            <Play className="w-4 h-4 mr-1 fill-current" />
-            See Our Platform
-          </MagneticButton>
+          {/* Secondary WhatsApp Direct */}
+          <a
+            href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20am%20interested%20in%20discussing%20a%20project."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn-ghost text-sm font-semibold py-3.5 px-6 flex items-center justify-center gap-2"
+          >
+            <MessageCircle className="w-4 h-4 text-emerald-400" />
+            <span>Chat on WhatsApp</span>
+          </a>
         </motion.div>
 
-        {/* Bottom stats bar */}
+        {/* Capability Matrix Console Box */}
         <motion.div
-          variants={fadeUpVariant}
-          className="mt-20 grid grid-cols-2 md:grid-cols-4 gap-6 max-w-3xl mx-auto"
+          initial={{ opacity: 0, y: 25 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="p-6 sm:p-8 rounded-2xl studio-glass border border-white/[0.08]"
         >
-          {[
-            { value: "300%", label: "Average ROI" },
-            { value: "10x", label: "Lead Generation" },
-            { value: "50+", label: "Companies Scaled" },
-            { value: "98%", label: "Client Retention" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              className="text-center group"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: 1.4 + i * 0.1,
-                duration: 0.6,
-                ease: [0.16, 1, 0.3, 1],
-              }}
-            >
-              <div className="font-display text-display-sm md:text-display-md text-cyan-400 font-bold group-hover:text-cyan-300 transition-colors duration-300">
-                {stat.value}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-white/[0.06] mb-6">
+            <div className="flex items-center gap-3">
+              <div className="w-3 h-3 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-300">
+                Live Studio Execution Environment
+              </span>
+            </div>
+            <div className="flex items-center gap-4 text-xs font-mono text-zinc-400">
+              <span>Delivery Standard: Zero Lock-in</span>
+              <span>•</span>
+              <span className="text-cyan-400 font-semibold">100% IP Transfer</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-1.5">
+                <Bot className="w-4 h-4" />
+                <span>AI Agents</span>
               </div>
-              <div className="text-body-xs text-mist mt-1 uppercase tracking-wider">
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
-      </motion.div>
+              <div className="text-sm font-bold text-white">Autonomous Workers</div>
+              <p className="text-xs text-zinc-400 mt-1">Multi-agent orchestrations & custom LLM pipelines</p>
+            </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 2, duration: 1 }}
-      >
-        <span className="text-body-xs text-mist uppercase tracking-widest">Scroll</span>
-        <motion.div
-          className="w-5 h-8 rounded-full border border-steel flex items-start justify-center p-1"
-          animate={{}}
-        >
-          <motion.div
-            className="w-1 h-2 rounded-full bg-cyan-500"
-            animate={{ y: [0, 12, 0] }}
-            transition={{
-              duration: 1.5,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-          />
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-1.5">
+                <Code className="w-4 h-4" />
+                <span>Web Platforms</span>
+              </div>
+              <div className="text-sm font-bold text-white">Full-Stack SaaS</div>
+              <p className="text-xs text-zinc-400 mt-1">Next.js 15, React 19 & automated billing rails</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-1.5">
+                <Cpu className="w-4 h-4" />
+                <span>Mobile Apps</span>
+              </div>
+              <div className="text-sm font-bold text-white">Native Flutter</div>
+              <p className="text-xs text-zinc-400 mt-1">Cross-platform iOS & Android offline-first apps</p>
+            </div>
+
+            <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.04]">
+              <div className="flex items-center gap-2 text-cyan-400 text-xs font-mono mb-1.5">
+                <ShieldCheck className="w-4 h-4" />
+                <span>Advisory</span>
+              </div>
+              <div className="text-sm font-bold text-white">Architecture & QA</div>
+              <p className="text-xs text-zinc-400 mt-1">Feasibility audits, schema design & MVP specs</p>
+            </div>
+          </div>
         </motion.div>
-      </motion.div>
+      </div>
     </section>
   );
 }

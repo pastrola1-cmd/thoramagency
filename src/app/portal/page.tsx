@@ -13,7 +13,9 @@ export default function PortalPage() {
 
   const handleRequestNextLoop = () => {
     setRequestStatus("pending");
-    console.log("Requested next build loop approval for user:", user?.email);
+    setTimeout(() => {
+      setRequestStatus("");
+    }, 5000);
   };
 
   return (
@@ -58,8 +60,10 @@ export default function PortalPage() {
       </div>
 
       {/* Tabs Selector */}
-      <div className="flex border-b border-steel/30 gap-6">
+      <div role="tablist" className="flex border-b border-steel/30 gap-6">
         <button
+          role="tab"
+          aria-selected={activeTab === "workspace"}
           onClick={() => setActiveTab("workspace")}
           className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
             activeTab === "workspace"
@@ -70,6 +74,8 @@ export default function PortalPage() {
           <LayoutDashboard className="w-4 h-4" /> Workspace
         </button>
         <button
+          role="tab"
+          aria-selected={activeTab === "billing"}
           onClick={() => setActiveTab("billing")}
           className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
             activeTab === "billing"
@@ -82,7 +88,7 @@ export default function PortalPage() {
       </div>
 
       {/* Conditional Sub-Widgets */}
-      <div>
+      <div role="tabpanel">
         {activeTab === "workspace" ? <LoopTracker /> : <BillingConsole />}
       </div>
 
