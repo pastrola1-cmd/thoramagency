@@ -1,11 +1,14 @@
-import CaseStudiesPage from "../case-studies/page";
+"use client";
 
-export const metadata = {
-  title: "Selected Work & Case Studies — Thoram Group",
-  description:
-    "Explore how we engineer custom software, AI digital workers, and native mobile apps that drive measurable revenue.",
-};
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function PortfolioPage() {
-  return <CaseStudiesPage />;
+export default function PortfolioRedirect() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/case-studies");
+  }, [router]);
+
+  return null;
 }

@@ -1,24 +1,24 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Layers, MessageSquare, HeartHandshake, ShieldCheck } from "lucide-react";
+import { Layers, Clock, HeartHandshake, ShieldCheck } from "lucide-react";
 
 export default function WhyUsSection() {
   const differentiators = [
     {
       icon: Layers,
       title: "Built for your exact context",
-      desc: "We don’t install generic tools and call it a day. Every software engine and AI worker is tailored to your real team workflows, customer inquiries, and commercial goals.",
+      desc: "We don't install generic tools and call it a day. Every software engine and AI worker is tailored to your real team workflows, customer inquiries, and commercial goals.",
     },
     {
-      icon: MessageSquare,
-      title: "We speak both tech & business",
-      desc: "Most developers speak technical jargon; most consultants speak abstract theory. We bridge both fluently so your software is technically bulletproof and directly drives profit.",
+      icon: Clock,
+      title: "Scoped proposal in 48 hours",
+      desc: "You get a fixed-price scope with milestones before any work begins. No bloated billable hours, no vague retainers, no surprises at invoice time.",
     },
     {
       icon: HeartHandshake,
       title: "We stay in the room after launch",
-      desc: "We don’t vanish after handing over the keys. We actively monitor server health, optimize AI prompt performance, and ensure your product thrives in production.",
+      desc: "We don't vanish after handing over the keys. We actively monitor server health, optimize AI prompt performance, and ensure your product thrives in production.",
     },
     {
       icon: ShieldCheck,
@@ -30,13 +30,13 @@ export default function WhyUsSection() {
   return (
     <section id="why-us" className="section-pad border-t border-white/[0.06] bg-[#0A0A0D]/40">
       <div className="max-w-3xl mb-16">
-        <div className="pill-badge mb-3">Why Thoram Group</div>
+        <div className="pill-badge mb-3">Why Thoram</div>
         <h2 className="section-title">
-          We build software that fits your business.{" "}
+          Built for your business.{" "}
           <span className="cyan-gradient">Not the other way around.</span>
         </h2>
         <p className="section-desc">
-          Four fundamental principles why founders and growing companies choose to build and partner with us long after the initial launch.
+          Four reasons founders and growing companies keep building with us long after the initial launch.
         </p>
       </div>
 

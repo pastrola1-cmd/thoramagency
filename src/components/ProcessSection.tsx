@@ -39,12 +39,12 @@ export default function ProcessSection() {
     <section id="how-it-works" className="section-pad border-t border-white/[0.06]">
       {/* Header */}
       <div className="max-w-3xl mb-16">
-        <div className="pill-badge mb-3">Delivery Protocol</div>
+        <div className="pill-badge mb-3">How We Work</div>
         <h2 className="section-title">
           From first conversation to live deployment.
         </h2>
         <p className="section-desc">
-          Four structured steps. Zero guesswork. You always know what is being built, why it matters, and when it will go live.
+          Four structured steps. You always know what's being built, why it matters, and when it ships.
         </p>
       </div>
 

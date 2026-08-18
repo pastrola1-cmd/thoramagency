@@ -9,9 +9,8 @@ export default function ServicesSection() {
     {
       id: "ai-agents",
       icon: Bot,
-      pill: "Service 01",
-      title: "AI Agents & Autonomous Digital Workers",
-      tagline: "Custom AI execution layers that operate 24/7 with human-grade precision.",
+      title: "AI Agents & Digital Workers",
+      tagline: "Autonomous systems that qualify leads, answer customers, and chase invoices 24/7.",
       features: [
         "Autonomous outbound prospecting SDRs",
         "24/7 AI customer care & WhatsApp escalation",
@@ -23,9 +22,8 @@ export default function ServicesSection() {
     {
       id: "web-engineering",
       icon: Globe,
-      pill: "Service 02",
-      title: "Product Design & Web Engineering",
-      tagline: "High-performance web applications and SaaS platforms engineered for scale.",
+      title: "Web & SaaS Platforms",
+      tagline: "High-performance web applications engineered to convert and scale.",
       features: [
         "Custom multi-tenant SaaS architectures",
         "High-converting digital landing experiences",
@@ -37,9 +35,8 @@ export default function ServicesSection() {
     {
       id: "mobile-apps",
       icon: Smartphone,
-      pill: "Service 03",
-      title: "Native Mobile App Development",
-      tagline: "Cross-platform iOS and Android applications compiled with native fluid speed.",
+      title: "Native Mobile Apps",
+      tagline: "iOS and Android from one codebase, with native speed and offline-first storage.",
       features: [
         "Single-codebase Flutter compilation",
         "Offline-first storage & local SQLite sync",
@@ -51,9 +48,8 @@ export default function ServicesSection() {
     {
       id: "strategy-advisory",
       icon: Compass,
-      pill: "Service 04",
-      title: "Strategy, Architecture & Advisory",
-      tagline: "Clear engineering blueprints and plain-English roadmaps before code is written.",
+      title: "Strategy & Architecture",
+      tagline: "Clear blueprints and honest roadmaps before a single line of code.",
       features: [
         "Technical feasibility & cost audits",
         "Codebase security & vulnerability review",
@@ -69,13 +65,12 @@ export default function ServicesSection() {
       {/* Section Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-16">
         <div className="max-w-2xl">
-          <div className="pill-badge mb-3">Our Core Services</div>
+          <div className="pill-badge mb-3">What We Do</div>
           <h2 className="section-title">
-            Engineering services built for{" "}
-            <span className="cyan-gradient">commercial impact.</span>
+            Four ways we help <span className="cyan-gradient">you earn.</span>
           </h2>
           <p className="section-desc">
-            We don’t build generic websites or deliver abstract slide decks. We engineer, deploy, and scale custom digital products that directly drive revenue.
+            No generic websites or abstract slide decks. Every build is scoped, priced, and shipped to move a metric you care about.
           </p>
         </div>
 
@@ -98,13 +93,8 @@ export default function ServicesSection() {
               className="p-8 rounded-2xl studio-glass studio-glass-hover flex flex-col justify-between group relative"
             >
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 flex items-center justify-center group-hover:border-cyan-500/40 group-hover:bg-cyan-500/10 transition-colors">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <span className="text-xs font-mono font-semibold uppercase tracking-wider text-cyan-400/80 bg-white/[0.03] px-2.5 py-1 rounded border border-white/[0.06]">
-                    {service.pill}
-                  </span>
+                <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 flex items-center justify-center group-hover:border-cyan-500/40 group-hover:bg-cyan-500/10 transition-colors mb-6">
+                  <Icon className="w-6 h-6" />
                 </div>
 
                 <h3 className="text-xl sm:text-2xl font-bold text-white mb-2 group-hover:text-cyan-400 transition-colors">

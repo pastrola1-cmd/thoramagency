@@ -18,9 +18,9 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Thoram Group — Product Studio + Technology Consulting Firm",
+  title: "Thoram Group — AI Agents, Web Platforms & Mobile Apps",
   description:
-    "We partner with ambitious teams to design, engineer, and scale custom software, AI agents, mobile applications, and digital infrastructure.",
+    "A product studio building AI agents, web platforms, and mobile apps that generate measurable revenue. 100% source code ownership. Scoped proposals in 48 hours.",
   keywords: [
     "product studio",
     "software engineering",
@@ -32,9 +32,9 @@ export const metadata: Metadata = {
     "technology consulting",
   ],
   openGraph: {
-    title: "Thoram Group — Product Studio + Technology Consulting Firm",
+    title: "Thoram Group — AI Agents, Web Platforms & Mobile Apps",
     description:
-      "We design, engineer, and scale digital products for ambitious teams.",
+      "We build software that moves real numbers. AI agents, web platforms, and mobile apps — you own 100% of what we build.",
     type: "website",
   },
 };
