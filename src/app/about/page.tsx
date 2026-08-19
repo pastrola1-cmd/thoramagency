@@ -34,11 +34,11 @@ export default function AboutPage() {
         {/* Page Header */}
         <div className="max-w-3xl mb-20">
           <div className="pill-badge mb-3">About Thoram Group</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             A modern product studio working with{" "}
             <span className="cyan-gradient">ambitious teams worldwide.</span>
           </h1>
-          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
             We partner with ambitious founders, startups, and growing enterprises to design, engineer, and scale digital products that drive real revenue.
           </p>
         </div>
@@ -46,15 +46,15 @@ export default function AboutPage() {
         {/* Narrative Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-24 items-start">
           <div className="lg:col-span-6 space-y-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white">
+            <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
               Why we exist
             </h2>
-            <div className="space-y-4 text-zinc-400 text-sm sm:text-base leading-relaxed">
+            <div className="space-y-4 text-zinc-500 text-sm sm:text-base leading-relaxed">
               <p>
                 In today's fast-moving software and AI landscape, too many businesses get caught between two extremes: expensive consultancies that deliver strategy decks without writing code, and offshore agencies that build generic templates without understanding business context.
               </p>
               <p>
-                <strong className="text-white">Thoram Group was built to be the bridge.</strong> We combine high-conviction product design, frontier full-stack engineering, and practical commercial strategy to ship software that moves the needle.
+                <strong className="text-zinc-900">Thoram Group was built to be the bridge.</strong> We combine high-conviction product design, frontier full-stack engineering, and practical commercial strategy to ship software that moves the needle.
               </p>
               <p>
                 Whether it's deploying autonomous AI agents that handle 24/7 client operations, building native mobile apps with 15k+ active users, or architecting custom SaaS billing platforms, we build technology you can depend on for years.
@@ -63,26 +63,26 @@ export default function AboutPage() {
           </div>
 
           <div className="lg:col-span-6 p-8 sm:p-10 rounded-3xl studio-glass space-y-6">
-            <div className="flex items-center gap-3 text-cyan-400 font-mono text-xs uppercase tracking-wider">
+            <div className="flex items-center gap-3 text-cyan-700 font-mono text-xs uppercase tracking-wider">
               <Globe2 className="w-4 h-4" />
               <span>Studio Snapshot</span>
             </div>
             <div className="grid grid-cols-2 gap-6 pt-2">
               <div>
-                <div className="text-3xl font-bold text-white font-mono">100%</div>
-                <div className="text-xs text-zinc-400 mt-1">Client IP Ownership</div>
+                <div className="text-3xl font-bold text-zinc-900 font-mono">100%</div>
+                <div className="text-xs text-zinc-500 mt-1">Client IP Ownership</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white font-mono">48h</div>
-                <div className="text-xs text-zinc-400 mt-1">Scoped Proposal SLA</div>
+                <div className="text-3xl font-bold text-zinc-900 font-mono">48h</div>
+                <div className="text-xs text-zinc-500 mt-1">Scoped Proposal SLA</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white font-mono">99.9%</div>
-                <div className="text-xs text-zinc-400 mt-1">Uptime Architecture</div>
+                <div className="text-3xl font-bold text-zinc-900 font-mono">99.9%</div>
+                <div className="text-xs text-zinc-500 mt-1">Uptime Architecture</div>
               </div>
               <div>
-                <div className="text-3xl font-bold text-white font-mono">Zero</div>
-                <div className="text-xs text-zinc-400 mt-1">Vendor Lock-In</div>
+                <div className="text-3xl font-bold text-zinc-900 font-mono">Zero</div>
+                <div className="text-xs text-zinc-500 mt-1">Vendor Lock-In</div>
               </div>
             </div>
           </div>
@@ -92,7 +92,7 @@ export default function AboutPage() {
         <div className="mb-24">
           <div className="max-w-3xl mb-12">
             <div className="pill-badge mb-3">Core Principles</div>
-            <h2 className="text-3xl font-bold text-white">
+            <h2 className="text-3xl font-bold text-zinc-900">
               How we operate and build
             </h2>
           </div>
@@ -105,13 +105,13 @@ export default function AboutPage() {
                   key={principle.title}
                   className="p-8 rounded-2xl studio-glass studio-glass-hover"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 flex items-center justify-center mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5" />
                   </div>
-                  <h3 className="text-xl font-bold text-white mb-2">
+                  <h3 className="text-xl font-bold text-zinc-900 mb-2">
                     {principle.title}
                   </h3>
-                  <p className="text-sm text-zinc-400 leading-relaxed">
+                  <p className="text-sm text-zinc-500 leading-relaxed">
                     {principle.desc}
                   </p>
                 </div>
@@ -123,10 +123,10 @@ export default function AboutPage() {
         {/* Call to Action */}
         <div className="p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
           <div className="pill-badge">Let's Build Together</div>
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-3xl font-bold text-zinc-900">
             Ready to scale your digital infrastructure?
           </h2>
-          <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             Book a free 30-minute discovery call. We’ll identify your highest-impact opportunity and tell you exactly how we’d build it.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">

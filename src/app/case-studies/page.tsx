@@ -39,25 +39,25 @@ export default function CaseStudiesPage() {
         {/* Header */}
         <div className="max-w-3xl mb-14">
           <div className="pill-badge mb-3">Selected Work & Case Studies</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Real software built for{" "}
             <span className="cyan-gradient">measurable outcomes.</span>
           </h1>
-          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
             Explore how we partner with ambitious teams to solve complex operational challenges, deploy AI and modern web platforms, and unlock sustainable business growth.
           </p>
         </div>
 
         {/* Filter Pills */}
-        <div className="flex flex-wrap items-center gap-2 mb-14 pb-4 border-b border-white/[0.06]">
+        <div className="flex flex-wrap items-center gap-2 mb-14 pb-4 border-b border-zinc-900/[0.06]">
           {categories.map((cat) => (
             <button
               key={cat.id}
               onClick={() => setSelectedCategory(cat.id)}
               className={`px-4 py-2 rounded-lg text-xs font-semibold font-mono uppercase tracking-wider transition-all duration-200 ${
                 selectedCategory === cat.id
-                  ? "bg-cyan-500 text-black shadow-md shadow-cyan-500/20"
-                  : "bg-white/[0.03] text-zinc-400 hover:text-white hover:bg-white/[0.06] border border-white/[0.06]"
+                  ? "bg-zinc-900 text-white shadow-md shadow-zinc-900/10"
+                  : "bg-zinc-900/[0.03] text-zinc-500 hover:text-zinc-900 hover:bg-zinc-900/[0.06] border border-zinc-900/[0.06]"
               }`}
             >
               {cat.label}
@@ -74,14 +74,14 @@ export default function CaseStudiesPage() {
               className="p-8 sm:p-12 rounded-3xl studio-glass space-y-10 relative overflow-hidden"
             >
               {/* Header */}
-              <div className="pb-8 border-b border-white/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div className="pb-8 border-b border-zinc-900/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider mb-2">
+                  <div className="flex items-center gap-2 text-xs font-mono text-cyan-700 uppercase tracking-wider mb-2">
                     <span>{study.industry}</span>
-                    <span className="text-zinc-600">·</span>
-                    <span className="text-zinc-400">{study.client}</span>
+                    <span className="text-zinc-400">·</span>
+                    <span className="text-zinc-500">{study.client}</span>
                   </div>
-                  <h2 className="text-2xl sm:text-3xl font-bold text-white">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
                     {study.title}
                   </h2>
                 </div>
@@ -96,36 +96,36 @@ export default function CaseStudiesPage() {
 
               {/* Challenge vs Engineering Solution */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
+                <div className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05] space-y-3">
                   <div className="text-xs font-mono uppercase tracking-wider text-rose-400 font-semibold">
                     The Commercial Challenge
                   </div>
-                  <p className="text-sm text-zinc-300 leading-relaxed">
+                  <p className="text-sm text-zinc-600 leading-relaxed">
                     {study.challenge}
                   </p>
                 </div>
 
-                <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-3">
-                  <div className="text-xs font-mono uppercase tracking-wider text-emerald-400 font-semibold">
+                <div className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05] space-y-3">
+                  <div className="text-xs font-mono uppercase tracking-wider text-emerald-600 font-semibold">
                     The Engineering Solution
                   </div>
-                  <p className="text-sm text-zinc-300 leading-relaxed">
+                  <p className="text-sm text-zinc-600 leading-relaxed">
                     {study.solution}
                   </p>
                 </div>
               </div>
 
               {/* Measured Business Results */}
-              <div className="p-8 rounded-2xl bg-white/[0.03] border border-white/[0.06]">
-                <div className="flex items-center gap-2 text-xs font-mono text-cyan-400 uppercase tracking-wider mb-6">
+              <div className="p-8 rounded-2xl bg-zinc-900/[0.03] border border-zinc-900/[0.06]">
+                <div className="flex items-center gap-2 text-xs font-mono text-cyan-700 uppercase tracking-wider mb-6">
                   <TrendingUp className="w-4 h-4" />
                   <span>Key Measured Business Results</span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {study.impact.map((item) => (
-                    <div key={item} className="flex items-start gap-3 text-sm text-zinc-200">
-                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    <div key={item} className="flex items-start gap-3 text-sm text-zinc-600">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -133,15 +133,15 @@ export default function CaseStudiesPage() {
               </div>
 
               {/* Technical Architecture Highlights */}
-              <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05] space-y-4">
-                <div className="flex items-center gap-2 text-xs font-mono text-zinc-400 uppercase tracking-wider">
-                  <Layers className="w-4 h-4 text-cyan-400" />
+              <div className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05] space-y-4">
+                <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-wider">
+                  <Layers className="w-4 h-4 text-cyan-700" />
                   <span>Architecture & Infrastructure Highlights</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {study.architecture.map((arch) => (
-                    <div key={arch} className="text-xs sm:text-sm text-zinc-300 font-mono flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400" />
+                    <div key={arch} className="text-xs sm:text-sm text-zinc-600 font-mono flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-700" />
                       <span>{arch}</span>
                     </div>
                   ))}
@@ -150,28 +150,28 @@ export default function CaseStudiesPage() {
 
               {/* Client Testimonial (if available) */}
               {study.testimonial && (
-                <div className="p-6 rounded-2xl bg-[#09090C] border border-white/[0.06] flex items-start gap-4">
-                  <div className="p-2 rounded-xl bg-cyan-500/10 text-cyan-400 shrink-0">
+                <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-900/[0.06] flex items-start gap-4">
+                  <div className="p-2 rounded-xl bg-cyan-700/10 text-cyan-700 shrink-0">
                     <Quote className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-sm sm:text-base text-zinc-200 italic leading-relaxed mb-3">
+                    <p className="text-sm sm:text-base text-zinc-600 italic leading-relaxed mb-3">
                       "{study.testimonial.quote}"
                     </p>
-                    <div className="text-xs font-semibold text-white">
-                      {study.testimonial.author} · <span className="text-zinc-400 font-normal">{study.testimonial.role}</span>
+                    <div className="text-xs font-semibold text-zinc-900">
+                      {study.testimonial.author} · <span className="text-zinc-500 font-normal">{study.testimonial.role}</span>
                     </div>
                   </div>
                 </div>
               )}
 
               {/* Tech Stack Pills */}
-              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-white/[0.06]">
-                <span className="text-xs font-mono text-zinc-400 mr-2">Technologies Used:</span>
+              <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-zinc-900/[0.06]">
+                <span className="text-xs font-mono text-zinc-500 mr-2">Technologies Used:</span>
                 {study.tech.map((t) => (
                   <span
                     key={t}
-                    className="text-xs font-mono px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06] text-zinc-300"
+                    className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900/[0.03] border border-zinc-900/[0.06] text-zinc-600"
                   >
                     {t}
                   </span>
@@ -184,10 +184,10 @@ export default function CaseStudiesPage() {
         {/* Bottom Consultation CTA */}
         <div className="mt-20 p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
           <div className="pill-badge">Start Your Project</div>
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-3xl font-bold text-zinc-900">
             Have a project ready to scale?
           </h2>
-          <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             Book a free 30-minute discovery session. We will evaluate your business context and outline an actionable technical proposal in 48 hours.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">

@@ -31,10 +31,10 @@ export default function ContactPage() {
         {/* Page Title */}
         <div className="max-w-3xl mb-16">
           <div className="pill-badge mb-3">Start a Project</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Tell us what you're building.
           </h1>
-          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
             We'll tell you honestly if and how we can help — and send a scoped proposal within 48 hours. No sales pitch. Just clarity.
           </p>
         </div>
@@ -43,7 +43,7 @@ export default function ContactPage() {
           {/* Left Column: Direct WhatsApp & Email Channels */}
           <div className="lg:col-span-5 space-y-6">
             <div className="p-8 rounded-3xl studio-glass space-y-6">
-              <h2 className="text-xl font-bold text-white">Direct Communication Channels</h2>
+              <h2 className="text-xl font-bold text-zinc-900">Direct Communication Channels</h2>
               
               <div className="space-y-4">
                 {/* WhatsApp Direct */}
@@ -51,42 +51,42 @@ export default function ContactPage() {
                   href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20am%20interested%20in%20discussing%20a%20project."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-emerald-500/50 hover:bg-emerald-500/5 transition-all group"
+                  className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/[0.03] border border-zinc-900/[0.08] hover:border-emerald-600/50 hover:bg-emerald-600/5 transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-emerald-600/10 border border-emerald-600/20 text-emerald-600 flex items-center justify-center shrink-0">
                       <MessageCircle className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">WhatsApp Chat</div>
-                      <div className="text-xs text-zinc-400">+234 906 791 4511 (Direct Lead)</div>
+                      <div className="text-sm font-semibold text-zinc-900">WhatsApp Chat</div>
+                      <div className="text-xs text-zinc-500">+234 906 791 4511 (Direct Lead)</div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-emerald-600 group-hover:translate-x-1 transition-all" />
                 </a>
 
                 {/* Email Direct */}
                 <a
                   href="mailto:hello@thoramgroup.com"
-                  className="flex items-center justify-between p-4 rounded-xl bg-white/[0.03] border border-white/[0.08] hover:border-cyan-500/50 hover:bg-cyan-500/5 transition-all group"
+                  className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/[0.03] border border-zinc-900/[0.08] hover:border-cyan-700/50 hover:bg-cyan-700/5 transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-cyan-700/10 border border-cyan-700/20 text-cyan-700 flex items-center justify-center shrink-0">
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
-                      <div className="text-sm font-semibold text-white">Direct Email</div>
-                      <div className="text-xs text-zinc-400">hello@thoramgroup.com</div>
+                      <div className="text-sm font-semibold text-zinc-900">Direct Email</div>
+                      <div className="text-xs text-zinc-500">hello@thoramgroup.com</div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-cyan-400 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-zinc-500 group-hover:text-cyan-700 group-hover:translate-x-1 transition-all" />
                 </a>
               </div>
 
               {/* Guarantees */}
-              <div className="pt-6 border-t border-white/[0.06] space-y-3 text-xs text-zinc-400 font-mono">
+              <div className="pt-6 border-t border-zinc-900/[0.06] space-y-3 text-xs text-zinc-500 font-mono">
                 <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-cyan-400" />
+                  <Clock className="w-4 h-4 text-cyan-700" />
                   <span>SLA: 1 business day response on all inquiries.</span>
                 </div>
               </div>
@@ -97,12 +97,12 @@ export default function ContactPage() {
           <div className="lg:col-span-7 p-8 sm:p-10 rounded-3xl studio-glass">
             {submitSuccess ? (
               <div className="text-center py-12 space-y-4">
-                <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 mx-auto flex items-center justify-center">
+                <div className="w-14 h-14 rounded-full bg-emerald-600/10 border border-emerald-600/30 text-emerald-600 mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-white">Inquiry Ready to Send</h3>
-                <p className="text-sm text-zinc-400 max-w-md mx-auto leading-relaxed">
-                  WhatsApp opened with your project details pre-filled. Press <strong className="text-white">Send</strong> and our team will reply within one business day.
+                <h3 className="text-2xl font-bold text-zinc-900">Inquiry Ready to Send</h3>
+                <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
+                  WhatsApp opened with your project details pre-filled. Press <strong className="text-zinc-900">Send</strong> and our team will reply within one business day.
                 </p>
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
@@ -111,14 +111,14 @@ export default function ContactPage() {
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-xs font-semibold"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
                   >
                     <MessageCircle className="w-3.5 h-3.5" />
                     <span>Open WhatsApp Again</span>
                   </a>
                   <a
                     href={mailtoFallback({ name, email, company, interest: service, message })}
-                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-white/[0.05] border border-white/[0.1] text-zinc-200 text-xs font-semibold"
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900/[0.05] border border-zinc-900/[0.1] text-zinc-400 text-xs font-semibold"
                   >
                     <Mail className="w-3.5 h-3.5" />
                     <span>Send via Email Instead</span>
@@ -129,7 +129,7 @@ export default function ContactPage() {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
                       Your Name *
                     </label>
                     <input
@@ -138,11 +138,11 @@ export default function ContactPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Alex Oladimeji"
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-900/[0.03] border border-zinc-900/[0.08] focus:border-cyan-700 rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
                       Work Email *
                     </label>
                     <input
@@ -151,14 +151,14 @@ export default function ContactPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="alex@company.com"
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-900/[0.03] border border-zinc-900/[0.08] focus:border-cyan-700 rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
                       Company / Organization Name
                     </label>
                     <input
@@ -166,17 +166,17 @@ export default function ContactPage() {
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
                       placeholder="e.g. Acme Health"
-                      className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-900/[0.03] border border-zinc-900/[0.08] focus:border-cyan-700 rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
                       Primary Service Focus
                     </label>
                     <select
                       value={service}
                       onChange={(e) => setService(e.target.value)}
-                      className="w-full bg-[#0E0E14] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 rounded-lg px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
                     >
                       <option value="AI Agents & Digital Workers">AI Agents & Digital Workers</option>
                       <option value="Web & Cloud Engineering">Product Design & Web Engineering</option>
@@ -187,7 +187,7 @@ export default function ContactPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wider text-zinc-400 mb-2">
+                  <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
                     Tell us about your project requirements *
                   </label>
                   <textarea
@@ -196,7 +196,7 @@ export default function ContactPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Describe your product vision, existing tech stack, or operational bottlenecks..."
-                    className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-cyan-500 rounded-lg px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors resize-none"
+                    className="w-full bg-zinc-900/[0.03] border border-zinc-900/[0.08] focus:border-cyan-700 rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
                   />
                 </div>
 

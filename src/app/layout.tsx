@@ -46,7 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`dark ${outfit.variable} ${inter.variable}`}>
-      <body className="font-body antialiased bg-[#070709] text-zinc-100 min-h-screen overflow-x-hidden flex flex-col justify-between">
+      <body className="font-body antialiased bg-white text-zinc-900 min-h-screen overflow-x-hidden flex flex-col justify-between">
         <AuthProvider>
           <Navbar />
           <div className="flex-grow">{children}</div>

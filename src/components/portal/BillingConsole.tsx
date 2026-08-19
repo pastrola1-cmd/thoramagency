@@ -247,7 +247,7 @@ export default function BillingConsole() {
       {/* Paystack Mock Checkout Popup Overlay */}
       <AnimatePresence>
         {mockModalOpen && (
-          <div className="fixed inset-0 bg-void/90 backdrop-blur-md z-50 flex items-center justify-center p-6" role="dialog" aria-modal="true" onKeyDown={(e) => e.key === 'Escape' && setMockModalOpen(false)}>
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-md z-50 flex items-center justify-center p-6" role="dialog" aria-modal="true" onKeyDown={(e) => e.key === 'Escape' && setMockModalOpen(false)}>
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
@@ -257,27 +257,27 @@ export default function BillingConsole() {
               <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 blur-[40px] pointer-events-none" />
 
               {/* Paystack Mock branding */}
-              <div className="flex justify-between items-center border-b border-steel/20 pb-4">
+              <div className="flex justify-between items-center border-b border-white/10 pb-4">
                 <div className="flex items-center gap-1.5">
                   <div className="w-5 h-5 rounded bg-emerald-500 flex items-center justify-center text-[10px] text-white font-bold">P</div>
-                  <span className="text-xs font-bold text-ice font-mono">Paystack <span className="text-emerald-400">test</span></span>
+                  <span className="text-xs font-bold text-white font-mono">Paystack <span className="text-emerald-400">test</span></span>
                 </div>
-                <span className="text-[9px] font-mono text-mist uppercase tracking-widest">Sandbox Mode</span>
+                <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest">Sandbox Mode</span>
               </div>
 
               {/* Transaction details */}
               <div className="space-y-4 text-body-xs">
                 <div className="flex justify-between">
-                  <span className="text-frost">Merchant:</span>
-                  <span className="text-ice font-bold">Thoram Group</span>
+                  <span className="text-zinc-300">Merchant:</span>
+                  <span className="text-white font-bold">Thoram Group</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-frost">Payable:</span>
-                  <span className="text-cyan-400 font-bold">${`${LOOP_PRICE.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}</span>
+                  <span className="text-cyan-300 font-bold">${`${LOOP_PRICE.toLocaleString('en-US', { minimumFractionDigits: 2 })}`}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-frost">User Email:</span>
-                  <span className="text-ice truncate font-mono max-w-[180px]">{user?.email}</span>
+                  <span className="text-zinc-300">User Email:</span>
+                  <span className="text-white truncate font-mono max-w-[180px]">{user?.email}</span>
                 </div>
               </div>
 
@@ -285,13 +285,13 @@ export default function BillingConsole() {
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => setMockModalOpen(false)}
-                  className="flex-1 py-2.5 border border-steel bg-steel/10 rounded-xl font-mono text-[10px] text-frost hover:bg-steel/20 uppercase"
+                  className="flex-1 py-2.5 border border-white/15 bg-white/5 rounded-xl font-mono text-[10px] text-zinc-200 hover:bg-white/10 uppercase"
                 >
                   Cancel
                 </button>
                 <button
                   onClick={handleConfirmMockPayment}
-                  className="flex-1 py-2.5 bg-emerald-500 text-obsidian rounded-xl font-mono text-[10px] font-bold hover:bg-emerald-400 uppercase shadow-glow shadow-emerald-500/15"
+                  className="flex-1 py-2.5 bg-emerald-500 text-black rounded-xl font-mono text-[10px] font-bold hover:bg-emerald-400 uppercase shadow-glow shadow-emerald-500/15"
                 >
                   Authorize Payment
                 </button>

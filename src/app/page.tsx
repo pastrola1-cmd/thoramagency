@@ -1,5 +1,4 @@
 import Hero from "@/components/Hero";
-import TrustBar from "@/components/TrustBar";
 import ServicesSection from "@/components/ServicesSection";
 import SelectedWork from "@/components/SelectedWork";
 import ProcessSection from "@/components/ProcessSection";
@@ -8,9 +7,8 @@ import ContactSection from "@/components/ContactSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-[#070709] text-white selection:bg-cyan-500/30 selection:text-white">
+    <main className="min-h-screen bg-white text-zinc-900 selection:bg-cyan-500/20">
       <Hero />
-      <TrustBar />
       <ServicesSection />
       <SelectedWork />
       <ProcessSection />

@@ -161,11 +161,11 @@ export default function ServicesPage() {
         {/* Page Header */}
         <div className="max-w-3xl mb-20">
           <div className="pill-badge mb-3">Our Core Services</div>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white mb-6">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Services engineered for{" "}
             <span className="cyan-gradient">real business growth.</span>
           </h1>
-          <p className="text-lg text-zinc-400 leading-relaxed max-w-2xl">
+          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
             We partner with ambitious teams to engineer bespoke digital products. From autonomous AI agents to mission-critical web and mobile applications, our engineering standards are designed for measurable commercial outcomes.
           </p>
         </div>
@@ -181,16 +181,16 @@ export default function ServicesPage() {
                 className="p-8 sm:p-12 rounded-3xl studio-glass relative overflow-hidden"
               >
                 {/* Header of Service */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-white/[0.06] mb-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-zinc-900/[0.06] mb-8">
                   <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-white/[0.04] border border-white/[0.08] text-cyan-400 flex items-center justify-center">
+                    <div className="w-12 h-12 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center">
                       <Icon className="w-6 h-6" />
                     </div>
                     <div>
-                      <span className="text-xs font-mono uppercase tracking-wider text-cyan-400">
+                      <span className="text-xs font-mono uppercase tracking-wider text-cyan-700">
                         {service.pill}
                       </span>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-white mt-0.5">
+                      <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mt-0.5">
                         {service.title}
                       </h2>
                     </div>
@@ -207,10 +207,10 @@ export default function ServicesPage() {
 
                 {/* Description & Core Value */}
                 <div className="max-w-3xl mb-10">
-                  <p className="text-base sm:text-lg text-zinc-300 leading-relaxed mb-4">
+                  <p className="text-base sm:text-lg text-zinc-600 leading-relaxed mb-4">
                     {service.tagline}
                   </p>
-                  <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
+                  <p className="text-sm sm:text-base text-zinc-500 leading-relaxed">
                     {service.description}
                   </p>
                 </div>
@@ -220,13 +220,13 @@ export default function ServicesPage() {
                   {service.deliverables.map((del) => (
                     <div
                       key={del.name}
-                      className="p-6 rounded-2xl bg-white/[0.02] border border-white/[0.05]"
+                      className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05]"
                     >
-                      <div className="flex items-center gap-2 text-sm font-bold text-white mb-2">
-                        <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-900 mb-2">
+                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
                         <span>{del.name}</span>
                       </div>
-                      <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed pl-6">
+                      <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed pl-6">
                         {del.desc}
                       </p>
                     </div>
@@ -234,13 +234,13 @@ export default function ServicesPage() {
                 </div>
 
                 {/* Tech Stack Footer */}
-                <div className="pt-6 border-t border-white/[0.06] flex flex-wrap items-center justify-between gap-4">
+                <div className="pt-6 border-t border-zinc-900/[0.06] flex flex-wrap items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono text-zinc-400 mr-2">Technologies & Protocols:</span>
+                    <span className="text-xs font-mono text-zinc-500 mr-2">Technologies & Protocols:</span>
                     {service.tech.map((t) => (
                       <span
                         key={t}
-                        className="text-xs font-mono px-2.5 py-1 rounded bg-white/[0.03] border border-white/[0.06] text-zinc-300"
+                        className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900/[0.03] border border-zinc-900/[0.06] text-zinc-400"
                       >
                         {t}
                       </span>
@@ -249,7 +249,7 @@ export default function ServicesPage() {
 
                   <Link
                     href="/contact"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-400 hover:text-cyan-300 transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-700 hover:text-cyan-600 transition-colors"
                   >
                     <span>Consult on this service</span>
                     <ArrowRight className="w-3.5 h-3.5" />
@@ -263,10 +263,10 @@ export default function ServicesPage() {
         {/* Bottom Consultation CTA */}
         <div className="mt-20 p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
           <div className="pill-badge">Let's Build</div>
-          <h2 className="text-3xl font-bold text-white">
+          <h2 className="text-3xl font-bold text-zinc-900">
             Have a project in mind?
           </h2>
-          <p className="text-zinc-400 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
+          <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
             Book a free 30-minute discovery call. We’ll identify your highest-impact opportunity and tell you exactly how we’d build it. No pitch. Just clarity.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
