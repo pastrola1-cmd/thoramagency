@@ -5,6 +5,17 @@ import Link from "next/link";
 
 const projects = [
   {
+    client: "EduThoram Schools Network",
+    tags: ["School Portal", "Institutional Software"],
+    title: "EduThoram — Multi-Branch School Management & Student Portal",
+    desc: "A comprehensive multi-campus school management portal automating tuition fee billing, academic continuous assessment calculations, and parent WhatsApp notifications.",
+    results: [
+      "100% elimination of tuition receipt falsification",
+      "Report card calculation cut from 2 weeks to 30s",
+      "12,000+ student records managed with 99.9% uptime",
+    ],
+  },
+  {
     client: "Manna Notes Project",
     tags: ["Mobile App", "Audio AI"],
     title: "Manna Bible — Cross-Platform Audio & Study Platform",

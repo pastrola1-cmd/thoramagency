@@ -115,28 +115,35 @@ export const caseStudiesData: CaseStudy[] = [
     },
   },
   {
-    id: "eduthoram-os",
-    title: "EduThoram — Enterprise Learning OS & Certificate Engine",
-    client: "EduThoram Group",
-    industry: "EdTech & Learning Infrastructure",
+    id: "eduthoram-portal",
+    title: "EduThoram — Multi-Branch School Management & Student Portal",
+    client: "EduThoram Schools Network",
+    industry: "School Management & Institutional Software",
     category: "edtech",
     summary:
-      "Engineered an enterprise learning platform with adaptive video streaming, student progress analytics, automated quiz scoring, and verifiable cryptographic certificate generation.",
+      "Architected a comprehensive multi-campus school management portal automating tuition fee collection, academic grading computations, parent notifications, and digital transcript verification.",
     challenge:
-      "Educational institutions struggled with sluggish video buffering, high bandwidth costs, and manual certificate fraud on student graduations.",
+      "Managing manual tuition fee receipts, termly report card calculations, and student attendance records across multiple campuses caused administrative bottlenecks, billing discrepancies, and slow communication with parents.",
     solution:
-      "We built a cloud-optimized LMS platform using adaptive HLS video streaming, automated grading state machines, and tamper-proof verification QR codes.",
+      "We engineered an institutional school management portal with automated Paystack fee collection, instant digital receipt generation, automated GPA/continuous assessment grade calculations, and WhatsApp result delivery to parents with tamper-proof QR verification.",
     impact: [
-      "Over 5,000+ course module completions with 99.8% streaming reliability",
-      "Zero video buffering lag across 3G/4G mobile networks",
-      "100% automated verification of issued student certificates",
+      "100% elimination of tuition receipt falsification with instant automated bank reconciliation",
+      "Termly report card computation time slashed from 2 weeks to under 30 seconds per class",
+      "Over 12,000+ student academic records and billing accounts managed with 99.9% uptime",
+      "Instant automated parent notifications for fee receipts and attendance alerts via WhatsApp & SMS",
     ],
     architecture: [
-      "Adaptive HLS video streaming pipeline",
-      "Automated student assessment grading engine",
-      "Cryptographic certificate generation with QR verification",
-      "Real-time instructor analytics dashboard",
+      "Multi-tenant role-based portal (Super Admin, Principal, Teacher, Accountant, Parent, Student)",
+      "Paystack recurring tuition installment payment processor with automated bank webhooks",
+      "Algorithmic continuous assessment (CA) grade computation & dynamic PDF report card generator",
+      "WhatsApp Cloud API & SMS automated parent notification gateway with QR verification",
     ],
-    tech: ["Next.js", "React", "Node.js", "Cloudflare Stream", "PostgreSQL", "Tailwind CSS"],
+    tech: ["Next.js 14", "TypeScript", "Node.js", "PostgreSQL", "Paystack API", "Tailwind CSS", "Docker"],
+    testimonial: {
+      quote:
+        "EduThoram transformed our school operations. What used to take our teachers two weeks of spreadsheet stress during end-of-term exams is now computed in seconds, and our fee collections are fully automated.",
+      author: "Director of Academic Operations",
+      role: "EduThoram Schools Network",
+    },
   },
 ];
