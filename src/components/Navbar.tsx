@@ -34,9 +34,11 @@ export default function Navbar() {
       <div className="max-w-6xl mx-auto px-5 sm:px-8 flex items-center justify-between">
         {/* Brand Logo */}
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center font-bold text-white text-sm group-hover:bg-cyan-700 transition-colors">
-            T
-          </div>
+          <img
+            src="/icon.png"
+            alt="Thoram Group Logo"
+            className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
+          />
           <span className="font-bold text-base tracking-tight text-zinc-900 group-hover:text-cyan-700 transition-colors">
             Thoram Group
           </span>

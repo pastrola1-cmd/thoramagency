@@ -24,14 +24,18 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-10 pb-10 border-b border-zinc-900/[0.06]">
           <div className="md:col-span-5 space-y-4">
             <Link href="/" className="flex items-center gap-2.5 group">
-              <div className="w-8 h-8 rounded-lg bg-zinc-900 flex items-center justify-center font-bold text-white text-sm group-hover:bg-cyan-700 transition-colors">
-                T
-              </div>
-              <span className="font-bold text-lg text-zinc-900">Thoram Group</span>
+              <img
+                src="/icon.png"
+                alt="Thoram Group Logo"
+                className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
+              />
+              <span className="font-bold text-lg text-zinc-900 group-hover:text-cyan-700 transition-colors">
+                Thoram Group
+              </span>
             </Link>
 
             <p className="text-sm text-zinc-500 max-w-sm leading-relaxed">
-              A product studio built on the continent, working with teams globally.
+              A product studio and technology consulting firm partnering with ambitious teams to design, engineer, and scale digital platforms.
             </p>
           </div>
 
