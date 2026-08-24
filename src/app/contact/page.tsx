@@ -32,7 +32,7 @@ export default function ContactPage() {
         <div className="max-w-3xl mb-16">
           <div className="pill-badge mb-3">Start a Project</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
-            Have a product <span className="text-cyan-700">worth building?</span>
+            Have a product <span className="text-orange-600">worth building?</span>
           </h1>
           <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
             Tell us what you're trying to build, fix, or automate. We'll assess the problem, tell you what it will take, what it should cost, and whether Thoram is the right team to do it.
@@ -68,10 +68,10 @@ export default function ContactPage() {
                 {/* Email Direct */}
                 <a
                   href="mailto:hello@thoramgroup.com"
-                  className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 border border-zinc-900/[0.08] hover:border-cyan-700/50 hover:bg-cyan-700/5 transition-all group"
+                  className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 border border-zinc-900/[0.08] hover:border-orange-600/50 hover:bg-orange-600/5 transition-all group"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-cyan-700/10 border border-cyan-700/20 text-cyan-700 flex items-center justify-center shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-orange-600/10 border border-orange-600/20 text-orange-600 flex items-center justify-center shrink-0">
                       <Mail className="w-5 h-5" />
                     </div>
                     <div>
@@ -79,14 +79,14 @@ export default function ContactPage() {
                       <div className="text-xs text-zinc-500">hello@thoramgroup.com</div>
                     </div>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-cyan-700 group-hover:translate-x-1 transition-all" />
+                  <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
                 </a>
               </div>
 
               {/* Guarantees */}
               <div className="pt-6 border-t border-zinc-900/[0.06] space-y-3">
                 <div className="flex items-center gap-2.5 text-xs text-zinc-600 font-mono">
-                  <Clock className="w-4 h-4 text-cyan-700" />
+                  <Clock className="w-4 h-4 text-orange-600" />
                   <span>Transparent scoped proposal within 48 hours</span>
                 </div>
                 <div className="flex items-center gap-2.5 text-xs text-zinc-600 font-mono">
@@ -133,7 +133,7 @@ export default function ContactPage() {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="e.g. Alex Oladimeji"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -147,7 +147,7 @@ export default function ContactPage() {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="alex@company.com"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -162,7 +162,7 @@ export default function ContactPage() {
                       value={company}
                       onChange={(e) => setCompany(e.target.value)}
                       placeholder="e.g. Acme Health"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
 
@@ -173,7 +173,7 @@ export default function ContactPage() {
                     <select
                       value={service}
                       onChange={(e) => setService(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
                     >
                       <option value="Business Systems & Custom Software">Business Systems & Custom Software</option>
                       <option value="Customer Platforms & SaaS">Customer Platforms & SaaS</option>
@@ -194,7 +194,7 @@ export default function ContactPage() {
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
                     placeholder="Tell us what you're trying to build, fix, or automate. Include any technical preferences or timeline targets..."
-                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
+                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
                   />
                 </div>
 

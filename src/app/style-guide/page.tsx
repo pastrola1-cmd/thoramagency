@@ -37,14 +37,14 @@ export default function StyleGuidePage() {
       <div className="border-b border-steel/50 bg-graphite/50 backdrop-blur-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-8 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center">
+            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center">
               <Zap className="w-4 h-4 text-obsidian" />
             </div>
             <span className="font-display text-body-lg font-bold text-ice">
-              Thoram <span className="text-cyan-400">Style Guide</span>
+              Thoram <span className="text-orange-500">Style Guide</span>
             </span>
           </div>
-          <a href="/" className="text-body-sm text-frost hover:text-cyan-400 transition-colors">
+          <a href="/" className="text-body-sm text-frost hover:text-orange-500 transition-colors">
             ← Back to site
           </a>
         </div>
@@ -171,7 +171,7 @@ export default function StyleGuidePage() {
 
             <motion.div variants={fadeUp} className="p-6 rounded-xl border border-steel/50 bg-graphite/30">
               <div className="text-caption text-mist mb-3">MONO — JetBrains Mono — 0.875rem</div>
-              <div className="font-mono text-body-sm text-cyan-400">const roi = revenue / adSpend * 100;</div>
+              <div className="font-mono text-body-sm text-orange-500">const roi = revenue / adSpend * 100;</div>
             </motion.div>
 
             {/* Gradient text */}
@@ -254,7 +254,7 @@ export default function StyleGuidePage() {
                 <button className="btn text-frost hover:text-ice hover:bg-glass-hover px-6 py-3 rounded-lg">
                   Ghost Button
                 </button>
-                <button className="btn text-cyan-400 hover:text-cyan-300 hover:bg-cyan-glow px-6 py-3 rounded-lg">
+                <button className="btn text-orange-500 hover:text-cyan-300 hover:bg-cyan-glow px-6 py-3 rounded-lg">
                   Cyan Ghost
                 </button>
               </div>
@@ -328,7 +328,7 @@ export default function StyleGuidePage() {
             ].map((s) => (
               <motion.div key={s.label} variants={fadeUp} className="flex items-center gap-4">
                 <span className="text-body-sm text-mist font-mono w-16 text-right">{s.label}</span>
-                <div className={`${s.size} h-3 bg-cyan-500/60 rounded-sm`} />
+                <div className={`${s.size} h-3 bg-orange-500/60 rounded-sm`} />
               </motion.div>
             ))}
           </div>
@@ -397,7 +397,7 @@ export default function StyleGuidePage() {
 
             <div className="aspect-square rounded-xl bg-graphite border border-steel flex items-center justify-center">
               <motion.div
-                className="w-3 h-3 rounded-full bg-cyan-500"
+                className="w-3 h-3 rounded-full bg-orange-500"
                 animate={{ scale: [1, 1.4, 1], opacity: [0.6, 1, 0.6] }}
                 transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
               />
@@ -405,7 +405,7 @@ export default function StyleGuidePage() {
 
             <div className="aspect-square rounded-xl bg-graphite border border-steel flex items-center justify-center">
               <motion.div
-                className="w-8 h-0.5 bg-cyan-500"
+                className="w-8 h-0.5 bg-orange-500"
                 animate={{ scaleX: [0, 1, 0], opacity: [0, 1, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
               />

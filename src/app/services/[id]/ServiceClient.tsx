@@ -47,7 +47,7 @@ export default function ServiceClient({ service }: ServiceClientProps) {
         {/* Back Link */}
         <Link
           href="/services"
-          className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 hover:text-cyan-700 transition-colors mb-10"
+          className="inline-flex items-center gap-2 text-xs font-mono text-zinc-500 hover:text-orange-600 transition-colors mb-10"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Back to All Services</span>
@@ -59,7 +59,7 @@ export default function ServiceClient({ service }: ServiceClientProps) {
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold tracking-tight text-zinc-900 mb-4">
             {service.title}
           </h1>
-          <p className="text-base sm:text-lg text-cyan-700/90 font-mono mb-6">
+          <p className="text-base sm:text-lg text-orange-600/90 font-mono mb-6">
             {service.tagline}
           </p>
           <p className="text-base sm:text-lg text-zinc-500 leading-relaxed max-w-3xl">
@@ -92,7 +92,7 @@ export default function ServiceClient({ service }: ServiceClientProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16 items-start">
           {/* Left: Deliverables list */}
           <div className="lg:col-span-7 p-8 rounded-2xl studio-glass space-y-6">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-700">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-orange-600">
               <Layers className="w-4 h-4" />
               <span>Core Scope & Deliverables</span>
             </div>
@@ -114,7 +114,7 @@ export default function ServiceClient({ service }: ServiceClientProps) {
 
           {/* Right: Delivery Guarantees */}
           <div className="lg:col-span-5 p-8 rounded-2xl studio-glass space-y-5">
-            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-cyan-700">
+            <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-orange-600">
               <ShieldCheck className="w-4 h-4" />
               <span>Delivery Standards</span>
             </div>
@@ -123,7 +123,7 @@ export default function ServiceClient({ service }: ServiceClientProps) {
               {deliveryGuarantees.map((item) => (
                 <div key={item.title} className="p-4 rounded-xl bg-zinc-900/[0.02] border border-zinc-900/[0.05]">
                   <div className="text-xs font-bold text-zinc-900 mb-1 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-cyan-700" />
+                    <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
                     <span>{item.title}</span>
                   </div>
                   <p className="text-[11px] text-zinc-500 leading-relaxed pl-3.5">

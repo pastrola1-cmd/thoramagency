@@ -134,11 +134,11 @@ export default function BillingConsole() {
         {/* Plan overview & Payment call to action */}
         <div className="lg:col-span-2 space-y-6">
           <div className="glass rounded-2xl p-6 border border-steel/60 relative overflow-hidden bg-graphite/10">
-            <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
             
             <div className="relative z-10 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6">
               <div className="space-y-1.5">
-                <span className="text-[10px] text-cyan-400 font-mono uppercase tracking-widest block">Active Contract</span>
+                <span className="text-[10px] text-orange-500 font-mono uppercase tracking-widest block">Active Contract</span>
                 <h3 className="font-display text-body-lg font-bold text-ice">Growth Sprint Cohort</h3>
                 <p className="text-body-xs text-frost leading-normal max-w-md">
                   Active sprint deployment. You are currently on a monthly cohort roadmap supporting continuous loops.
@@ -234,7 +234,7 @@ export default function BillingConsole() {
 
           <div className="glass rounded-2xl p-6 border border-steel/40 text-mist text-[10px] space-y-2.5">
             <div className="flex gap-2">
-              <HelpCircle className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+              <HelpCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
               <p className="leading-normal text-frost">
                 Need customized enterprise invoices? Our systems support customized invoicing schedules, bank wires, and localized VAT references. Reach out to our lead growth architect.
               </p>
@@ -252,9 +252,9 @@ export default function BillingConsole() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm bg-[#0a1124] border border-cyan-500/25 rounded-2xl p-6 shadow-glow space-y-6 relative overflow-hidden"
+              className="w-full max-w-sm bg-[#0a1124] border border-orange-500/25 rounded-2xl p-6 shadow-glow space-y-6 relative overflow-hidden"
             >
-              <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/10 blur-[40px] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-24 h-24 bg-orange-500/10 blur-[40px] pointer-events-none" />
 
               {/* Paystack Mock branding */}
               <div className="flex justify-between items-center border-b border-white/10 pb-4">

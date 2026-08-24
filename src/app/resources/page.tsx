@@ -74,7 +74,7 @@ export default function ResourcesPage() {
                 onClick={() => setActiveTab(tab.id)}
                 className={`px-5 py-2.5 rounded-xl font-mono text-[10px] uppercase tracking-wider border transition-all ${
                   activeTab === tab.id
-                    ? "bg-cyan-500 text-obsidian border-cyan-500 font-bold"
+                    ? "bg-orange-500 text-obsidian border-orange-500 font-bold"
                     : "border-steel hover:border-cyan-border text-frost hover:text-ice bg-glass-white"
                 }`}
               >
@@ -91,7 +91,7 @@ export default function ResourcesPage() {
                 placeholder="Search articles..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-11 pr-4 py-3 rounded-xl border border-steel bg-steel/10 text-ice placeholder-mist focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all focus:outline-none text-body-xs font-mono"
+                className="w-full pl-11 pr-4 py-3 rounded-xl border border-steel bg-steel/10 text-ice placeholder-mist focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50 transition-all focus:outline-none text-body-xs font-mono"
               />
             </div>
           )}
@@ -105,7 +105,7 @@ export default function ResourcesPage() {
                 <Link href={`/insights/${art.slug}`} key={art.slug} className="block group">
                   <div className="glass h-full p-6 rounded-2xl border border-steel/60 hover:border-cyan-border/40 hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
                     <div>
-                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-cyan-glow border border-cyan-border/20 text-cyan-400 font-mono text-[9px] uppercase tracking-wider font-semibold mb-4">
+                      <span className="inline-block px-2.5 py-0.5 rounded-full bg-cyan-glow border border-cyan-border/20 text-orange-500 font-mono text-[9px] uppercase tracking-wider font-semibold mb-4">
                         {art.category}
                       </span>
                       <h3 className="font-display text-body-lg font-bold text-ice mb-3 group-hover:text-cyan-300 transition-colors line-clamp-2">
@@ -115,7 +115,7 @@ export default function ResourcesPage() {
                         {art.excerpt}
                       </p>
                     </div>
-                    <div className="text-[10px] text-cyan-400 font-mono font-bold flex items-center gap-1 group-hover:text-cyan-300 transition-colors">
+                    <div className="text-[10px] text-orange-500 font-mono font-bold flex items-center gap-1 group-hover:text-cyan-300 transition-colors">
                       Read Article <BookOpen className="w-3.5 h-3.5" />
                     </div>
                   </div>
@@ -129,7 +129,7 @@ export default function ResourcesPage() {
               {guides.map((g) => (
                 <div key={g.title} className="glass p-8 rounded-3xl border border-steel/60 hover:border-cyan-border/40 flex flex-col justify-between group">
                   <div>
-                    <div className="w-12 h-12 rounded-xl bg-steel/20 border border-steel/50 text-cyan-400 flex items-center justify-center mb-6">
+                    <div className="w-12 h-12 rounded-xl bg-steel/20 border border-steel/50 text-orange-500 flex items-center justify-center mb-6">
                       <FileDown className="w-6 h-6" />
                     </div>
                     <h3 className="font-display text-body-lg font-bold text-ice mb-2">{g.title}</h3>
@@ -189,7 +189,7 @@ export default function ResourcesPage() {
                     placeholder="you@company.com"
                     value={downloadEmail}
                     onChange={(e) => setDownloadEmail(e.target.value)}
-                    className="w-full px-4 py-3 rounded-xl border border-steel bg-steel/10 text-ice placeholder-mist focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 transition-all focus:outline-none text-body-xs"
+                    className="w-full px-4 py-3 rounded-xl border border-steel bg-steel/10 text-ice placeholder-mist focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50 transition-all focus:outline-none text-body-xs"
                     required
                   />
                 </div>

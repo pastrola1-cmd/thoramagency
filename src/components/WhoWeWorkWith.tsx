@@ -44,10 +44,10 @@ export default function WhoWeWorkWith() {
           return (
             <div
               key={persona.title}
-              className="p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between"
+              className="p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between"
             >
               <div>
-                <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center mb-5">
+                <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-orange-600 flex items-center justify-center mb-5">
                   <Icon className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-zinc-900 mb-2.5">

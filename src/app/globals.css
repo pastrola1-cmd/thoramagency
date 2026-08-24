@@ -1,6 +1,6 @@
 /* ─────────────────────────────────────────────────────────────
    Thoram Group — Light Premium Design System
-   Clean, simple, editorial. Evogue-inspired minimal luxury.
+   Clean, simple, editorial. Radiant International Orange accents.
    ───────────────────────────────────────────────────────────── */
 
 @tailwind base;
@@ -15,12 +15,12 @@
     --bg-card: rgba(255, 255, 255, 0.85);
     --border-subtle: rgba(24, 24, 27, 0.08);
     --border-hover: rgba(24, 24, 27, 0.18);
-    --border-focus: rgba(8, 145, 178, 0.5);
+    --border-focus: rgba(234, 88, 12, 0.5);
     --text-primary: #18181B;
     --text-secondary: #52525B;
     --text-muted: #A1A1AA;
-    --brand-cyan: #0891B2;
-    --brand-cyan-light: #06B6D4;
+    --brand-primary: #EA580C;
+    --brand-primary-light: #F97316;
     --brand-indigo: #4F46E5;
 
     /* Design-system aliases used by token-based components */
@@ -68,7 +68,7 @@
   }
 
   ::selection {
-    background: rgba(6, 182, 212, 0.2);
+    background: rgba(249, 115, 22, 0.2);
     color: #18181B;
   }
 }
@@ -94,8 +94,8 @@
     -webkit-text-fill-color: transparent;
   }
 
-  .cyan-gradient {
-    background: linear-gradient(135deg, #06B6D4 0%, #0891B2 100%);
+  .orange-gradient {
+    background: linear-gradient(135deg, #F97316 0%, #EA580C 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
   }
@@ -111,7 +111,7 @@
     transform: translate(-50%, -50%);
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle, rgba(6, 182, 212, 0.06) 0%, transparent 70%);
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.06) 0%, transparent 70%);
     pointer-events: none;
     z-index: -1;
   }
@@ -131,7 +131,7 @@
   }
 
   .pill-badge {
-    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700;
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase bg-orange-500/[0.06] border border-orange-500/20 text-orange-600;
   }
 
   .btn-solid {
@@ -150,7 +150,7 @@
   }
 
   .eyebrow {
-    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 text-[11px] font-mono;
+    @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-medium tracking-wide uppercase bg-orange-500/[0.06] border border-orange-500/20 text-orange-600 text-[11px] font-mono;
   }
 
   .btn {

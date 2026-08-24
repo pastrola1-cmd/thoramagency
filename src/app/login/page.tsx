@@ -34,7 +34,7 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-void flex items-center justify-center px-6 relative overflow-hidden py-16">
       {/* Background decoration */}
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -44,7 +44,7 @@ export default function LoginPage() {
       >
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-border text-cyan-400 flex items-center justify-center mx-auto mb-4">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-cyan-border text-orange-500 flex items-center justify-center mx-auto mb-4">
             <Bot className="w-6 h-6" />
           </div>
           <h2 className="font-display text-body-lg md:text-display-sm font-bold text-ice">
@@ -78,7 +78,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="developer@company.com"
-                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
+                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50 outline-none transition-colors"
               />
             </div>
           </div>
@@ -96,7 +96,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-cyan-500 focus:ring-2 focus:ring-cyan-500/50 outline-none transition-colors"
+                className="w-full bg-void border border-steel rounded-xl pl-11 pr-4 py-3 text-body-sm text-ice focus:border-orange-500 focus:ring-2 focus:ring-orange-500/50 outline-none transition-colors"
               />
             </div>
           </div>
@@ -116,7 +116,7 @@ export default function LoginPage() {
         <div className="mt-8 text-center border-t border-steel/30 pt-6">
           <p className="text-body-xs text-frost">
             New partnership?{" "}
-            <Link href="/signup" className="text-cyan-400 font-semibold hover:underline font-mono">
+            <Link href="/signup" className="text-orange-500 font-semibold hover:underline font-mono">
               Apply/Create Account
             </Link>
           </p>

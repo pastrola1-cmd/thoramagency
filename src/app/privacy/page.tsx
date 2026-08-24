@@ -8,14 +8,14 @@ export default function PrivacyPage() {
   return (
     <div className="min-h-screen bg-void py-24 px-6 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
 
       {/* Navigation header */}
       <div className="max-w-4xl mx-auto mb-16 flex items-center justify-between border-b border-steel/30 pb-6 relative z-10">
-        <Link href="/" className="font-display text-body-lg font-bold text-ice hover:text-cyan-400 transition-colors">
-          Thoram<span className="text-cyan-400">.</span>
+        <Link href="/" className="font-display text-body-lg font-bold text-ice hover:text-orange-500 transition-colors">
+          Thoram<span className="text-orange-500">.</span>
         </Link>
-        <Link href="/" className="text-body-sm text-frost hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-mono">
+        <Link href="/" className="text-body-sm text-frost hover:text-orange-500 transition-colors flex items-center gap-1.5 font-mono">
           <ArrowLeft className="w-4 h-4" /> Back to site
         </Link>
       </div>
@@ -32,7 +32,7 @@ export default function PrivacyPage() {
         </div>
 
         <div className="glass rounded-2xl p-6 md:p-8 border border-steel/60 space-y-6 text-frost text-body-xs md:text-body-sm leading-relaxed font-mono">
-          <div className="flex items-center gap-2 text-cyan-400 pb-2 border-b border-steel/30">
+          <div className="flex items-center gap-2 text-orange-500 pb-2 border-b border-steel/30">
             <ShieldCheck className="w-4 h-4" />
             <span>SECURE_COMPLIANCE_PROTOCOL</span>
           </div>

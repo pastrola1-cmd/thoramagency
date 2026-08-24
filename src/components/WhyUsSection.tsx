@@ -44,7 +44,7 @@ export default function WhyUsSection() {
             key={reason.num}
             className="grid grid-cols-1 md:grid-cols-12 gap-4 py-8 border-t border-zinc-900/[0.06] hover:bg-zinc-50/60 transition-colors"
           >
-            <div className="md:col-span-2 text-2xl font-bold text-cyan-700 font-mono">
+            <div className="md:col-span-2 text-2xl font-bold text-orange-600 font-mono">
               {reason.num}
             </div>
             <div className="md:col-span-4">
@@ -63,7 +63,7 @@ export default function WhyUsSection() {
       {/* Strategic Origin Box */}
       <div className="p-8 sm:p-10 rounded-2xl bg-zinc-50 border border-zinc-900/[0.08] flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
         <div className="space-y-2 max-w-2xl">
-          <div className="flex items-center gap-2 text-xs font-mono text-cyan-700 uppercase tracking-wider font-semibold">
+          <div className="flex items-center gap-2 text-xs font-mono text-orange-600 uppercase tracking-wider font-semibold">
             <Globe2 className="w-4 h-4" />
             <span>Strategic Perspective · Built in Africa. Working Globally.</span>
           </div>

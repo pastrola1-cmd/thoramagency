@@ -29,7 +29,7 @@ export default function Footer() {
                 alt="Thoram Group Logo"
                 className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
               />
-              <span className="font-bold text-lg text-zinc-900 group-hover:text-cyan-700 transition-colors">
+              <span className="font-bold text-lg text-zinc-900 group-hover:text-orange-600 transition-colors">
                 Thoram Group
               </span>
             </Link>
@@ -46,7 +46,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-zinc-500">
               {quickLinks.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="hover:text-cyan-700 transition-colors">
+                  <Link href={link.href} className="hover:text-orange-600 transition-colors">
                     {link.label}
                   </Link>
                 </li>
@@ -61,7 +61,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-zinc-500">
               {support.map((link) => (
                 <li key={link.label}>
-                  <Link href={link.href} className="hover:text-cyan-700 transition-colors">
+                  <Link href={link.href} className="hover:text-orange-600 transition-colors">
                     {link.label}
                   </Link>
                 </li>

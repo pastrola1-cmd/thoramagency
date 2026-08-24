@@ -8,7 +8,7 @@ import ContactSection from "@/components/ContactSection";
 
 export default function Home() {
   return (
-    <main className="min-h-screen bg-white text-zinc-900 selection:bg-cyan-500/20">
+    <main className="min-h-screen bg-white text-zinc-900 selection:bg-orange-500/20">
       <Hero />
       <ServicesSection />
       <WhoWeWorkWith />

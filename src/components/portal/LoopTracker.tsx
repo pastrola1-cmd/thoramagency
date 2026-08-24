@@ -33,13 +33,13 @@ export default function LoopTracker() {
     <div className="space-y-8">
       {/* Progress header card */}
       <div className="glass rounded-2xl p-6 border border-steel/60 relative overflow-hidden bg-graphite/10">
-        <div className="absolute top-0 right-0 w-48 h-48 bg-cyan-500/5 blur-[80px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 right-0 w-48 h-48 bg-orange-500/5 blur-[80px] rounded-full pointer-events-none" />
         
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 relative z-10">
           <div className="space-y-1">
             <span className="text-[10px] text-mist font-mono uppercase tracking-widest block">Build Completion</span>
             <h2 className="font-display text-display-sm font-bold text-ice flex items-center gap-2">
-              <Award className="w-6 h-6 text-cyan-400" />
+              <Award className="w-6 h-6 text-orange-500" />
               {progressPercent}% Delivered
             </h2>
             <p className="text-body-xs text-frost">
@@ -51,7 +51,7 @@ export default function LoopTracker() {
           <div className="w-full md:w-80 space-y-2">
             <div className="h-2 w-full bg-steel/30 rounded-full overflow-hidden">
               <motion.div
-                className="h-full bg-cyan-500 rounded-full shadow-glow"
+                className="h-full bg-orange-500 rounded-full shadow-glow"
                 initial={{ width: 0 }}
                 animate={{ width: `${progressPercent}%` }}
                 transition={{ duration: 1.2, ease: "easeOut" }}
@@ -83,7 +83,7 @@ export default function LoopTracker() {
                   isCompleted
                     ? "border-emerald-500/20 bg-emerald-500/2"
                     : isInProgress
-                    ? "border-cyan-500/30 bg-cyan-glow/5 shadow-glow/5"
+                    ? "border-orange-500/30 bg-cyan-glow/5 shadow-glow/5"
                     : "border-steel/40 bg-void/5 opacity-60"
                 }`}
               >
@@ -99,7 +99,7 @@ export default function LoopTracker() {
                         <CheckCircle2 className="w-3 h-3" /> Locked
                       </span>
                     ) : isInProgress ? (
-                      <span className="text-[9px] font-mono text-cyan-400 flex items-center gap-1 uppercase">
+                      <span className="text-[9px] font-mono text-orange-500 flex items-center gap-1 uppercase">
                         <Play className="w-2.5 h-2.5 animate-pulse" /> Active
                       </span>
                     ) : (

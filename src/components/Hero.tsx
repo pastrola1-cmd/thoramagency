@@ -39,7 +39,7 @@ export default function Hero() {
   return (
     <section className="relative pt-40 pb-20 md:pt-48 md:pb-24 overflow-hidden">
       {/* Soft ambient tint */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-cyan-500/[0.05] rounded-full blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[900px] h-[500px] bg-orange-500/[0.05] rounded-full blur-[120px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-5 sm:px-8 relative z-10">
         {/* Top Eyebrow Badge */}
@@ -47,10 +47,10 @@ export default function Hero() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/[0.04] border border-zinc-900/[0.08] mb-8"
+          className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-orange-500/[0.06] border border-orange-500/20 mb-8"
         >
-          <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
-          <span className="text-xs font-mono font-medium text-cyan-700 uppercase tracking-wider">
+          <span className="w-2 h-2 rounded-full bg-orange-500 animate-pulse" />
+          <span className="text-xs font-mono font-medium text-orange-600 uppercase tracking-wider">
             Product Engineering & Technology Studio
           </span>
         </motion.div>
@@ -63,7 +63,7 @@ export default function Hero() {
           className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 max-w-4xl leading-[1.06] mb-6"
         >
           We build the software that{" "}
-          <span className="text-cyan-700">moves businesses forward.</span>
+          <span className="text-orange-600">moves businesses forward.</span>
         </motion.h1>
 
         {/* Subhead Narrative */}
@@ -115,7 +115,7 @@ export default function Hero() {
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
-              <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
+              <ShieldCheck className="w-3.5 h-3.5 text-orange-600" />
               <span>Zero Vendor Lock-in · 100% Client Ownership</span>
             </div>
           </div>
@@ -151,7 +151,7 @@ export default function Hero() {
               {clients.map((client) => (
                 <div
                   key={client.name}
-                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs text-zinc-800 font-medium shadow-2xs hover:border-zinc-400 transition-colors"
+                  className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs text-zinc-800 font-medium shadow-2xs hover:border-orange-500/50 transition-colors"
                 >
                   <span className="font-semibold text-zinc-900">{client.name}</span>
                   <span className="text-[10px] font-mono text-zinc-400 px-1.5 py-0.5 rounded bg-zinc-100">

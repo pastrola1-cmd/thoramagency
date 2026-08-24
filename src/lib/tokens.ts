@@ -122,9 +122,9 @@ export const animation = {
 // ─────────────────────────────────────────────────────────────
 
 export const buttonVariants = {
-  primary: "bg-cyan-500 hover:bg-cyan-400 text-obsidian font-semibold shadow-glow hover:shadow-glowLg transition-all duration-300 hover:-translate-y-0.5",
+  primary: "bg-orange-500 hover:bg-cyan-400 text-obsidian font-semibold shadow-glow hover:shadow-glowLg transition-all duration-300 hover:-translate-y-0.5",
   secondary: "border border-steel bg-glass-white hover:bg-glass-hover text-ice font-medium transition-all duration-300 hover:-translate-y-0.5",
-  outline: "border border-cyan-border text-cyan-500 hover:bg-cyan-glow font-medium transition-all duration-300",
+  outline: "border border-cyan-border text-orange-500 hover:bg-cyan-glow font-medium transition-all duration-300",
   ghost: "text-frost hover:text-ice hover:bg-glass-hover font-medium transition-all duration-200",
   danger: "bg-danger hover:bg-red-600 text-white font-semibold transition-all duration-200",
 } as const;

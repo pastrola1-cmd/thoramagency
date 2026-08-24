@@ -66,11 +66,11 @@ export default function FAQAccordion() {
               >
                 <button
                   onClick={() => toggle(idx)}
-                  className="w-full p-6 text-left flex items-center justify-between gap-4 text-ice hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-cyan-500/50 rounded-t-2xl"
+                  className="w-full p-6 text-left flex items-center justify-between gap-4 text-ice hover:text-cyan-300 transition-colors focus:outline-none focus:ring-2 focus:ring-orange-500/50 rounded-t-2xl"
                   aria-expanded={isOpen}
                 >
                   <span className="font-display text-body-md md:text-body-lg font-bold flex items-center gap-2.5">
-                    <HelpCircle className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                    <HelpCircle className="w-4 h-4 text-orange-500 flex-shrink-0" />
                     {faq.question}
                   </span>
                   <div className="p-1 rounded-lg bg-steel/30 border border-steel/50 text-ice flex-shrink-0">

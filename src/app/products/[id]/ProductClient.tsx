@@ -49,7 +49,7 @@ const productsDetailData: Record<
       { label: "Integrations", value: "HubSpot, Salesforce, Segment" },
     ],
     theme: {
-      accent: "text-cyan-700 border-cyan-700/20 bg-cyan-700/2",
+      accent: "text-orange-600 border-orange-600/20 bg-orange-600/2",
       glow: "rgba(6, 182, 212, 0.15)",
       radialGlow: "from-cyan-700/5",
     },
@@ -166,14 +166,14 @@ export default function ProductClient() {
         const roiScore = (val2 * 2.2).toFixed(1);
         return (
           <div className="space-y-6">
-            <h4 className="text-body-xs font-mono uppercase tracking-widest text-cyan-700 flex items-center gap-1.5">
+            <h4 className="text-body-xs font-mono uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
               <Cpu className="w-4 h-4" /> LTV & ROI Score Simulator
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Monthly Traffic</span>
-                  <span className="text-cyan-700 font-bold">{val1.toLocaleString()} visitors</span>
+                  <span className="text-orange-600 font-bold">{val1.toLocaleString()} visitors</span>
                 </div>
                 <input
                   type="range"
@@ -189,7 +189,7 @@ export default function ProductClient() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Conversion Rate</span>
-                  <span className="text-cyan-700 font-bold">{val2.toFixed(1)}%</span>
+                  <span className="text-orange-600 font-bold">{val2.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -222,14 +222,14 @@ export default function ProductClient() {
         const hoursSaved = Math.round((val1 / 100) * 1.5);
         return (
           <div className="space-y-6">
-            <h4 className="text-body-xs font-mono uppercase tracking-widest text-cyan-700 flex items-center gap-1.5">
+            <h4 className="text-body-xs font-mono uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
               <Cpu className="w-4 h-4" /> Outreach Sourcing Planner
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Target Leads / mo</span>
-                  <span className="text-cyan-700 font-bold">{val1.toLocaleString()} contacts</span>
+                  <span className="text-orange-600 font-bold">{val1.toLocaleString()} contacts</span>
                 </div>
                 <input
                   type="range"
@@ -245,7 +245,7 @@ export default function ProductClient() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Target Reply Rate</span>
-                  <span className="text-cyan-700 font-bold">{val2.toFixed(1)}%</span>
+                  <span className="text-orange-600 font-bold">{val2.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -277,14 +277,14 @@ export default function ProductClient() {
         const liftValue = Math.round(val1 * (val2 / 100) * 120);
         return (
           <div className="space-y-6">
-            <h4 className="text-body-xs font-mono uppercase tracking-widest text-cyan-700 flex items-center gap-1.5">
+            <h4 className="text-body-xs font-mono uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
               <Cpu className="w-4 h-4" /> A/B Conversion Value Simulator
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Current Signups / mo</span>
-                  <span className="text-cyan-700 font-bold">{val1.toLocaleString()} signups</span>
+                  <span className="text-orange-600 font-bold">{val1.toLocaleString()} signups</span>
                 </div>
                 <input
                   type="range"
@@ -300,7 +300,7 @@ export default function ProductClient() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Target Lift</span>
-                  <span className="text-cyan-700 font-bold">+{val2.toFixed(1)}%</span>
+                  <span className="text-orange-600 font-bold">+{val2.toFixed(1)}%</span>
                 </div>
                 <input
                   type="range"
@@ -333,14 +333,14 @@ export default function ProductClient() {
         const estimatedVisitors = Math.round(val1 * 850 * (val2 / 2));
         return (
           <div className="space-y-6">
-            <h4 className="text-body-xs font-mono uppercase tracking-widest text-cyan-700 flex items-center gap-1.5">
+            <h4 className="text-body-xs font-mono uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
               <Cpu className="w-4 h-4" /> SEO Domain Velocity Planner
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Monthly Articles</span>
-                  <span className="text-cyan-700 font-bold">{val1} articles / mo</span>
+                  <span className="text-orange-600 font-bold">{val1} articles / mo</span>
                 </div>
                 <input
                   type="range"
@@ -356,7 +356,7 @@ export default function ProductClient() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>PR Distribution Frequency</span>
-                  <span className="text-cyan-700 font-bold">{val2.toFixed(0)} releases / Q</span>
+                  <span className="text-orange-600 font-bold">{val2.toFixed(0)} releases / Q</span>
                 </div>
                 <input
                   type="range"
@@ -389,14 +389,14 @@ export default function ProductClient() {
         const dollarsSaved = Math.round(teamSavedHours * 45);
         return (
           <div className="space-y-6">
-            <h4 className="text-body-xs font-mono uppercase tracking-widest text-cyan-700 flex items-center gap-1.5">
+            <h4 className="text-body-xs font-mono uppercase tracking-widest text-orange-600 flex items-center gap-1.5">
               <Cpu className="w-4 h-4" /> Operational Savings Calculator
             </h4>
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Sales / Ops Reps</span>
-                  <span className="text-cyan-700 font-bold">{val1} members</span>
+                  <span className="text-orange-600 font-bold">{val1} members</span>
                 </div>
                 <input
                   type="range"
@@ -412,7 +412,7 @@ export default function ProductClient() {
               <div>
                 <div className="flex justify-between text-[11px] font-mono text-frost mb-1">
                   <span>Data entry time / member</span>
-                  <span className="text-cyan-700 font-bold">{val2.toFixed(1)} hrs / wk</span>
+                  <span className="text-orange-600 font-bold">{val2.toFixed(1)} hrs / wk</span>
                 </div>
                 <input
                   type="range"
@@ -452,9 +452,9 @@ export default function ProductClient() {
       {/* Navigation header */}
       <div className="max-w-6xl mx-auto mb-12 flex items-center justify-between border-b border-steel/30 pb-6 relative z-10">
         <Link href="/" className="font-display text-body-lg font-bold text-ice">
-          Thoram<span className="text-cyan-700">.</span>
+          Thoram<span className="text-orange-600">.</span>
         </Link>
-        <Link href="/services" className="text-body-sm text-frost hover:text-cyan-700 transition-colors flex items-center gap-1.5 font-mono">
+        <Link href="/services" className="text-body-sm text-frost hover:text-orange-600 transition-colors flex items-center gap-1.5 font-mono">
           <ArrowLeft className="w-4 h-4" /> Back to Services
         </Link>
       </div>
@@ -469,13 +469,13 @@ export default function ProductClient() {
           className="flex-grow max-w-3xl glass rounded-2xl p-6 md:p-10 border border-steel/60 flex flex-col justify-between"
         >
           <div className="space-y-6">
-            <span className="text-[10px] text-cyan-700 font-mono uppercase tracking-widest block">
+            <span className="text-[10px] text-orange-600 font-mono uppercase tracking-widest block">
               PRODUCT DETAILS
             </span>
             <h1 className="font-display text-display-sm md:text-display-md font-extrabold text-ice leading-snug">
               {product.name}
             </h1>
-            <p className="text-body-xs font-mono text-cyan-600 font-semibold uppercase tracking-wider">
+            <p className="text-body-xs font-mono text-orange-600 font-semibold uppercase tracking-wider">
               {product.tagline}
             </p>
             <p className="text-body-xs md:text-body-sm text-frost leading-relaxed border-t border-steel/30 pt-6">
@@ -489,7 +489,7 @@ export default function ProductClient() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {product.deliverables.map((item, idx) => (
                   <div key={idx} className="flex items-center gap-2 text-body-xs text-frost font-mono">
-                    <CheckCircle2 className="w-4 h-4 text-cyan-700 flex-shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-orange-600 flex-shrink-0" />
                     <span>{item}</span>
                   </div>
                 ))}
@@ -516,7 +516,7 @@ export default function ProductClient() {
         >
           {/* Simulator Card */}
           <div className="glass rounded-2xl p-6 border border-steel/60 bg-graphite/20 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-700/5 blur-[50px] rounded-full pointer-events-none" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-orange-600/5 blur-[50px] rounded-full pointer-events-none" />
             {renderInteractiveWidget()}
           </div>
 

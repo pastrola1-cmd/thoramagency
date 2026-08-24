@@ -70,7 +70,7 @@ export default function SelectedWork() {
 
         <Link
           href="/case-studies"
-          className="inline-flex items-center gap-1.5 text-xs font-mono text-cyan-700 hover:text-cyan-600 font-semibold group self-start md:self-auto"
+          className="inline-flex items-center gap-1.5 text-xs font-mono text-orange-600 hover:text-orange-500 font-semibold group self-start md:self-auto"
         >
           <span>View all case studies</span>
           <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -99,10 +99,10 @@ export default function SelectedWork() {
             </div>
 
             <div className="mb-4">
-              <span className="text-xs font-mono text-cyan-700 font-semibold uppercase tracking-wider block mb-1">
+              <span className="text-xs font-mono text-orange-600 font-semibold uppercase tracking-wider block mb-1">
                 {project.title}
               </span>
-              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 group-hover:text-cyan-700 transition-colors">
+              <h3 className="text-xl sm:text-2xl font-bold text-zinc-900 group-hover:text-orange-600 transition-colors">
                 {project.headline}
               </h3>
             </div>
@@ -117,7 +117,7 @@ export default function SelectedWork() {
                   key={res}
                   className="flex items-start gap-2 p-3.5 rounded-xl bg-zinc-50 border border-zinc-900/[0.06] text-xs sm:text-sm text-zinc-700 font-medium"
                 >
-                  <Check className="w-4 h-4 text-cyan-700 shrink-0 mt-0.5" />
+                  <Check className="w-4 h-4 text-orange-600 shrink-0 mt-0.5" />
                   <span>{res}</span>
                 </div>
               ))}
@@ -125,7 +125,7 @@ export default function SelectedWork() {
 
             <Link
               href="/case-studies"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-700 hover:text-cyan-600 transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-orange-600 hover:text-orange-500 transition-colors"
             >
               <span>Read Full Case Study</span>
               <ArrowUpRight className="w-3.5 h-3.5" />

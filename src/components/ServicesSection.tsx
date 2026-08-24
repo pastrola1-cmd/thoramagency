@@ -62,12 +62,12 @@ export default function ServicesSection() {
             <Link
               key={cap.id}
               href={cap.href}
-              className={`group p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between gap-6 ${
+              className={`group p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between gap-6 ${
                 idx === 3 ? "lg:col-span-1 md:col-span-1" : ""
               } ${idx === 4 ? "lg:col-span-2 md:col-span-2" : ""}`}
             >
               <div>
-                <div className="w-11 h-11 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center mb-6 group-hover:bg-cyan-700 group-hover:text-white transition-colors">
+                <div className="w-11 h-11 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-orange-600 flex items-center justify-center mb-6 group-hover:bg-orange-600 group-hover:text-white transition-colors">
                   <Icon className="w-5 h-5" />
                 </div>
                 <h3 className="text-lg sm:text-xl font-bold text-zinc-900 mb-2.5">
@@ -77,7 +77,7 @@ export default function ServicesSection() {
                   {cap.desc}
                 </p>
               </div>
-              <div className="text-xs font-semibold text-zinc-500 group-hover:text-cyan-700 flex items-center gap-1.5 transition-colors">
+              <div className="text-xs font-semibold text-zinc-500 group-hover:text-orange-600 flex items-center gap-1.5 transition-colors">
                 <span>Explore capability</span>
                 <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
               </div>

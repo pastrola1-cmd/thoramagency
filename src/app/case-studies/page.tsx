@@ -41,7 +41,7 @@ export default function CaseStudiesPage() {
           <div className="pill-badge mb-3">Selected Work & Case Studies</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Real products.{" "}
-            <span className="text-cyan-700">Real outcomes.</span>
+            <span className="text-orange-600">Real outcomes.</span>
           </h1>
           <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
             We don't build portfolios of mockups. We engineer software that moves critical business metrics and eliminates operational friction.
@@ -76,7 +76,7 @@ export default function CaseStudiesPage() {
               {/* Header */}
               <div className="pb-8 border-b border-zinc-900/[0.06] flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <div className="flex items-center gap-2 text-xs font-mono text-cyan-700 uppercase tracking-wider mb-2">
+                  <div className="flex items-center gap-2 text-xs font-mono text-orange-600 uppercase tracking-wider mb-2">
                     <span>{study.industry}</span>
                     <span className="text-zinc-400">·</span>
                     <span className="text-zinc-500">{study.client}</span>
@@ -117,7 +117,7 @@ export default function CaseStudiesPage() {
 
               {/* Measured Business Results */}
               <div className="p-8 rounded-2xl bg-zinc-900/[0.03] border border-zinc-900/[0.06]">
-                <div className="flex items-center gap-2 text-xs font-mono text-cyan-700 uppercase tracking-wider mb-6">
+                <div className="flex items-center gap-2 text-xs font-mono text-orange-600 uppercase tracking-wider mb-6">
                   <TrendingUp className="w-4 h-4" />
                   <span>Key Measured Business Results</span>
                 </div>
@@ -135,13 +135,13 @@ export default function CaseStudiesPage() {
               {/* Technical Architecture Highlights */}
               <div className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05] space-y-4">
                 <div className="flex items-center gap-2 text-xs font-mono text-zinc-500 uppercase tracking-wider">
-                  <Layers className="w-4 h-4 text-cyan-700" />
+                  <Layers className="w-4 h-4 text-orange-600" />
                   <span>Architecture & Infrastructure Highlights</span>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {study.architecture.map((arch) => (
                     <div key={arch} className="text-xs sm:text-sm text-zinc-600 font-mono flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-700" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-orange-600" />
                       <span>{arch}</span>
                     </div>
                   ))}
@@ -151,7 +151,7 @@ export default function CaseStudiesPage() {
               {/* Client Testimonial (if available) */}
               {study.testimonial && (
                 <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-900/[0.06] flex items-start gap-4">
-                  <div className="p-2 rounded-xl bg-cyan-700/10 text-cyan-700 shrink-0">
+                  <div className="p-2 rounded-xl bg-orange-600/10 text-orange-600 shrink-0">
                     <Quote className="w-5 h-5" />
                   </div>
                   <div>

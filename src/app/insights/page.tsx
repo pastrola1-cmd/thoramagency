@@ -11,14 +11,14 @@ export default function InsightsPage() {
   return (
     <div className="min-h-screen bg-void py-24 px-6 relative overflow-hidden">
       {/* Background glow */}
-      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
 
       {/* Navigation header */}
       <div className="max-w-6xl mx-auto mb-16 flex items-center justify-between border-b border-steel/30 pb-6 relative z-10">
-        <Link href="/" className="font-display text-body-lg font-bold text-ice hover:text-cyan-400 transition-colors">
-          Thoram<span className="text-cyan-400">.</span>
+        <Link href="/" className="font-display text-body-lg font-bold text-ice hover:text-orange-500 transition-colors">
+          Thoram<span className="text-orange-500">.</span>
         </Link>
-        <Link href="/" className="text-body-sm text-frost hover:text-cyan-400 transition-colors">
+        <Link href="/" className="text-body-sm text-frost hover:text-orange-500 transition-colors">
           ← Back to site
         </Link>
       </div>
@@ -43,7 +43,7 @@ export default function InsightsPage() {
                 <div>
                   {/* Category & Date */}
                   <div className="flex items-center justify-between mb-4">
-                    <span className="text-caption px-2.5 py-1 rounded bg-cyan-glow border border-cyan-border/30 text-cyan-400 font-mono">
+                    <span className="text-caption px-2.5 py-1 rounded bg-cyan-glow border border-cyan-border/30 text-orange-500 font-mono">
                       {art.category}
                     </span>
                     <span className="text-[10px] text-mist flex items-center gap-1 font-mono">
@@ -67,7 +67,7 @@ export default function InsightsPage() {
                     <Clock className="w-3.5 h-3.5" />
                     {art.readTime}
                   </span>
-                  <span className="text-body-xs text-cyan-400 font-mono flex items-center gap-0.5">
+                  <span className="text-body-xs text-orange-500 font-mono flex items-center gap-0.5">
                     Read Article <ArrowRight className="w-3.5 h-3.5" />
                   </span>
                 </div>

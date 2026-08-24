@@ -36,7 +36,7 @@ export default function AboutPage() {
           <div className="pill-badge mb-3">About Thoram Group</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Product Engineering &{" "}
-            <span className="text-cyan-700">Technology Studio.</span>
+            <span className="text-orange-600">Technology Studio.</span>
           </h1>
           <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
             We design, build, and scale high-performance digital products for businesses ready to move faster — from internal business systems and customer platforms to mobile applications and automation.
@@ -63,7 +63,7 @@ export default function AboutPage() {
           </div>
 
           <div className="lg:col-span-6 p-8 sm:p-10 rounded-3xl bg-[#F8F8F6] border border-zinc-200/80 space-y-6">
-            <div className="flex items-center gap-3 text-cyan-700 font-mono text-xs uppercase tracking-wider font-semibold">
+            <div className="flex items-center gap-3 text-orange-600 font-mono text-xs uppercase tracking-wider font-semibold">
               <Globe2 className="w-4 h-4" />
               <span>Built in Africa. Working Globally.</span>
             </div>
@@ -98,9 +98,9 @@ export default function AboutPage() {
               return (
                 <div
                   key={principle.title}
-                  className="p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300"
+                  className="p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300"
                 >
-                  <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center mb-5">
+                  <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-orange-600 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5" />
                   </div>
                   <h3 className="text-xl font-bold text-zinc-900 mb-2">

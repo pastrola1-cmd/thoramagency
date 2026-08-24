@@ -39,7 +39,7 @@ export default function Navbar() {
             alt="Thoram Group Logo"
             className="w-8 h-8 object-contain rounded-lg group-hover:scale-105 transition-transform"
           />
-          <span className="font-bold text-base tracking-tight text-zinc-900 group-hover:text-cyan-700 transition-colors">
+          <span className="font-bold text-base tracking-tight text-zinc-900 group-hover:text-orange-600 transition-colors">
             Thoram Group
           </span>
         </Link>
@@ -61,7 +61,7 @@ export default function Navbar() {
         <div className="hidden md:flex items-center gap-3">
           <Link
             href="/contact"
-            className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-cyan-700 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition-all active:scale-95"
+            className="inline-flex items-center gap-1.5 bg-zinc-900 hover:bg-orange-600 text-white font-semibold text-xs px-4 py-2.5 rounded-lg transition-all active:scale-95"
           >
             <span>Start a Project</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -87,7 +87,7 @@ export default function Navbar() {
                 key={link.label}
                 href={link.href}
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-base font-medium text-zinc-700 hover:text-cyan-700 py-1"
+                className="text-base font-medium text-zinc-700 hover:text-orange-600 py-1"
               >
                 {link.label}
               </Link>

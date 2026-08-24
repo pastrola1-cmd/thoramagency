@@ -24,7 +24,7 @@ export default function PortalPage() {
       {/* Welcome Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-steel/30">
         <div>
-          <span className="text-[10px] text-cyan-400 font-mono uppercase tracking-widest block">
+          <span className="text-[10px] text-orange-500 font-mono uppercase tracking-widest block">
             Console Workspace
           </span>
           <h1 className="font-display text-display-sm font-bold text-ice mt-1">
@@ -67,7 +67,7 @@ export default function PortalPage() {
           onClick={() => setActiveTab("workspace")}
           className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
             activeTab === "workspace"
-              ? "border-cyan-500 text-cyan-400"
+              ? "border-orange-500 text-orange-500"
               : "border-transparent text-mist hover:text-frost"
           }`}
         >
@@ -79,7 +79,7 @@ export default function PortalPage() {
           onClick={() => setActiveTab("billing")}
           className={`pb-4 text-body-xs font-mono uppercase tracking-wider font-semibold border-b-2 flex items-center gap-2 transition-all duration-300 ${
             activeTab === "billing"
-              ? "border-cyan-500 text-cyan-400"
+              ? "border-orange-500 text-orange-500"
               : "border-transparent text-mist hover:text-frost"
           }`}
         >

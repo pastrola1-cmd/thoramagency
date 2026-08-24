@@ -25,7 +25,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
     return (
       <div className="min-h-screen bg-void flex items-center justify-center">
         <div className="text-center space-y-4">
-          <div className="w-12 h-12 rounded-xl bg-cyan-500/10 border border-cyan-border text-cyan-400 flex items-center justify-center mx-auto animate-spin">
+          <div className="w-12 h-12 rounded-xl bg-orange-500/10 border border-cyan-border text-orange-500 flex items-center justify-center mx-auto animate-spin">
             <Bot className="w-6 h-6" />
           </div>
           <p className="text-body-xs text-mist font-mono uppercase tracking-widest">
@@ -47,11 +47,11 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
         <div className="space-y-8">
           {/* Header */}
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-obsidian">
+            <div className="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-obsidian">
               <Bot className="w-[18px] h-[18px]" />
             </div>
             <span className="font-display text-body-md font-bold text-ice">
-              Console <span className="text-cyan-400">v1.0</span>
+              Console <span className="text-orange-500">v1.0</span>
             </span>
           </div>
 
@@ -59,7 +59,7 @@ export default function PortalLayout({ children }: { children: React.ReactNode }
           <nav className="space-y-1.5">
             <Link
               href="/portal"
-              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-cyan-glow border border-cyan-border/40 text-cyan-400 font-mono text-body-xs uppercase font-semibold"
+              className="flex items-center gap-3 px-4 py-3 rounded-xl bg-cyan-glow border border-cyan-border/40 text-orange-500 font-mono text-body-xs uppercase font-semibold"
             >
               <LayoutDashboard className="w-4 h-4" />
               Workspace

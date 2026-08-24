@@ -156,7 +156,7 @@ export default function ServicesPage() {
           <div className="pill-badge mb-3">What We Build</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
             Software engineered for{" "}
-            <span className="text-cyan-700">commercial outcomes.</span>
+            <span className="text-orange-600">commercial outcomes.</span>
           </h1>
           <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
             We design and build digital products around real business problems — not trends, templates, or unnecessary complexity.
@@ -176,10 +176,10 @@ export default function ServicesPage() {
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
                   <div className="lg:col-span-5 space-y-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-orange-600 flex items-center justify-center">
                         <Icon className="w-5 h-5" />
                       </div>
-                      <span className="text-xs font-mono font-semibold text-cyan-700 uppercase tracking-wider">
+                      <span className="text-xs font-mono font-semibold text-orange-600 uppercase tracking-wider">
                         {cap.pill}
                       </span>
                     </div>
@@ -222,7 +222,7 @@ export default function ServicesPage() {
                           className="p-4 rounded-xl bg-white border border-zinc-200/80 space-y-1.5"
                         >
                           <div className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
-                            <Check className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
+                            <Check className="w-3.5 h-3.5 text-orange-600 shrink-0" />
                             <span>{del.name}</span>
                           </div>
                           <p className="text-xs text-zinc-500 leading-relaxed">

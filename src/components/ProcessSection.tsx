@@ -40,11 +40,11 @@ export default function ProcessSection() {
         {steps.map((step) => (
           <div
             key={step.num}
-            className="p-7 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between"
+            className="p-7 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300 flex flex-col justify-between"
           >
             <div>
               <div className="flex items-center justify-between mb-4">
-                <span className="text-2xl font-bold text-cyan-700 font-mono">{step.num}</span>
+                <span className="text-2xl font-bold text-orange-600 font-mono">{step.num}</span>
                 <span className="text-[10px] font-mono font-semibold tracking-wider text-zinc-400 uppercase">
                   {step.phase}
                 </span>

@@ -41,14 +41,14 @@ export default function ArticlePage({ params }: PageProps) {
   return (
     <div className="min-h-screen bg-void py-24 px-6 relative overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full bg-cyan-500/5 blur-[120px] pointer-events-none" />
+      <div className="absolute top-0 right-1/4 w-[600px] h-[600px] rounded-full bg-orange-500/5 blur-[120px] pointer-events-none" />
 
       {/* Navigation header */}
       <div className="max-w-6xl mx-auto mb-12 flex items-center justify-between border-b border-steel/30 pb-6 relative z-10">
         <Link href="/" className="font-display text-body-lg font-bold text-ice">
-          Thoram<span className="text-cyan-400">.</span>
+          Thoram<span className="text-orange-500">.</span>
         </Link>
-        <Link href="/insights" className="text-body-sm text-frost hover:text-cyan-400 transition-colors flex items-center gap-1.5 font-mono">
+        <Link href="/insights" className="text-body-sm text-frost hover:text-orange-500 transition-colors flex items-center gap-1.5 font-mono">
           <ArrowLeft className="w-4 h-4" /> Back to Insights
         </Link>
       </div>
@@ -58,7 +58,7 @@ export default function ArticlePage({ params }: PageProps) {
         <article className="flex-1 max-w-3xl glass rounded-2xl p-6 md:p-10 border border-steel/60">
           {/* Metadata */}
           <div className="flex items-center gap-4 text-body-xs text-mist font-mono mb-6">
-            <span className="text-caption px-2.5 py-1 rounded bg-cyan-glow border border-cyan-border/30 text-cyan-400">
+            <span className="text-caption px-2.5 py-1 rounded bg-cyan-glow border border-cyan-border/30 text-orange-500">
               {article.category}
             </span>
             <span className="flex items-center gap-1">
@@ -105,7 +105,7 @@ export default function ArticlePage({ params }: PageProps) {
               }
               if (text.startsWith("`")) {
                 return (
-                  <pre key={idx} className="p-4 rounded-xl border border-steel/60 bg-graphite font-mono text-body-xs text-cyan-400 overflow-x-auto my-6 leading-normal">
+                  <pre key={idx} className="p-4 rounded-xl border border-steel/60 bg-graphite font-mono text-body-xs text-orange-500 overflow-x-auto my-6 leading-normal">
                     <code>{text.replace(/`/g, "")}</code>
                   </pre>
                 );
@@ -130,7 +130,7 @@ export default function ArticlePage({ params }: PageProps) {
         <aside className="w-full lg:w-80 flex-shrink-0 space-y-6">
           <div className="glass rounded-xl p-5 border border-steel/60">
             <h3 className="font-display text-body-md font-bold text-ice mb-4 flex items-center gap-2">
-              <BookOpen className="w-4 h-4 text-cyan-500" />
+              <BookOpen className="w-4 h-4 text-orange-500" />
               Related Insights
             </h3>
             
@@ -138,7 +138,7 @@ export default function ArticlePage({ params }: PageProps) {
               {relatedArticles.map((rel) => (
                 <Link key={rel.slug} href={`/insights/${rel.slug}`} className="block group">
                   <div className="p-3.5 rounded-lg border border-transparent hover:border-steel/60 hover:bg-steel/10 transition-all duration-300">
-                    <span className="text-[9px] text-cyan-400 font-mono uppercase block mb-1">
+                    <span className="text-[9px] text-orange-500 font-mono uppercase block mb-1">
                       {rel.category}
                     </span>
                     <h4 className="text-body-xs font-bold text-ice group-hover:text-cyan-300 transition-colors line-clamp-2 leading-snug">

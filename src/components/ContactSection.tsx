@@ -32,7 +32,7 @@ export default function ContactSection() {
           <div className="lg:col-span-5 space-y-6">
             <div className="pill-badge">Start a Project</div>
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-zinc-900 tracking-tight">
-              Have a product <span className="text-cyan-700">worth building?</span>
+              Have a product <span className="text-orange-600">worth building?</span>
             </h2>
             <p className="text-base text-zinc-500 leading-relaxed">
               Tell us what you're trying to build, fix or automate. We'll assess the problem, tell you what it will take, what it should cost, and whether Thoram is the right team to do it.
@@ -61,10 +61,10 @@ export default function ContactSection() {
               {/* Email Direct */}
               <a
                 href="mailto:hello@thoramgroup.com"
-                className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 transition-all group"
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 transition-all group"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-cyan-700/10 border border-cyan-700/20 flex items-center justify-center text-cyan-700">
+                  <div className="w-9 h-9 rounded-lg bg-orange-600/10 border border-orange-600/20 flex items-center justify-center text-orange-600">
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
@@ -72,14 +72,14 @@ export default function ContactSection() {
                     <div className="text-xs text-zinc-500">hello@thoramgroup.com</div>
                   </div>
                 </div>
-                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-cyan-700 group-hover:translate-x-1 transition-all" />
+                <ArrowRight className="w-4 h-4 text-zinc-400 group-hover:text-orange-600 group-hover:translate-x-1 transition-all" />
               </a>
             </div>
 
             {/* SLA Badges */}
             <div className="pt-6 border-t border-zinc-900/[0.06] space-y-3 text-xs text-zinc-500 font-mono">
               <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-cyan-700" />
+                <Clock className="w-4 h-4 text-orange-600" />
                 <span>Guaranteed 24-hour turnaround on all project inquiries.</span>
               </div>
               <div className="flex items-center gap-2">
@@ -125,7 +125,7 @@ export default function ContactSection() {
                       value={form.name}
                       onChange={update("name")}
                       placeholder="e.g. Alex Oladimeji"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
@@ -138,7 +138,7 @@ export default function ContactSection() {
                       value={form.email}
                       onChange={update("email")}
                       placeholder="alex@company.com"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
@@ -153,7 +153,7 @@ export default function ContactSection() {
                       value={form.company}
                       onChange={update("company")}
                       placeholder="e.g. Acme Health"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
@@ -163,7 +163,7 @@ export default function ContactSection() {
                     <select
                       value={form.interest}
                       onChange={update("interest")}
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
                     >
                       <option value="Business Systems & Custom Software">Business Systems & Custom Software</option>
                       <option value="Customer Platforms & SaaS">Customer Platforms & SaaS</option>
@@ -184,7 +184,7 @@ export default function ContactSection() {
                     value={form.message}
                     onChange={update("message")}
                     placeholder="Describe the operational bottleneck, product vision, or technical requirements..."
-                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-cyan-700 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
+                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
                   />
                 </div>
 
