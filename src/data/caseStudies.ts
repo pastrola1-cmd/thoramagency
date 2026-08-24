@@ -12,6 +12,7 @@ export interface CaseStudy {
   tech: string[];
   image?: string;
   gallery?: string[];
+  liveUrl?: string;
   testimonial?: {
     quote: string;
     author: string;
@@ -27,6 +28,7 @@ export const caseStudiesData: CaseStudy[] = [
     industry: "School Management & Institutional Software",
     category: "edtech",
     image: "/case-studies/eduthoram-dashboard.png",
+    liveUrl: "https://eduthoramos.web.app",
     gallery: [
       "/case-studies/eduthoram-dashboard.png",
       "/case-studies/eduthoram-guide.png",
@@ -58,6 +60,44 @@ export const caseStudiesData: CaseStudy[] = [
         "EduThoramOS transformed our school operations. What used to take our teachers two weeks of spreadsheet stress during end-of-term exams is now computed in seconds, and our fee collections are fully automated.",
       author: "Director of Academic Operations",
       role: "EduThoram Schools Network",
+    },
+  },
+  {
+    id: "dwealth-crm",
+    title: "D-Wealth CRM — Admissions Pipeline & Counselor Command Engine",
+    client: "D-Wealth Global / DGNCrm",
+    industry: "Education Consultancy & Admissions CRM",
+    category: "web",
+    image: "/case-studies/dwealth-dashboard.png",
+    liveUrl: "https://dgncrm.com",
+    gallery: [
+      "/case-studies/dwealth-dashboard.png",
+      "/case-studies/dwealth-analytics.png",
+    ],
+    summary:
+      "Architected an enterprise international student recruitment and admissions CRM with automated counselor pipeline tracking, live team velocity command, document vaults, and bottleneck detection.",
+    challenge:
+      "Tracking hundreds of international university applications and admission counselor outreach across decentralized spreadsheets led to missed student visa deadlines, untracked counselor workloads, and zero executive visibility into application pipeline bottlenecks.",
+    solution:
+      "We engineered D-Wealth CRM (dgncrm.com) — a full-suite agency operations platform featuring multi-stage applicant tracking, automated hot-lead priority queues, team performance logs, and real-time conversion velocity analytics.",
+    impact: [
+      "Over 500+ active student visa and university application pipelines tracked simultaneously",
+      "Real-time counselor outreach logs and automated team bottleneck alerts",
+      "100% centralized student document repository eliminating email attachment risks",
+      "Sub-second database search across applicants, parent contacts, and global institutions",
+    ],
+    architecture: [
+      "Dark-mode counselor command dashboard with real-time state management",
+      "PostgreSQL relational admissions pipeline database with multi-stage indexation",
+      "Automated lead prioritization engine with hot-lead scoring algorithms",
+      "Team Performance Command with counselor outreach logs and bottleneck detection",
+    ],
+    tech: ["Next.js 14", "TypeScript", "Tailwind CSS", "PostgreSQL", "Node.js", "Cloudflare"],
+    testimonial: {
+      quote:
+        "D-Wealth CRM gave our agency complete operational clarity. We track every student application and counselor action in real time with zero dropped leads.",
+      author: "Managing Director",
+      role: "D-Wealth Global",
     },
   },
   {

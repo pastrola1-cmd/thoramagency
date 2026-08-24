@@ -19,6 +19,20 @@ const projects = [
     ],
   },
   {
+    client: "D-Wealth Global / DGNCrm",
+    tags: ["Admissions CRM", "Pipeline Analytics"],
+    title: "D-Wealth CRM",
+    headline: "From spreadsheet chaos to real-time counselor pipeline and team velocity command.",
+    desc: "An enterprise international student admissions CRM featuring multi-stage applicant tracking, automated hot-lead priority queues, document vaults, and team bottleneck detection.",
+    image: "/case-studies/dwealth-dashboard.png",
+    liveUrl: "https://dgncrm.com",
+    results: [
+      "500+ student visa & university pipelines tracked",
+      "Real-time counselor outreach velocity logs",
+      "100% centralized student document repository",
+    ],
+  },
+  {
     client: "Nissie Ideal Shelters",
     tags: ["Web Platform", "WhatsApp Lead Routing"],
     title: "Nissie Shelters",
