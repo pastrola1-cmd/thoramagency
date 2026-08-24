@@ -1,5 +1,6 @@
 import Hero from "@/components/Hero";
 import ServicesSection from "@/components/ServicesSection";
+import WhoWeWorkWith from "@/components/WhoWeWorkWith";
 import SelectedWork from "@/components/SelectedWork";
 import ProcessSection from "@/components/ProcessSection";
 import WhyUsSection from "@/components/WhyUsSection";
@@ -10,6 +11,7 @@ export default function Home() {
     <main className="min-h-screen bg-white text-zinc-900 selection:bg-cyan-500/20">
       <Hero />
       <ServicesSection />
+      <WhoWeWorkWith />
       <SelectedWork />
       <ProcessSection />
       <WhyUsSection />

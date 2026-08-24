@@ -8,22 +8,22 @@ const stats = [
   {
     index: "01 · OWNERSHIP",
     value: "100%",
-    label: "Source code, IP & design handover",
+    label: "Client ownership (Source code, IP & design handover)",
   },
   {
-    index: "02 · REACH",
+    index: "02 · SCALE",
     value: "15,000+",
     label: "Active users on shipped platforms",
   },
   {
     index: "03 · VELOCITY",
     value: "3.8x",
-    label: "Lead inquiry lift on active portals",
+    label: "Lead inquiry lift on active client portals",
   },
   {
-    index: "04 · SLA",
+    index: "04 · SLA SPEED",
     value: "48h",
-    label: "Transparent scoped proposal turnaround",
+    label: "Transparent, scoped proposal turnaround",
   },
 ];
 
@@ -50,8 +50,8 @@ export default function Hero() {
           className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-900/[0.04] border border-zinc-900/[0.08] mb-8"
         >
           <span className="w-2 h-2 rounded-full bg-cyan-600 animate-pulse" />
-          <span className="text-xs font-mono font-medium text-cyan-700">
-            Product Studio + Technology Consulting Firm
+          <span className="text-xs font-mono font-medium text-cyan-700 uppercase tracking-wider">
+            Product Engineering & Technology Studio
           </span>
         </motion.div>
 
@@ -62,8 +62,8 @@ export default function Hero() {
           transition={{ duration: 0.6, delay: 0.1 }}
           className="text-4xl sm:text-6xl md:text-7xl font-bold tracking-tight text-zinc-900 max-w-4xl leading-[1.06] mb-6"
         >
-          Building digital products that{" "}
-          <span className="text-cyan-700">earn their place.</span>
+          We build the software that{" "}
+          <span className="text-cyan-700">moves businesses forward.</span>
         </motion.h1>
 
         {/* Subhead Narrative */}
@@ -71,9 +71,9 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.2 }}
-          className="text-lg sm:text-xl text-zinc-500 max-w-2xl leading-relaxed mb-10"
+          className="text-lg sm:text-xl text-zinc-600 max-w-2xl leading-relaxed mb-10"
         >
-          We work with founders, product leads, and growing businesses to design, engineer, and scale software people actually want to use.
+          From business systems and customer platforms to mobile applications and automation, Thoram Group designs, builds, and scales high-performance digital products for companies ready to move faster.
         </motion.p>
 
         {/* Action CTAs */}
@@ -84,18 +84,18 @@ export default function Hero() {
           className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-16"
         >
           <Link
-            href="/case-studies"
+            href="/contact"
             className="btn-solid text-sm font-bold py-3.5 px-6 flex items-center justify-center gap-2 group"
           >
-            <span>See Our Work</span>
+            <span>Build With Thoram</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
 
           <Link
-            href="/contact"
+            href="/case-studies"
             className="btn-ghost text-sm font-semibold py-3.5 px-6 flex items-center justify-center gap-2"
           >
-            <span>Start a Project</span>
+            <span>See What We've Built</span>
           </Link>
         </motion.div>
 
@@ -111,12 +111,12 @@ export default function Hero() {
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse" />
               <span className="text-xs font-mono font-semibold uppercase tracking-wider text-zinc-700">
-                Studio Track Record & SLA Standards
+                Built to work. Built for you.
               </span>
             </div>
             <div className="flex items-center gap-2 text-xs font-mono text-zinc-500">
               <ShieldCheck className="w-3.5 h-3.5 text-cyan-700" />
-              <span>Zero Lock-in · 100% Client Ownership</span>
+              <span>Zero Vendor Lock-in · 100% Client Ownership</span>
             </div>
           </div>
 
