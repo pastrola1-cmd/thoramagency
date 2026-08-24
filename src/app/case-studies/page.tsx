@@ -14,18 +14,78 @@ import {
   Sparkles,
   Layers,
   Quote,
+  ExternalLink,
 } from "lucide-react";
 import Link from "next/link";
+
+function StudyGallery({ study }: { study: CaseStudy }) {
+  const images = study.gallery || (study.image ? [study.image] : []);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  if (images.length === 0) return null;
+
+  return (
+    <div className="rounded-3xl overflow-hidden border border-zinc-900/[0.10] bg-zinc-50/90 p-3 sm:p-4 space-y-3">
+      <div className="rounded-2xl overflow-hidden border border-zinc-200 bg-white shadow-xs">
+        {/* Browser Topbar */}
+        <div className="px-4 py-2.5 bg-zinc-100/90 border-b border-zinc-200 flex items-center justify-between">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+          </div>
+          <div className="text-[11px] font-mono text-zinc-400">
+            {study.title.split("—")[0].trim()} · Production Interface Preview
+          </div>
+          <div className="text-[11px] font-mono text-zinc-400">
+            {activeIdx + 1} / {images.length}
+          </div>
+        </div>
+        {/* Main Screenshot */}
+        <div className="relative aspect-[16/9] w-full bg-zinc-950 overflow-hidden">
+          <img
+            src={images[activeIdx]}
+            alt={`${study.title} Preview ${activeIdx + 1}`}
+            className="w-full h-full object-cover object-top transition-all duration-300"
+          />
+        </div>
+      </div>
+
+      {/* Thumbnails Row */}
+      {images.length > 1 && (
+        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1">
+          {images.map((img, idx) => (
+            <button
+              key={img}
+              onClick={() => setActiveIdx(idx)}
+              className={`relative rounded-xl overflow-hidden border transition-all h-14 sm:h-16 aspect-[16/9] shrink-0 ${
+                activeIdx === idx
+                  ? "border-orange-600 ring-2 ring-orange-500/30 shadow-xs"
+                  : "border-zinc-200 opacity-60 hover:opacity-100 hover:border-zinc-400"
+              }`}
+            >
+              <img
+                src={img}
+                alt="Thumbnail"
+                className="w-full h-full object-cover object-top"
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function CaseStudiesPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   const categories = [
     { id: "all", label: "All Selected Work" },
-    { id: "mobile", label: "Mobile Apps" },
-    { id: "web", label: "Web Engineering" },
+    { id: "edtech", label: "School Portals (SMS/SIS)" },
+    { id: "web", label: "Web Platforms & CRM" },
     { id: "fintech", label: "Fintech & Payments" },
-    { id: "edtech", label: "EdTech & Learning" },
+    { id: "mobile", label: "Mobile Apps" },
   ];
 
   const filteredStudies =
@@ -93,6 +153,9 @@ export default function CaseStudiesPage() {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
+
+              {/* Product Gallery Showcase (if screenshots available) */}
+              <StudyGallery study={study} />
 
               {/* Challenge vs Engineering Solution */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
