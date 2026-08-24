@@ -63,42 +63,41 @@ export const caseStudiesData: CaseStudy[] = [
     },
   },
   {
-    id: "manna-bible",
-    title: "Manna Bible — Scripture Study, Audio & Community Platform",
-    client: "Manna Bible Project",
-    industry: "Mobile Engineering & Spiritual Tech",
-    category: "mobile",
-    image: "/case-studies/manna-home.png",
+    id: "scalewealth-crm",
+    title: "ScaleWealth Estate — Brokerage CRM & Automated Lead Engine",
+    client: "Scale Wealth Estate",
+    industry: "Proptech & Brokerage Infrastructure",
+    category: "fintech",
+    image: "/case-studies/scalewealth-dashboard.png",
     gallery: [
-      "/case-studies/manna-home.png",
-      "/case-studies/manna-reader.png",
-      "/case-studies/manna-community.png",
-      "/case-studies/manna-reflections.png",
+      "/case-studies/scalewealth-dashboard.png",
+      "/case-studies/scalewealth-pipeline.png",
+      "/case-studies/scalewealth-sourcing.png",
     ],
     summary:
-      "Engineered an offline-first scripture platform featuring daily devotionals, distraction-free study reader modes, reflection journaling with sermon linking, and active community fellowship feeds.",
+      "Architected an all-in-one real estate agency platform featuring automated Google Places lead sourcing, multi-stage transaction pipelines, revenue goal tracking, and inspection dispatching.",
     challenge:
-      "Creating an engaging digital scripture experience that combines offline-first reading performance with live social fellowship feeds, sermon note journaling, and daily streak tracking across mobile and web platforms.",
+      "Real estate brokerages were struggling with scattered property inventory, untracked agent inspections, manual prospect prospecting, and fragmented sales performance data leading to stalled deal pipelines.",
     solution:
-      "We engineered Manna Bible with a refined dark-gold aesthetic, instant chapter loading, full-text scripture search, rich-media reflection journals with YouTube/audio attachments, and an interactive community hub.",
+      "We engineered ScaleWealth Estate — an agency operations platform with automated Google Places lead extraction, multi-stage deal pipelines, property portfolio management, and real-time revenue goal tracking.",
     impact: [
-      "15,000+ active reading, study, and daily devotional sessions logged",
-      "Sub-100ms on-device chapter rendering with instant verse lookups",
-      "Rich reflection journaling with sermon audio and YouTube video integration",
-      "Engaged community feed with testimony posts, prayer groups, and reading challenges",
+      "Over ₦800M+ in real estate deal pipelines and sales revenue goals actively tracked",
+      "Automated Google Places API lead discovery eliminating hours of manual prospecting",
+      "Full lifecycle deal management: Contacted → Inspection Booked → Negotiation → Closed",
+      "Centralized inspection calendar and automated agent task dispatching",
     ],
     architecture: [
-      "Cross-platform client architecture with dark luxury theme and smooth transitions",
-      "Local-first SQLite caching for zero-latency offline Bible reading across all translations",
-      "Real-time community social feed with media attachments and comment threads",
-      "Cloud-synchronized reflection notes and user streak gamification engine",
+      "Next.js agency admin portal with operational performance command dashboards",
+      "Automated Google Places API & web scraper lead enrichment pipelines",
+      "Relational PostgreSQL database tracking properties, transactions, and partner commissions",
+      "Inspection calendar and lead-to-agent round-robin task assignment engine",
     ],
-    tech: ["Flutter", "Dart", "TypeScript", "Firebase", "SQLite", "Tailwind CSS", "Node.js"],
+    tech: ["Next.js 14", "TypeScript", "Google Places API", "PostgreSQL", "Node.js", "Tailwind CSS", "Docker"],
     testimonial: {
       quote:
-        "Thoram Group brought our vision for Manna Bible to life with unmatched polish. The speed of the reader, the community feeds, and the reflection features make it a joy to use every day.",
-      author: "Founder & Lead",
-      role: "Manna Bible Project",
+        "ScaleWealth Estate gave our sales agents and partners immense leverage. The automated lead discovery and deal pipeline tracking transformed our monthly close rate.",
+      author: "Managing Director",
+      role: "Scale Wealth Estate",
     },
   },
   {
@@ -140,6 +139,45 @@ export const caseStudiesData: CaseStudy[] = [
     },
   },
   {
+    id: "manna-bible",
+    title: "Manna Bible — Scripture Study, Audio & Community Platform",
+    client: "Manna Bible Project",
+    industry: "Mobile Engineering & Spiritual Tech",
+    category: "mobile",
+    image: "/case-studies/manna-home.png",
+    gallery: [
+      "/case-studies/manna-home.png",
+      "/case-studies/manna-reader.png",
+      "/case-studies/manna-community.png",
+      "/case-studies/manna-reflections.png",
+    ],
+    summary:
+      "Engineered an offline-first scripture platform featuring daily devotionals, distraction-free study reader modes, reflection journaling with sermon linking, and active community fellowship feeds.",
+    challenge:
+      "Creating an engaging digital scripture experience that combines offline-first reading performance with live social fellowship feeds, sermon note journaling, and daily streak tracking across mobile and web platforms.",
+    solution:
+      "We engineered Manna Bible with a refined dark-gold aesthetic, instant chapter loading, full-text scripture search, rich-media reflection journals with YouTube/audio attachments, and an interactive community hub.",
+    impact: [
+      "15,000+ active reading, study, and daily devotional sessions logged",
+      "Sub-100ms on-device chapter rendering with instant verse lookups",
+      "Rich reflection journaling with sermon audio and YouTube video integration",
+      "Engaged community feed with testimony posts, prayer groups, and reading challenges",
+    ],
+    architecture: [
+      "Cross-platform client architecture with dark luxury theme and smooth transitions",
+      "Local-first SQLite caching for zero-latency offline Bible reading across all translations",
+      "Real-time community social feed with media attachments and comment threads",
+      "Cloud-synchronized reflection notes and user streak gamification engine",
+    ],
+    tech: ["Flutter", "Dart", "TypeScript", "Firebase", "SQLite", "Tailwind CSS", "Node.js"],
+    testimonial: {
+      quote:
+        "Thoram Group brought our vision for Manna Bible to life with unmatched polish. The speed of the reader, the community feeds, and the reflection features make it a joy to use every day.",
+      author: "Founder & Lead",
+      role: "Manna Bible Project",
+    },
+  },
+  {
     id: "nissie-shelters",
     title: "Nissie Shelters — High-Conversion Real Estate Portal & Lead CRM",
     client: "Nissie Ideal Shelters",
@@ -169,38 +207,6 @@ export const caseStudiesData: CaseStudy[] = [
         "Before Thoram Group rebuilt our platform, leads were slipping through the cracks. Now, every buyer inquiry is instantly delivered to our sales reps' WhatsApp with full property context.",
       author: "Head of Marketing",
       role: "Nissie Ideal Shelters",
-    },
-  },
-  {
-    id: "scale-wealth",
-    title: "Scale Wealth — Automated Investor Onboarding & Payment Gateway",
-    client: "Scale Wealth Estate",
-    industry: "Fintech & Fractional Real Estate",
-    category: "fintech",
-    summary:
-      "Engineered an automated investor onboarding platform with identity verification, automated recurring invoice reconciliation, and Paystack payment gateway integrations.",
-    challenge:
-      "Managing multi-million naira property investment installments manually was leading to reconciliation delays, payment mismatches, and delayed investor verification, risking buyer trust.",
-    solution:
-      "We designed and built a bank-grade web portal with automated KYC document upload, Paystack recurring subscription webhooks, and automatic receipt generation.",
-    impact: [
-      "Over ₦100M+ in investment payments processed securely with zero downtime",
-      "100% automated invoice reconciliation with zero accounting mismatches",
-      "Investor onboarding time reduced from 3 business days to under 5 minutes",
-      "Complete audit logging and compliance-ready transaction reporting",
-    ],
-    architecture: [
-      "Next.js multi-tenant customer dashboard",
-      "Paystack secure recurring payment webhook processor",
-      "PostgreSQL encrypted ledger database",
-      "Automated PDF receipt and statement generator",
-    ],
-    tech: ["Next.js", "Node.js", "Paystack Webhooks", "PostgreSQL", "Tailwind CSS", "Cloudflare Security"],
-    testimonial: {
-      quote:
-        "Thoram Group built an institutional-grade investment platform for us. The automated reconciliation alone saved our accounting team dozens of hours every single week.",
-      author: "Chief Operating Officer",
-      role: "Scale Wealth Estate",
     },
   },
 ];

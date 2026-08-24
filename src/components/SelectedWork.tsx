@@ -46,14 +46,15 @@ const projects = [
   },
   {
     client: "Scale Wealth Estate",
-    tags: ["Fintech", "Payment Rails", "Automated KYC"],
-    title: "Scale Wealth",
-    headline: "Bank-grade investor onboarding and automated payment reconciliation.",
-    desc: "An enterprise investor onboarding portal with KYC document verification, Paystack recurring subscription webhooks, and automated statement generation.",
+    tags: ["Brokerage CRM", "Lead Sourcing"],
+    title: "ScaleWealth Estate",
+    headline: "Brokerage CRM with automated Google Places lead extraction and pipeline tracking.",
+    desc: "An all-in-one real estate agency platform featuring automated Google Places prospect sourcing, deal stage pipelines, revenue goal tracking, and inspection dispatching.",
+    image: "/case-studies/scalewealth-dashboard.png",
     results: [
-      "₦100M+ in payments processed safely",
-      "100% automated invoice reconciliation",
-      "Investor onboarding: 3 days → under 5 mins",
+      "₦800M+ deal pipelines & revenue tracked",
+      "Automated Google Places API lead discovery",
+      "Centralized inspection calendar & task routing",
     ],
   },
   {
