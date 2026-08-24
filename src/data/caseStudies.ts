@@ -63,6 +63,45 @@ export const caseStudiesData: CaseStudy[] = [
     },
   },
   {
+    id: "manna-bible",
+    title: "Manna Bible — Scripture Study, Audio & Community Platform",
+    client: "Manna Bible Project",
+    industry: "Mobile Engineering & Spiritual Tech",
+    category: "mobile",
+    image: "/case-studies/manna-home.png",
+    gallery: [
+      "/case-studies/manna-home.png",
+      "/case-studies/manna-reader.png",
+      "/case-studies/manna-community.png",
+      "/case-studies/manna-reflections.png",
+    ],
+    summary:
+      "Engineered an offline-first scripture platform featuring daily devotionals, distraction-free study reader modes, reflection journaling with sermon linking, and active community fellowship feeds.",
+    challenge:
+      "Creating an engaging digital scripture experience that combines offline-first reading performance with live social fellowship feeds, sermon note journaling, and daily streak tracking across mobile and web platforms.",
+    solution:
+      "We engineered Manna Bible with a refined dark-gold aesthetic, instant chapter loading, full-text scripture search, rich-media reflection journals with YouTube/audio attachments, and an interactive community hub.",
+    impact: [
+      "15,000+ active reading, study, and daily devotional sessions logged",
+      "Sub-100ms on-device chapter rendering with instant verse lookups",
+      "Rich reflection journaling with sermon audio and YouTube video integration",
+      "Engaged community feed with testimony posts, prayer groups, and reading challenges",
+    ],
+    architecture: [
+      "Cross-platform client architecture with dark luxury theme and smooth transitions",
+      "Local-first SQLite caching for zero-latency offline Bible reading across all translations",
+      "Real-time community social feed with media attachments and comment threads",
+      "Cloud-synchronized reflection notes and user streak gamification engine",
+    ],
+    tech: ["Flutter", "Dart", "TypeScript", "Firebase", "SQLite", "Tailwind CSS", "Node.js"],
+    testimonial: {
+      quote:
+        "Thoram Group brought our vision for Manna Bible to life with unmatched polish. The speed of the reader, the community feeds, and the reflection features make it a joy to use every day.",
+      author: "Founder & Lead",
+      role: "Manna Bible Project",
+    },
+  },
+  {
     id: "dwealth-crm",
     title: "D-Wealth CRM — Admissions Pipeline & Counselor Command Engine",
     client: "D-Wealth Global / DGNCrm",
@@ -162,38 +201,6 @@ export const caseStudiesData: CaseStudy[] = [
         "Thoram Group built an institutional-grade investment platform for us. The automated reconciliation alone saved our accounting team dozens of hours every single week.",
       author: "Chief Operating Officer",
       role: "Scale Wealth Estate",
-    },
-  },
-  {
-    id: "manna-bible",
-    title: "Manna Bible — Cross-Platform Mobile Scripture & Audio Engine",
-    client: "Manna Notes Project",
-    industry: "Consumer Mobile & Audio AI",
-    category: "mobile",
-    summary:
-      "Engineered an offline-first mobile scripture app with synchronized audio playback, AI text-to-speech, and semantic search across thousands of chapters.",
-    challenge:
-      "The client needed a mobile application that could synchronize complex audio streams with live text highlighting in real time, while maintaining instant load times in low-bandwidth network environments across West Africa and globally.",
-    solution:
-      "We built a local-first SQLite indexing architecture compiled natively via Flutter. Audio tracks and text indices are cached on-device with zero background playback latency, backed by Firebase Authentication and cloud sync.",
-    impact: [
-      "15,000+ active mobile reading and audio study sessions",
-      "Sub-100ms on-device search across 31,000+ verses with zero network lag",
-      "4.9★ rating across Apple App Store and Google Play Store",
-      "Single codebase deployment reducing client engineering maintenance overhead by 50%",
-    ],
-    architecture: [
-      "Local-first SQLite on-device database",
-      "Flutter native audio background state machine",
-      "Firebase Cloud Messaging & APNs real-time sync",
-      "Automated CI/CD App Store distribution pipelines",
-    ],
-    tech: ["Flutter", "Dart", "Firebase", "SQLite", "Audio Engine", "App Store Connect", "Google Play"],
-    testimonial: {
-      quote:
-        "Thoram Group took our vision for an offline-first scripture audio experience and delivered a native app that feels lightning-fast. Our readers love the speed and offline reliability.",
-      author: "Product Lead",
-      role: "Manna Notes Project",
     },
   },
 ];

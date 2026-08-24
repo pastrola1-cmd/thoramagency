@@ -57,15 +57,16 @@ const projects = [
     ],
   },
   {
-    client: "Manna Notes Project",
-    tags: ["Mobile App", "Audio Engine", "Flutter"],
+    client: "Manna Bible Project",
+    tags: ["Scripture App", "Audio & Community"],
     title: "Manna Bible",
-    headline: "High-performance scripture platform with synchronized audio and local-first caching.",
-    desc: "An offline-first mobile scripture app with synchronized multi-track audio playback, on-device caching, and instant search across 31,000+ verses.",
+    headline: "High-performance scripture platform with devotionals, study reader, and community.",
+    desc: "An offline-first scripture platform featuring daily devotionals, distraction-free reader modes, reflection journaling with sermon linking, and active community fellowship feeds.",
+    image: "/case-studies/manna-home.png",
     results: [
-      "15,000+ active reading & study sessions",
+      "15,000+ active reading & devotional sessions",
       "Sub-100ms on-device search with zero lag",
-      "4.9★ rating across Apple & Google app stores",
+      "Integrated reflection journal & community feeds",
     ],
   },
 ];
