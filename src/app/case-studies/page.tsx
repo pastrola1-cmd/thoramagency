@@ -40,11 +40,11 @@ export default function CaseStudiesPage() {
         <div className="max-w-3xl mb-14">
           <div className="pill-badge mb-3">Selected Work & Case Studies</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
-            Real software built for{" "}
-            <span className="cyan-gradient">measurable outcomes.</span>
+            Real products.{" "}
+            <span className="text-cyan-700">Real outcomes.</span>
           </h1>
-          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
-            Explore how we partner with ambitious teams to solve complex operational challenges, deploy AI and modern web platforms, and unlock sustainable business growth.
+          <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
+            We don't build portfolios of mockups. We engineer software that moves critical business metrics and eliminates operational friction.
           </p>
         </div>
 
@@ -182,17 +182,17 @@ export default function CaseStudiesPage() {
         </div>
 
         {/* Bottom Consultation CTA */}
-        <div className="mt-20 p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
-          <div className="pill-badge">Start Your Project</div>
-          <h2 className="text-3xl font-bold text-zinc-900">
-            Have a project ready to scale?
+        <div className="mt-20 p-10 sm:p-14 rounded-3xl bg-[#F8F8F6] border border-zinc-200/80 text-center max-w-3xl mx-auto space-y-6">
+          <div className="pill-badge">Start a Project</div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900">
+            Have a product worth building?
           </h2>
           <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            Book a free 30-minute discovery session. We will evaluate your business context and outline an actionable technical proposal in 48 hours.
+            Tell us what you're trying to build, fix, or automate. We'll assess the problem, tell you what it will take, what it should cost, and give you a clear path forward.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link href="/contact" className="btn-solid text-sm">
-              <span>Book a Discovery Call</span>
+              <span>Start a Project</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <a

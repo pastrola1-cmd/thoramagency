@@ -1,157 +1,150 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Bot, Globe, Smartphone, Compass, Check, ArrowRight, Sparkles, Shield, Cpu, Zap, ArrowUpRight } from "lucide-react";
+import { LayoutGrid, Globe, Smartphone, Zap, Compass, Check, ArrowRight, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 
 export default function ServicesPage() {
-  const services = [
+  const capabilities = [
     {
-      id: "ai-agents",
-      icon: Bot,
-      pill: "Service 01",
-      title: "AI Agents & Autonomous Digital Workers",
-      tagline: "Custom AI execution layers that operate 24/7 with human-grade reasoning.",
+      id: "business-systems",
+      icon: LayoutGrid,
+      pill: "Capability 01",
+      title: "Business Systems",
+      tagline: "Custom software that replaces fragmented spreadsheets and manual operations.",
       description:
-        "We build, fine-tune, and deploy bespoke AI agents that integrate directly into your communications, databases, and operational workflows. We replace fragile manual processes with autonomous digital workers that scale your business without increasing payroll overhead.",
+        "We build operational software systems engineered around how your business actually functions. From multi-branch management portals and custom inventory engines to automated ERP workflows and role-based staff portals.",
       deliverables: [
         {
-          name: "Autonomous Outbound SDR & Lead Qualification",
-          desc: "Researches prospective accounts, crafts hyper-personalized outreach, qualifies replies, and books meetings into your team's calendar.",
+          name: "Multi-Tenant Operational Portals",
+          desc: "Role-based dashboards with granular permission controls for management, staff, and accountants.",
         },
         {
-          name: "24/7 AI Customer Care & Support",
-          desc: "Trained on your private documentation and ticketing history to resolve 80%+ of customer inquiries instantly across web and WhatsApp.",
+          name: "Automated Record & Calculation Engines",
+          desc: "Algorithmic computation systems that eliminate spreadsheet errors and automate complex operational math.",
         },
         {
-          name: "Multi-Agent Operations Coordinator (MCP)",
-          desc: "Moves structured data between your CRM, accounting software, and internal tools using Model Context Protocol.",
+          name: "Database Consolidation & ERP Syncing",
+          desc: "Unifying fragmented legacy databases into a secure, high-uptime PostgreSQL backbone.",
         },
         {
-          name: "Automated Collections & Invoice Chasing",
-          desc: "Tracks invoice aging, sends respectful follow-up sequences, and reconciles incoming payments automatically.",
+          name: "Digital Document & Certificate Verification",
+          desc: "Cryptographic QR-verified document generation to prevent forgery and streamline compliance.",
         },
       ],
-      tech: [
-        "Claude 3.5 Sonnet",
-        "OpenAI o3-mini & GPT-4o",
-        "Gemini 2.0 Flash",
-        "DeepSeek-R1",
-        "LangGraph & CrewAI",
-        "Pinecone & pgvector",
-        "Model Context Protocol (MCP)",
-        "Python 3.12",
-        "Supabase",
-      ],
+      tech: ["Next.js 14", "React", "TypeScript", "Node.js", "PostgreSQL", "Docker", "Tailwind CSS"],
     },
     {
-      id: "web-engineering",
+      id: "customer-platforms",
       icon: Globe,
-      pill: "Service 02",
-      title: "Product Design & Web Engineering",
-      tagline: "High-performance web applications and SaaS platforms engineered for scale.",
+      pill: "Capability 02",
+      title: "Customer Platforms & SaaS",
+      tagline: "High-performance web platforms designed to acquire, serve, and retain customers.",
       description:
-        "We engineer full-stack web platforms, subscription SaaS portals, and enterprise dashboards with extreme attention to performance, security, and conversion rates. Built on modern Next.js 15, React 19, Turbopack, and edge serverless foundations for 99.99% uptime.",
+        "We engineer full-stack web applications, subscription SaaS platforms, and customer-facing portals with extreme attention to conversion velocity, security, and sub-second page loads.",
       deliverables: [
         {
-          name: "Custom Multi-Tenant SaaS Architectures",
-          desc: "End-to-end subscription portals with workspace permissions, user roles, and team administration.",
+          name: "Custom SaaS Subscription Architectures",
+          desc: "End-to-end customer self-service portals with automated recurring billing and account management.",
         },
         {
           name: "High-Converting Digital Landing Experiences",
-          desc: "Speed-optimized, SEO-dominant landing pages engineered to convert visitors into qualified sales pipeline.",
+          desc: "Speed-optimized web experiences engineered to convert inbound traffic into qualified leads.",
         },
         {
           name: "Payment Gateway & Billing Infrastructure",
-          desc: "Seamless integration of Paystack, Stripe, and crypto payment rails with automated webhook reconciliation.",
+          desc: "Seamless Paystack, Stripe, and bank transfer rails with automated webhook reconciliation.",
         },
         {
-          name: "API Design & Database Schema Modeling",
-          desc: "Clean RESTful and GraphQL APIs with PostgreSQL and Upstash Redis caching for sub-millisecond query responses.",
+          name: "Real-Time User & Admin Dashboards",
+          desc: "Interactive data analytics, activity feeds, and notification centers.",
         },
       ],
-      tech: [
-        "Next.js 15",
-        "React 19",
-        "TypeScript 5.5",
-        "Tailwind CSS",
-        "Turbopack",
-        "PostgreSQL (Drizzle / Prisma)",
-        "Upstash Redis",
-        "Paystack & Stripe Rails",
-        "Cloudflare Edge",
-      ],
+      tech: ["Next.js 14", "TypeScript", "PostgreSQL", "Redis", "Paystack API", "Stripe", "Cloudflare"],
     },
     {
-      id: "mobile-apps",
+      id: "mobile-products",
       icon: Smartphone,
-      pill: "Service 03",
-      title: "Native Mobile App Development",
-      tagline: "Cross-platform iOS and Android applications compiled with native fluid speed.",
+      pill: "Capability 03",
+      title: "Mobile Products",
+      tagline: "Fast, reliable iOS and Android applications built for real-world usage.",
       description:
-        "We build high-performance mobile applications using Flutter 3.24, delivering beautiful native iOS and Android experiences from a single robust codebase. We handle everything from UI design and sensor integration to App Store & Google Play approval.",
+        "We build native-performance mobile applications using Flutter, delivering robust iOS and Android experiences from a single codebase. We handle everything from UX architecture to App Store & Google Play launch.",
       deliverables: [
         {
           name: "Single-Codebase iOS & Android Compilation",
-          desc: "Native 60fps performance on both Apple App Store and Google Play Store without doubling development cost.",
+          desc: "Fluid 60fps performance on both Apple App Store and Google Play without duplicate engineering overhead.",
         },
         {
           name: "Offline-First Storage & Local Caching",
-          desc: "Seamless offline capability using local SQLite & Isar databases that sync bidirectionally when connectivity returns.",
+          desc: "Reliable offline performance with background synchronization when network connectivity resumes.",
         },
         {
-          name: "Real-Time Push Notifications & Background Ops",
-          desc: "Reliable APNs and Firebase Cloud Messaging for targeted retention and transaction alerts.",
+          name: "Push Notifications & Device Integrations",
+          desc: "Targeted push messaging, biometrics, audio players, camera access, and background sync.",
         },
         {
-          name: "In-App Purchases & Subscriptions",
-          desc: "Apple StoreKit 2 and Google Play Billing v7 workflows with receipt validation and entitlement management.",
+          name: "App Store Publishing & Release Management",
+          desc: "Complete handling of Apple and Google submission, review guidelines, and OTA updates.",
         },
       ],
-      tech: [
-        "Flutter 3.24",
-        "Dart",
-        "Swift & Kotlin Native Bridges",
-        "Firebase Auth & Cloud Messaging",
-        "SQLite & Isar Vector Cache",
-        "StoreKit 2 & Play Billing v7",
-        "GitHub Actions Mobile CI/CD",
-      ],
+      tech: ["Flutter", "Dart", "SQLite / Isar", "Firebase Cloud Messaging", "Audio Engine", "REST / GraphQL"],
     },
     {
-      id: "strategy-advisory",
-      icon: Compass,
-      pill: "Service 04",
-      title: "Strategy, Technical Architecture & Advisory",
-      tagline: "Clear engineering blueprints and plain-English roadmaps before code is written.",
+      id: "automation-ai",
+      icon: Zap,
+      pill: "Capability 04",
+      title: "Automation & AI Workflows",
+      tagline: "Systems that reduce repetitive work and give your team immense operational leverage.",
       description:
-        "For teams who want complete clarity before committing to a major engineering build. We audit legacy systems, map technical feasibility, design scalable database architectures, and deliver actionable MVP roadmaps.",
+        "We engineer automated workflows and AI execution layers that integrate directly into your communications, databases, and third-party tools. From instant WhatsApp lead routing to automated customer support.",
       deliverables: [
         {
-          name: "Technical Feasibility & Architecture Blueprints",
-          desc: "Complete system architecture diagrams, infrastructure cost estimates, and risk mitigation strategies.",
+          name: "WhatsApp Cloud API & CRM Routing",
+          desc: "Instant 2-second lead handoffs from web forms to sales reps on WhatsApp with full context.",
         },
         {
-          name: "Codebase Security & Vulnerability Audits",
-          desc: "Comprehensive review of existing repositories for security flaws, performance bottlenecks, and technical debt.",
+          name: "Automated Invoice & Collections Chasing",
+          desc: "Trigger-based payment reminders, digital receipt issuance, and automated ledger reconciliation.",
         },
         {
-          name: "AI Opportunity Mapping & ROI Scoping",
-          desc: "We analyze your business workflows to pinpoint the highest-ROI automation use-cases before investing.",
+          name: "Custom AI Knowledge Assistants",
+          desc: "Retrieval-augmented AI agents trained on private company documentation for instant support resolution.",
         },
         {
-          name: "MVP Scope Specification & Phased Roadmaps",
-          desc: "Itemized sprint roadmaps ensuring your product launches on schedule with zero scope bloat.",
+          name: "Multi-System Webhook Orchestration",
+          desc: "Connecting disparate platforms into a unified automated data pipeline.",
         },
       ],
-      tech: [
-        "System Architecture Blueprints",
-        "Cloudflare Workers & AWS Infrastructure",
-        "Docker & Containerization",
-        "Schema Design (PostgreSQL / Redis)",
-        "Security Audits & Penetration Testing",
-        "Fixed-Scope Sprint Specs",
+      tech: ["Python", "Node.js", "WhatsApp Cloud API", "LangGraph", "Vector DBs", "Claude / OpenAI APIs"],
+    },
+    {
+      id: "strategy-architecture",
+      icon: Compass,
+      pill: "Capability 05",
+      title: "Product Strategy & Architecture",
+      tagline: "A clear technical and product roadmap before you spend heavily on development.",
+      description:
+        "Not sure what to build or how to build it? We analyze the commercial bottleneck, define the technical requirements, design the system architecture, and map out an executable development plan.",
+      deliverables: [
+        {
+          name: "Technical Architecture & System Design",
+          desc: "Comprehensive database schemas, API specs, infrastructure topologies, and security protocols.",
+        },
+        {
+          name: "Scoped Product Roadmap & Milestone Breakdown",
+          desc: "Fixed-cost, timeline-bound engineering milestones that prevent scope bloat and wasted capital.",
+        },
+        {
+          name: "Interactive Figma UX/UI Prototypes",
+          desc: "High-fidelity clickable designs ready for user validation and engineering handoff.",
+        },
+        {
+          name: "Build vs. Buy Evaluation",
+          desc: "Objective technical analysis on where custom engineering delivers competitive advantage.",
+        },
       ],
+      tech: ["Figma", "System Architecture Diagrams", "PostgreSQL Schemas", "OpenAPI Specifications"],
     },
   ];
 
@@ -159,119 +152,104 @@ export default function ServicesPage() {
     <div className="py-24 sm:py-32">
       <div className="max-w-6xl mx-auto px-5 sm:px-8">
         {/* Page Header */}
-        <div className="max-w-3xl mb-20">
-          <div className="pill-badge mb-3">Our Core Services</div>
+        <div className="max-w-3xl mb-16">
+          <div className="pill-badge mb-3">What We Build</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
-            Services engineered for{" "}
-            <span className="cyan-gradient">real business growth.</span>
+            Software engineered for{" "}
+            <span className="text-cyan-700">commercial outcomes.</span>
           </h1>
-          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
-            We partner with ambitious teams to engineer bespoke digital products. From autonomous AI agents to mission-critical web and mobile applications, our engineering standards are designed for measurable commercial outcomes.
+          <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
+            We design and build digital products around real business problems — not trends, templates, or unnecessary complexity.
           </p>
         </div>
 
-        {/* Services Deep Dives */}
-        <div className="space-y-16">
-          {services.map((service) => {
-            const Icon = service.icon;
+        {/* Capabilities List */}
+        <div className="space-y-12 mb-24">
+          {capabilities.map((cap) => {
+            const Icon = cap.icon;
             return (
               <div
-                key={service.id}
-                id={service.id}
-                className="p-8 sm:p-12 rounded-3xl studio-glass relative overflow-hidden"
+                key={cap.id}
+                id={cap.id}
+                className="p-8 sm:p-12 rounded-3xl bg-white border border-zinc-900/[0.08] hover:border-zinc-900/[0.16] hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300"
               >
-                {/* Header of Service */}
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-8 border-b border-zinc-900/[0.06] mb-8">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <span className="text-xs font-mono uppercase tracking-wider text-cyan-700">
-                        {service.pill}
-                      </span>
-                      <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900 mt-0.5">
-                        {service.title}
-                      </h2>
-                    </div>
-                  </div>
-
-                  <Link
-                    href="/contact"
-                    className="btn-solid text-xs py-2.5 px-5 font-semibold shrink-0"
-                  >
-                    <span>Start Project</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
-                </div>
-
-                {/* Description & Core Value */}
-                <div className="max-w-3xl mb-10">
-                  <p className="text-base sm:text-lg text-zinc-600 leading-relaxed mb-4">
-                    {service.tagline}
-                  </p>
-                  <p className="text-sm sm:text-base text-zinc-500 leading-relaxed">
-                    {service.description}
-                  </p>
-                </div>
-
-                {/* 4 Deliverable Blocks */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                  {service.deliverables.map((del) => (
-                    <div
-                      key={del.name}
-                      className="p-6 rounded-2xl bg-zinc-900/[0.02] border border-zinc-900/[0.05]"
-                    >
-                      <div className="flex items-center gap-2 text-sm font-bold text-zinc-900 mb-2">
-                        <Check className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>{del.name}</span>
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                  <div className="lg:col-span-5 space-y-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center">
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <p className="text-xs sm:text-sm text-zinc-500 leading-relaxed pl-6">
-                        {del.desc}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Tech Stack Footer */}
-                <div className="pt-6 border-t border-zinc-900/[0.06] flex flex-wrap items-center justify-between gap-4">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-mono text-zinc-500 mr-2">Technologies & Protocols:</span>
-                    {service.tech.map((t) => (
-                      <span
-                        key={t}
-                        className="text-xs font-mono px-2.5 py-1 rounded bg-zinc-900/[0.03] border border-zinc-900/[0.06] text-zinc-400"
-                      >
-                        {t}
+                      <span className="text-xs font-mono font-semibold text-cyan-700 uppercase tracking-wider">
+                        {cap.pill}
                       </span>
-                    ))}
+                    </div>
+
+                    <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
+                      {cap.title}
+                    </h2>
+                    <p className="text-sm font-medium text-zinc-700">
+                      {cap.tagline}
+                    </p>
+                    <p className="text-sm text-zinc-500 leading-relaxed">
+                      {cap.description}
+                    </p>
+
+                    <div className="pt-2">
+                      <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 font-semibold block mb-2">
+                        Core Technologies:
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        {cap.tech.map((t) => (
+                          <span
+                            key={t}
+                            className="text-[11px] font-mono px-2.5 py-1 rounded bg-zinc-100 text-zinc-600 border border-zinc-200/60"
+                          >
+                            {t}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
-                  <Link
-                    href="/contact"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-cyan-700 hover:text-cyan-600 transition-colors"
-                  >
-                    <span>Consult on this service</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="lg:col-span-7 bg-zinc-50/80 p-6 sm:p-8 rounded-2xl border border-zinc-900/[0.06] space-y-4">
+                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-900 font-semibold block">
+                      Core Deliverables
+                    </span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {cap.deliverables.map((del) => (
+                        <div
+                          key={del.name}
+                          className="p-4 rounded-xl bg-white border border-zinc-200/80 space-y-1.5"
+                        >
+                          <div className="text-xs font-bold text-zinc-900 flex items-center gap-1.5">
+                            <Check className="w-3.5 h-3.5 text-cyan-700 shrink-0" />
+                            <span>{del.name}</span>
+                          </div>
+                          <p className="text-xs text-zinc-500 leading-relaxed">
+                            {del.desc}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
 
-        {/* Bottom Consultation CTA */}
-        <div className="mt-20 p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
-          <div className="pill-badge">Let's Build</div>
-          <h2 className="text-3xl font-bold text-zinc-900">
-            Have a project in mind?
+        {/* Bottom CTA */}
+        <div className="p-10 sm:p-14 rounded-3xl bg-[#F8F8F6] border border-zinc-200/80 text-center max-w-3xl mx-auto space-y-6">
+          <div className="pill-badge">Start a Project</div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900">
+            Have a product worth building?
           </h2>
           <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            Book a free 30-minute discovery call. We’ll identify your highest-impact opportunity and tell you exactly how we’d build it. No pitch. Just clarity.
+            Tell us what you're trying to build, fix, or automate. We'll assess the problem, tell you what it will take, what it should cost, and give you a clear path forward.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link href="/contact" className="btn-solid text-sm">
-              <span>Book a Discovery Call</span>
+              <span>Start a Project</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <a

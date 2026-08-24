@@ -1,30 +1,30 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { Compass, Target, ShieldCheck, HeartHandshake, Layers, Code, Globe2, ArrowRight } from "lucide-react";
+import { ShieldCheck, Layers, Clock, HeartHandshake, Globe2, ArrowRight, CheckCircle2, Zap } from "lucide-react";
 import Link from "next/link";
 
 export default function AboutPage() {
   const principles = [
     {
-      icon: Target,
-      title: "Priced for the outcome, not the hour",
-      desc: "We don’t believe in bloated billable hours or vague retainers. We scope every milestone precisely so you always know what is being built and why it matters.",
+      icon: ShieldCheck,
+      title: "You own what we build.",
+      desc: "100% of your source code repositories, intellectual property, database schemas, and design assets belong to you in full. Zero vendor lock-in.",
     },
     {
       icon: Layers,
-      title: "Engineered for your exact context",
-      desc: "We don't install cookie-cutter templates. Every AI agent, database schema, and interface is custom-tailored to how your team operates and what your clients demand.",
+      title: "We build around the business.",
+      desc: "We don't force your operation into a rigid off-the-shelf template. Every software system is engineered around your exact commercial workflows.",
     },
     {
-      icon: Code,
-      title: "We speak both tech and business",
-      desc: "Most developers get lost in syntax, while most consultants speak in abstract slides. We bridge deep technical execution with clear commercial logic from day one.",
+      icon: Clock,
+      title: "We move with discipline.",
+      desc: "Defined scopes, fixed milestone pricing, weekly progress demos, and direct engineering access. Transparent timelines with zero mystery.",
     },
     {
-      icon: ShieldCheck,
-      title: "100% IP & Code Ownership",
-      desc: "All source code, database architectures, Figma UI kits, and credentials belong to you in full. We build zero vendor lock-in.",
+      icon: HeartHandshake,
+      title: "We don't disappear after launch.",
+      desc: "Launch is the beginning of a product's life, not the end of the engagement. We provide active monitoring, QA stability warranties, and ongoing support.",
     },
   ];
 
@@ -35,11 +35,11 @@ export default function AboutPage() {
         <div className="max-w-3xl mb-20">
           <div className="pill-badge mb-3">About Thoram Group</div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-zinc-900 mb-6">
-            A modern product studio working with{" "}
-            <span className="cyan-gradient">ambitious teams worldwide.</span>
+            Product Engineering &{" "}
+            <span className="text-cyan-700">Technology Studio.</span>
           </h1>
-          <p className="text-lg text-zinc-500 leading-relaxed max-w-2xl">
-            We partner with ambitious founders, startups, and growing enterprises to design, engineer, and scale digital products that drive real revenue.
+          <p className="text-lg text-zinc-600 leading-relaxed max-w-2xl">
+            We design, build, and scale high-performance digital products for businesses ready to move faster — from internal business systems and customer platforms to mobile applications and automation.
           </p>
         </div>
 
@@ -47,42 +47,37 @@ export default function AboutPage() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-24 items-start">
           <div className="lg:col-span-6 space-y-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-zinc-900">
-              Why we exist
+              The Technology Partner for Critical Software
             </h2>
-            <div className="space-y-4 text-zinc-500 text-sm sm:text-base leading-relaxed">
+            <div className="space-y-4 text-zinc-600 text-sm sm:text-base leading-relaxed">
               <p>
-                In today's fast-moving software and AI landscape, too many businesses get caught between two extremes: expensive consultancies that deliver strategy decks without writing code, and offshore agencies that build generic templates without understanding business context.
+                Too many businesses get caught between two extremes: expensive consultancies that deliver strategy decks without writing code, and offshore agencies that build generic templates without understanding commercial context.
               </p>
               <p>
-                <strong className="text-zinc-900">Thoram Group was built to be the bridge.</strong> We combine high-conviction product design, frontier full-stack engineering, and practical commercial strategy to ship software that moves the needle.
+                <strong className="text-zinc-900">Thoram Group was built to be the bridge.</strong> We are the technology partner businesses call when software becomes critical to how they operate, serve customers, or scale.
               </p>
               <p>
-                Whether it's deploying autonomous AI agents that handle 24/7 client operations, building native mobile apps with 15k+ active users, or architecting custom SaaS billing platforms, we build technology you can depend on for years.
+                Whether it's building multi-campus school management portals, native mobile apps with tens of thousands of active users, or automated real estate and fintech payment rails, we turn complex problems into reliable digital products.
               </p>
             </div>
           </div>
 
-          <div className="lg:col-span-6 p-8 sm:p-10 rounded-3xl studio-glass space-y-6">
-            <div className="flex items-center gap-3 text-cyan-700 font-mono text-xs uppercase tracking-wider">
+          <div className="lg:col-span-6 p-8 sm:p-10 rounded-3xl bg-[#F8F8F6] border border-zinc-200/80 space-y-6">
+            <div className="flex items-center gap-3 text-cyan-700 font-mono text-xs uppercase tracking-wider font-semibold">
               <Globe2 className="w-4 h-4" />
-              <span>Studio Snapshot</span>
+              <span>Built in Africa. Working Globally.</span>
             </div>
-            <div className="grid grid-cols-2 gap-6 pt-2">
-              <div>
-                <div className="text-3xl font-bold text-zinc-900 font-mono">100%</div>
+            <p className="text-sm text-zinc-600 leading-relaxed">
+              We understand the realities of building technology in complex, fast-moving markets — connectivity constraints, fragmented payment rails, operational nuances, and rapidly growing digital demand. That firsthand experience equips us to engineer robust products that perform reliably anywhere in the world.
+            </p>
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t border-zinc-200">
+              <div className="p-4 rounded-xl bg-white border border-zinc-200/70">
+                <div className="text-2xl font-bold text-zinc-900 font-mono">100%</div>
                 <div className="text-xs text-zinc-500 mt-1">Client IP Ownership</div>
               </div>
-              <div>
-                <div className="text-3xl font-bold text-zinc-900 font-mono">48h</div>
-                <div className="text-xs text-zinc-500 mt-1">Scoped Proposal SLA</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-zinc-900 font-mono">99.9%</div>
-                <div className="text-xs text-zinc-500 mt-1">Uptime Architecture</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold text-zinc-900 font-mono">Zero</div>
-                <div className="text-xs text-zinc-500 mt-1">Vendor Lock-In</div>
+              <div className="p-4 rounded-xl bg-white border border-zinc-200/70">
+                <div className="text-2xl font-bold text-zinc-900 font-mono">48h</div>
+                <div className="text-xs text-zinc-500 mt-1">Proposal SLA</div>
               </div>
             </div>
           </div>
@@ -91,9 +86,9 @@ export default function AboutPage() {
         {/* Operating Principles */}
         <div className="mb-24">
           <div className="max-w-3xl mb-12">
-            <div className="pill-badge mb-3">Core Principles</div>
+            <div className="pill-badge mb-3">Why Companies Choose Thoram</div>
             <h2 className="text-3xl font-bold text-zinc-900">
-              How we operate and build
+              How we operate and deliver
             </h2>
           </div>
 
@@ -103,7 +98,7 @@ export default function AboutPage() {
               return (
                 <div
                   key={principle.title}
-                  className="p-8 rounded-2xl studio-glass studio-glass-hover"
+                  className="p-8 rounded-2xl bg-white border border-zinc-900/[0.08] hover:border-cyan-700/40 hover:shadow-lg hover:shadow-zinc-900/[0.04] transition-all duration-300"
                 >
                   <div className="w-10 h-10 rounded-xl bg-zinc-900/[0.04] border border-zinc-900/[0.08] text-cyan-700 flex items-center justify-center mb-5">
                     <Icon className="w-5 h-5" />
@@ -121,21 +116,21 @@ export default function AboutPage() {
         </div>
 
         {/* Call to Action */}
-        <div className="p-10 rounded-3xl studio-glass text-center max-w-3xl mx-auto space-y-6">
-          <div className="pill-badge">Let's Build Together</div>
-          <h2 className="text-3xl font-bold text-zinc-900">
-            Ready to scale your digital infrastructure?
+        <div className="p-10 sm:p-14 rounded-3xl bg-[#F8F8F6] border border-zinc-200/80 text-center max-w-3xl mx-auto space-y-6">
+          <div className="pill-badge">Start a Project</div>
+          <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900">
+            Have a product worth building?
           </h2>
           <p className="text-zinc-500 text-sm sm:text-base leading-relaxed max-w-xl mx-auto">
-            Book a free 30-minute discovery call. We’ll identify your highest-impact opportunity and tell you exactly how we’d build it.
+            Tell us what you're trying to build, fix, or automate. We'll assess the problem, tell you what it will take, what it should cost, and give you a clear path forward.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
             <Link href="/contact" className="btn-solid text-sm">
-              <span>Book a Discovery Call</span>
+              <span>Start a Project</span>
               <ArrowRight className="w-4 h-4" />
             </Link>
             <a
-              href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,"
+              href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20have%20a%20project%20I%20would%20like%20to%20discuss."
               target="_blank"
               rel="noopener noreferrer"
               className="btn-ghost text-sm"
