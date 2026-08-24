@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { caseStudiesData, CaseStudy } from "@/data/caseStudies";
 import {
   Smartphone,
@@ -15,65 +15,107 @@ import {
   Layers,
   Quote,
   ExternalLink,
+  Maximize2,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 
 function StudyGallery({ study }: { study: CaseStudy }) {
   const images = study.gallery || (study.image ? [study.image] : []);
   const [activeIdx, setActiveIdx] = useState(0);
+  const [lightboxOpen, setLightboxOpen] = useState(false);
 
   if (images.length === 0) return null;
 
   return (
-    <div className="rounded-3xl overflow-hidden border border-zinc-900/[0.10] bg-zinc-50/90 p-3 sm:p-4 space-y-3">
-      <div className="rounded-2xl overflow-hidden border border-zinc-200 bg-white shadow-xs">
-        {/* Browser Topbar */}
-        <div className="px-4 py-2.5 bg-zinc-100/90 border-b border-zinc-200 flex items-center justify-between">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+    <>
+      <div className="rounded-3xl overflow-hidden border border-zinc-900/[0.10] bg-zinc-50/90 p-3 sm:p-5 space-y-3.5">
+        <div className="rounded-2xl overflow-hidden border border-zinc-200 bg-white shadow-xs">
+          {/* Browser Topbar */}
+          <div className="px-4 py-2.5 bg-zinc-100/90 border-b border-zinc-200 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2.5 h-2.5 rounded-full bg-rose-400/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-amber-400/80" />
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400/80" />
+            </div>
+            <div className="text-[11px] font-mono text-zinc-400 truncate max-w-[280px]">
+              {study.title.split("—")[0].trim()} · Production Interface Preview
+            </div>
+            <button
+              onClick={() => setLightboxOpen(true)}
+              className="inline-flex items-center gap-1 text-[11px] font-mono text-zinc-500 hover:text-orange-600 transition-colors px-2 py-0.5 rounded hover:bg-zinc-200/60"
+              title="Expand Fullscreen"
+            >
+              <Maximize2 className="w-3 h-3" />
+              <span className="hidden sm:inline">Fullscreen</span>
+            </button>
           </div>
-          <div className="text-[11px] font-mono text-zinc-400">
-            {study.title.split("—")[0].trim()} · Production Interface Preview
-          </div>
-          <div className="text-[11px] font-mono text-zinc-400">
-            {activeIdx + 1} / {images.length}
+          {/* Main Screenshot - Full Uncropped View */}
+          <div
+            onClick={() => setLightboxOpen(true)}
+            className="relative w-full bg-zinc-950/5 flex items-center justify-center p-2 sm:p-4 cursor-zoom-in group"
+          >
+            <img
+              src={images[activeIdx]}
+              alt={`${study.title} Preview ${activeIdx + 1}`}
+              className="w-full h-auto max-h-[640px] object-contain rounded-xl shadow-xs group-hover:scale-[1.005] transition-transform duration-300"
+            />
           </div>
         </div>
-        {/* Main Screenshot */}
-        <div className="relative aspect-[16/9] w-full bg-zinc-950 overflow-hidden">
-          <img
-            src={images[activeIdx]}
-            alt={`${study.title} Preview ${activeIdx + 1}`}
-            className="w-full h-full object-cover object-top transition-all duration-300"
-          />
-        </div>
+
+        {/* Thumbnails Row */}
+        {images.length > 1 && (
+          <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1">
+            {images.map((img, idx) => (
+              <button
+                key={img}
+                onClick={() => setActiveIdx(idx)}
+                className={`relative rounded-xl overflow-hidden border transition-all h-14 sm:h-16 aspect-[16/10] shrink-0 bg-zinc-100 ${
+                  activeIdx === idx
+                    ? "border-orange-600 ring-2 ring-orange-500/30 shadow-xs"
+                    : "border-zinc-200 opacity-60 hover:opacity-100 hover:border-zinc-400"
+                }`}
+              >
+                <img
+                  src={img}
+                  alt="Thumbnail"
+                  className="w-full h-full object-cover object-top"
+                />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Thumbnails Row */}
-      {images.length > 1 && (
-        <div className="flex items-center gap-2.5 overflow-x-auto pb-1 px-1">
-          {images.map((img, idx) => (
+      {/* Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setLightboxOpen(false)}
+            className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md p-4 sm:p-8 flex items-center justify-center cursor-zoom-out"
+          >
             <button
-              key={img}
-              onClick={() => setActiveIdx(idx)}
-              className={`relative rounded-xl overflow-hidden border transition-all h-14 sm:h-16 aspect-[16/9] shrink-0 ${
-                activeIdx === idx
-                  ? "border-orange-600 ring-2 ring-orange-500/30 shadow-xs"
-                  : "border-zinc-200 opacity-60 hover:opacity-100 hover:border-zinc-400"
-              }`}
+              onClick={() => setLightboxOpen(false)}
+              className="absolute top-5 right-5 p-2.5 rounded-full bg-zinc-900/80 text-white hover:bg-orange-600 transition-colors z-50"
             >
-              <img
-                src={img}
-                alt="Thumbnail"
-                className="w-full h-full object-cover object-top"
-              />
+              <X className="w-6 h-6" />
             </button>
-          ))}
-        </div>
-      )}
-    </div>
+            <motion.img
+              initial={{ scale: 0.95 }}
+              animate={{ scale: 1 }}
+              exit={{ scale: 0.95 }}
+              src={images[activeIdx]}
+              alt="Fullscreen Preview"
+              className="max-w-full max-h-[90vh] object-contain rounded-2xl shadow-2xl"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 

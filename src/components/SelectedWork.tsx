@@ -145,11 +145,11 @@ export default function SelectedWork() {
                   <div className="w-8" />
                 </div>
                 {/* Image */}
-                <div className="relative aspect-[16/9] w-full bg-zinc-950 overflow-hidden">
+                <div className="relative w-full bg-zinc-950/5 flex items-center justify-center p-2 sm:p-4 overflow-hidden">
                   <img
                     src={project.image}
                     alt={`${project.title} Interface Preview`}
-                    className="w-full h-full object-cover object-top group-hover:scale-[1.01] transition-transform duration-500"
+                    className="w-full h-auto max-h-[620px] object-contain rounded-xl shadow-xs group-hover:scale-[1.005] transition-transform duration-500"
                   />
                 </div>
               </div>
