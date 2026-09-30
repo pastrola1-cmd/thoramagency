@@ -39,145 +39,21 @@ export interface CRMLead {
   updatedAt: string;
 }
 
-const STORAGE_KEY = "thoram_crm_leads_v1";
-
-const INITIAL_DEMO_LEADS: CRMLead[] = [
-  {
-    id: "LD-2026-001",
-    name: "Dr. Kunle Adeleke",
-    email: "k.adeleke@lagoshealth.ng",
-    phone: "+2348035550192",
-    company: "Lagoon Specialist Hospitals",
-    service: "Business Systems & Custom Software",
-    budget: "₦10M - ₦25M",
-    timeline: "1-2 Months",
-    message: "We need a unified multi-branch patient electronic records and automated billing management portal connecting 4 clinic locations across Lagos.",
-    status: "proposal_sent",
-    priority: "urgent",
-    assignedTo: "Olamide (Lead Partner)",
-    notes: [
-      {
-        id: "note-1",
-        author: "Olamide",
-        text: "Had discovery call with Chief Medical Director. Architecture draft sent for review.",
-        createdAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-      },
-    ],
-    nextFollowUp: new Date(Date.now() + 86400000).toISOString().split("T")[0],
-    source: "Website Contact Form",
-    createdAt: new Date(Date.now() - 86400000 * 4).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 2).toISOString(),
-  },
-  {
-    id: "LD-2026-002",
-    name: "Tariq Mansoor",
-    email: "tariq@vertexcapital.ae",
-    phone: "+971501234567",
-    company: "Vertex Asset Management (Dubai)",
-    service: "Customer Platforms & SaaS",
-    budget: "$30,000 - $50,000",
-    timeline: "Immediate (< 2 weeks)",
-    message: "Seeking to build an institutional LP investor portal with automated capital call notifications and Paystack / Stripe multi-currency rails.",
-    status: "negotiation",
-    priority: "urgent",
-    assignedTo: "Engineering Team",
-    notes: [
-      {
-        id: "note-2",
-        author: "Staff",
-        text: "Contract terms agreed. Awaiting final board signature on Monday.",
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-      },
-    ],
-    nextFollowUp: new Date(Date.now() + 86400000 * 2).toISOString().split("T")[0],
-    source: "Direct Referral",
-    createdAt: new Date(Date.now() - 86400000 * 6).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "LD-2026-003",
-    name: "Amina Bello",
-    email: "amina@kadirischools.com",
-    phone: "+2349021118899",
-    company: "Kadiri Academy Network",
-    service: "Business Systems & Custom Software",
-    budget: "₦5M - ₦10M",
-    timeline: "1-2 Months",
-    message: "Inspired by your EduThoramOS case study. We have 2 campuses and want to eliminate manual paper report cards and automate fee receipts.",
-    status: "new",
-    priority: "high",
-    assignedTo: "Unassigned",
-    notes: [],
-    source: "EduThoramOS Case Study",
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: "LD-2026-004",
-    name: "David Sterling",
-    email: "david@propwealth.co.uk",
-    phone: "+447700900123",
-    company: "Sterling Realty London",
-    service: "Automation & AI Workflows",
-    budget: "£15,000 - £25,000",
-    timeline: "Quarterly",
-    message: "Need automated WhatsApp lead distribution webhooks connected to our custom property CRM, similar to your Nissie Shelters system.",
-    status: "contacted",
-    priority: "medium",
-    assignedTo: "Olamide (Lead Partner)",
-    notes: [
-      {
-        id: "note-3",
-        author: "Olamide",
-        text: "Sent initial tech stack overview and WhatsApp Cloud API specs.",
-        createdAt: new Date(Date.now() - 86400000).toISOString(),
-      },
-    ],
-    nextFollowUp: new Date(Date.now() + 86400000 * 3).toISOString().split("T")[0],
-    source: "Nissie Shelters Case Study",
-    createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "LD-2026-005",
-    name: "Emeka Nwosu",
-    email: "emeka@nwosugroup.com",
-    phone: "+2348109988776",
-    company: "Nwosu Logistics & Freight",
-    service: "Mobile App Development",
-    budget: "₦8M - ₦15M",
-    timeline: "1-2 Months",
-    message: "Driver tracking and consignment dispatching app with offline sync capability.",
-    status: "won",
-    priority: "high",
-    assignedTo: "Engineering Team",
-    notes: [
-      {
-        id: "note-4",
-        author: "Olamide",
-        text: "Kickoff payment confirmed via Paystack. Sprints starting this Friday.",
-        createdAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-      },
-    ],
-    source: "Website Contact Form",
-    createdAt: new Date(Date.now() - 86400000 * 10).toISOString(),
-    updatedAt: new Date(Date.now() - 86400000 * 5).toISOString(),
-  },
-];
+const STORAGE_KEY = "thoram_crm_leads_v2";
 
 // Helper to safely fetch local storage leads
 function getLocalLeads(): CRMLead[] {
-  if (typeof window === "undefined") return INITIAL_DEMO_LEADS;
+  if (typeof window === "undefined") return [];
   const raw = localStorage.getItem(STORAGE_KEY);
   if (!raw) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(INITIAL_DEMO_LEADS));
-    return INITIAL_DEMO_LEADS;
+    localStorage.setItem(STORAGE_KEY, JSON.stringify([]));
+    return [];
   }
   try {
     return JSON.parse(raw);
   } catch (e) {
     console.error("Failed to parse CRM leads store:", e);
-    return INITIAL_DEMO_LEADS;
+    return [];
   }
 }
 
