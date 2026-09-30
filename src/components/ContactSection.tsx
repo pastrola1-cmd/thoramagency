@@ -1,16 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { MessageCircle, Mail, Send, CheckCircle2, ArrowRight, Clock, ShieldCheck } from "lucide-react";
-import { submitLeadViaWhatsApp, mailtoFallback } from "@/lib/lead";
+import { MessageCircle, Mail, Send, CheckCircle2, ArrowRight, Clock, ShieldCheck, Phone } from "lucide-react";
+import { submitLeadAndDispatch } from "@/lib/lead";
 
 export default function ContactSection() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [form, setForm] = useState({
     name: "",
     email: "",
+    phone: "",
     company: "",
     interest: "Business Systems & Custom Software",
+    budget: "₦3M - ₦10M ($2k - $6k)",
+    timeline: "1 - 2 Months",
     message: "",
   });
 
@@ -18,9 +22,21 @@ export default function ContactSection() {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => setForm((prev) => ({ ...prev, [field]: e.target.value }));
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    submitLeadViaWhatsApp(form);
+    setIsSubmitting(true);
+    await submitLeadAndDispatch({
+      name: form.name,
+      email: form.email,
+      phone: form.phone,
+      company: form.company,
+      interest: form.interest,
+      budget: form.budget,
+      timeline: form.timeline,
+      message: form.message,
+      source: "Homepage Contact Section",
+    });
+    setIsSubmitting(false);
     setFormSubmitted(true);
   };
 
@@ -96,11 +112,11 @@ export default function ContactSection() {
                 <div className="w-14 h-14 rounded-full bg-emerald-600/10 border border-emerald-600/20 text-emerald-700 mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-zinc-900">Project Brief Received</h3>
+                <h3 className="text-2xl font-bold text-zinc-900">Project Brief Logged & Received</h3>
                 <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
-                  Thank you for reaching out. Our engineering director will review your project parameters and contact you within 24 hours with an actionable roadmap.
+                  Thank you for reaching out. Your brief is registered in our pipeline, and our engineering director will contact you within 24 hours with an actionable roadmap.
                 </p>
-                <div className="pt-4">
+                <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
                     href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20just%20submitted%20a%20project%20inquiry."
                     target="_blank"
@@ -110,13 +126,31 @@ export default function ContactSection() {
                     <MessageCircle className="w-4 h-4" />
                     <span>Follow up instantly on WhatsApp</span>
                   </a>
+                  <button
+                    onClick={() => {
+                      setFormSubmitted(false);
+                      setForm({
+                        name: "",
+                        email: "",
+                        phone: "",
+                        company: "",
+                        interest: "Business Systems & Custom Software",
+                        budget: "₦3M - ₦10M ($2k - $6k)",
+                        timeline: "1 - 2 Months",
+                        message: "",
+                      });
+                    }}
+                    className="text-xs font-mono text-zinc-400 hover:text-zinc-700 transition-colors"
+                  >
+                    Submit another inquiry
+                  </button>
                 </div>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
                       Your Name *
                     </label>
                     <input
@@ -125,11 +159,11 @@ export default function ContactSection() {
                       value={form.name}
                       onChange={update("name")}
                       placeholder="e.g. Alex Oladimeji"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
                       Work Email *
                     </label>
                     <input
@@ -138,14 +172,26 @@ export default function ContactSection() {
                       value={form.email}
                       onChange={update("email")}
                       placeholder="alex@company.com"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Phone / WhatsApp
+                    </label>
+                    <input
+                      type="tel"
+                      value={form.phone}
+                      onChange={update("phone")}
+                      placeholder="+234 800 000 0000"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
                       Company / Organization
                     </label>
                     <input
@@ -153,30 +199,65 @@ export default function ContactSection() {
                       value={form.company}
                       onChange={update("company")}
                       placeholder="e.g. Acme Health"
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
-                      Primary Project Focus
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Primary Focus
                     </label>
                     <select
                       value={form.interest}
                       onChange={update("interest")}
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
                     >
-                      <option value="Business Systems & Custom Software">Business Systems & Custom Software</option>
-                      <option value="Customer Platforms & SaaS">Customer Platforms & SaaS</option>
-                      <option value="Mobile App Development">Mobile App Development</option>
-                      <option value="Automation & AI Workflows">Automation & AI Workflows</option>
-                      <option value="Product Strategy & Architecture">Product Strategy & Architecture</option>
+                      <option value="Business Systems & Custom Software">Business Systems</option>
+                      <option value="Customer Platforms & SaaS">Platforms & SaaS</option>
+                      <option value="Mobile App Development">Mobile Apps</option>
+                      <option value="Automation & AI Workflows">Automation & AI</option>
+                      <option value="Product Strategy & Architecture">Product Strategy</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Budget
+                    </label>
+                    <select
+                      value={form.budget}
+                      onChange={update("budget")}
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
+                    >
+                      <option value="< ₦3M (< $2k)">&lt; ₦3M (&lt; $2k)</option>
+                      <option value="₦3M - ₦10M ($2k - $6k)">₦3M - ₦10M ($2k - $6k)</option>
+                      <option value="₦10M - ₦30M ($6k - $20k)">₦10M - ₦30M ($6k - $20k)</option>
+                      <option value="₦30M+ ($20k+ Enterprise)">₦30M+ ($20k+ Enterprise)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Timeline
+                    </label>
+                    <select
+                      value={form.timeline}
+                      onChange={update("timeline")}
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
+                    >
+                      <option value="Immediate (< 2 weeks)">Immediate (&lt; 2 wks)</option>
+                      <option value="1 - 2 Months">1 - 2 Months</option>
+                      <option value="3 - 6 Months">3 - 6 Months</option>
+                      <option value="Flexible / Planning">Flexible</option>
                     </select>
                   </div>
                 </div>
 
                 <div>
-                  <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2">
-                    Tell us what you're trying to build, fix or automate *
+                  <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                    Requirements & Bottlenecks *
                   </label>
                   <textarea
                     required
@@ -184,16 +265,17 @@ export default function ContactSection() {
                     value={form.message}
                     onChange={update("message")}
                     placeholder="Describe the operational bottleneck, product vision, or technical requirements..."
-                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-lg px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
+                    className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
                   />
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full btn-solid text-sm py-3.5 font-bold"
+                  disabled={isSubmitting}
+                  className="w-full btn-solid text-sm py-4 font-bold shadow-md shadow-orange-600/10"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <span>Start a Project</span>
+                    <span>{isSubmitting ? "Logging Brief..." : "Submit Project Brief"}</span>
                     <Send className="w-4 h-4" />
                   </span>
                 </button>

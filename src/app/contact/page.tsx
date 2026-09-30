@@ -2,27 +2,38 @@
 
 import { motion } from "framer-motion";
 import { useState } from "react";
-import { Send, MessageCircle, Mail, CheckCircle2, Clock, ShieldCheck, ArrowRight } from "lucide-react";
-import { submitLeadViaWhatsApp, mailtoFallback } from "@/lib/lead";
+import { Send, MessageCircle, Mail, CheckCircle2, Clock, ShieldCheck, ArrowRight, Phone, DollarSign, Calendar } from "lucide-react";
+import { submitLeadAndDispatch } from "@/lib/lead";
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [service, setService] = useState("Business Systems & Custom Software");
+  const [budget, setBudget] = useState("₦3M - ₦10M ($2k - $6k)");
+  const [timeline, setTimeline] = useState("1 - 2 Months");
   const [message, setMessage] = useState("");
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    submitLeadViaWhatsApp({ name, email, company, interest: service, message });
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-    }, 600);
+    await submitLeadAndDispatch({
+      name,
+      email,
+      phone,
+      company,
+      interest: service,
+      budget,
+      timeline,
+      message,
+      source: "Contact Page Brief",
+    });
+    setIsSubmitting(false);
+    setSubmitSuccess(true);
   };
 
   return (
@@ -104,11 +115,11 @@ export default function ContactPage() {
                 <div className="w-16 h-16 rounded-full bg-emerald-600/10 border border-emerald-600/20 text-emerald-700 mx-auto flex items-center justify-center">
                   <CheckCircle2 className="w-8 h-8" />
                 </div>
-                <h3 className="text-2xl font-bold text-zinc-900">Project Brief Received</h3>
+                <h3 className="text-2xl font-bold text-zinc-900">Project Brief Logged & Received</h3>
                 <p className="text-sm text-zinc-500 max-w-md mx-auto leading-relaxed">
-                  Thank you for sharing your project parameters. A senior partner will review your requirements and follow up with a clear proposal within 48 hours.
+                  Thank you for sharing your project parameters. Your brief is registered in our pipeline, and a senior partner will review your requirements within 24-48 hours.
                 </p>
-                <div className="pt-4">
+                <div className="pt-4 flex flex-col sm:flex-row items-center justify-center gap-3">
                   <a
                     href="https://wa.me/2349067914511?text=Hello%20Thoram%20Group,%20I%20just%20submitted%20a%20project%20brief."
                     target="_blank"
@@ -118,6 +129,18 @@ export default function ContactPage() {
                     <MessageCircle className="w-4 h-4" />
                     <span>Follow up instantly on WhatsApp</span>
                   </a>
+                  <button
+                    onClick={() => {
+                      setSubmitSuccess(false);
+                      setName("");
+                      setEmail("");
+                      setPhone("");
+                      setMessage("");
+                    }}
+                    className="text-xs font-mono text-zinc-400 hover:text-zinc-700 transition-colors"
+                  >
+                    Submit another inquiry
+                  </button>
                 </div>
               </div>
             ) : (
@@ -155,6 +178,19 @@ export default function ContactPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Phone / WhatsApp
+                    </label>
+                    <input
+                      type="tel"
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="+234 800 000 0000"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
                       Company / Organization
                     </label>
                     <input
@@ -165,7 +201,9 @@ export default function ContactPage() {
                       className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors"
                     />
                   </div>
+                </div>
 
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
                     <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
                       Primary Capability *
@@ -173,13 +211,45 @@ export default function ContactPage() {
                     <select
                       value={service}
                       onChange={(e) => setService(e.target.value)}
-                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 focus:outline-none transition-colors"
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
                     >
-                      <option value="Business Systems & Custom Software">Business Systems & Custom Software</option>
+                      <option value="Business Systems & Custom Software">Business Systems & Software</option>
                       <option value="Customer Platforms & SaaS">Customer Platforms & SaaS</option>
                       <option value="Mobile App Development">Mobile App Development</option>
                       <option value="Automation & AI Workflows">Automation & AI Workflows</option>
-                      <option value="Product Strategy & Architecture">Product Strategy & Architecture</option>
+                      <option value="Product Strategy & Architecture">Product Strategy</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Target Budget
+                    </label>
+                    <select
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
+                    >
+                      <option value="< ₦3M (< $2k)">&lt; ₦3M (&lt; $2k)</option>
+                      <option value="₦3M - ₦10M ($2k - $6k)">₦3M - ₦10M ($2k - $6k)</option>
+                      <option value="₦10M - ₦30M ($6k - $20k)">₦10M - ₦30M ($6k - $20k)</option>
+                      <option value="₦30M+ ($20k+ Enterprise)">₦30M+ ($20k+ Enterprise)</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-wider text-zinc-500 mb-2 font-mono">
+                      Target Timeline
+                    </label>
+                    <select
+                      value={timeline}
+                      onChange={(e) => setTimeline(e.target.value)}
+                      className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-3 py-3 text-xs text-zinc-900 focus:outline-none transition-colors"
+                    >
+                      <option value="Immediate (< 2 weeks)">Immediate (&lt; 2 weeks)</option>
+                      <option value="1 - 2 Months">1 - 2 Months</option>
+                      <option value="3 - 6 Months">3 - 6 Months</option>
+                      <option value="Flexible / Planning">Flexible / Planning</option>
                     </select>
                   </div>
                 </div>
@@ -193,7 +263,7 @@ export default function ContactPage() {
                     required
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder="Tell us what you're trying to build, fix, or automate. Include any technical preferences or timeline targets..."
+                    placeholder="Tell us what you're trying to build, fix, or automate. Include any technical preferences, target integrations, or operational goals..."
                     className="w-full bg-zinc-50 border border-zinc-900/[0.08] focus:border-orange-600 focus:bg-white rounded-xl px-4 py-3 text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none transition-colors resize-none"
                   />
                 </div>
@@ -201,10 +271,10 @@ export default function ContactPage() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="w-full btn-solid text-sm py-4 font-bold tracking-wide"
+                  className="w-full btn-solid text-sm py-4 font-bold tracking-wide shadow-md shadow-orange-600/10"
                 >
                   <span className="flex items-center justify-center gap-2">
-                    <span>{isSubmitting ? "Submitting Brief..." : "Submit Project Brief"}</span>
+                    <span>{isSubmitting ? "Logging Brief..." : "Submit Project Brief"}</span>
                     <Send className="w-4 h-4" />
                   </span>
                 </button>
