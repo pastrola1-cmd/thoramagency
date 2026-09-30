@@ -14,7 +14,6 @@ export default function Footer() {
 
   const support = [
     { label: "Resources", href: "/resources" },
-    { label: "Staff Portal & CRM", href: "/admin/leads" },
     { label: "Terms & Conditions", href: "/terms" },
     { label: "Privacy Policy", href: "/privacy" },
   ];
