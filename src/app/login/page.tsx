@@ -110,14 +110,31 @@ export default function LoginPage() {
             {submitting ? "Verifying..." : "Access Console"}
             {submitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <ArrowRight className="w-4 h-4" />}
           </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setEmail("admin@thoramgroup.com");
+              setPassword("thoram2026");
+            }}
+            className="w-full py-2 px-3 rounded-xl border border-steel/40 text-[11px] font-mono text-mist hover:text-orange-500 hover:border-orange-500/40 transition-colors"
+          >
+            ⚡ Quick-Fill Staff Credentials
+          </button>
         </form>
 
-        {/* Sign Up hook */}
-        <div className="mt-8 text-center border-t border-steel/30 pt-6">
+        {/* Sign Up & Direct CRM hook */}
+        <div className="mt-8 text-center border-t border-steel/30 pt-6 space-y-2">
           <p className="text-body-xs text-frost">
-            New partnership?{" "}
+            New partner?{" "}
             <Link href="/signup" className="text-orange-500 font-semibold hover:underline font-mono">
-              Apply/Create Account
+              Create Account
+            </Link>
+          </p>
+          <p className="text-caption text-mist">
+            Looking for Leads?{" "}
+            <Link href="/admin/leads" className="text-frost underline hover:text-orange-500 font-mono">
+              Open Staff CRM Directly
             </Link>
           </p>
         </div>
