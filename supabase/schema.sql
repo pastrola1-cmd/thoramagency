@@ -39,6 +39,8 @@ CREATE TABLE IF NOT EXISTS public.scraped_prospects (
   recommended_product TEXT DEFAULT '',
   demo_url TEXT DEFAULT '',
   source_page TEXT DEFAULT '',
+  has_mobile_app BOOLEAN NOT NULL DEFAULT FALSE,
+  website_status TEXT NOT NULL DEFAULT 'no_website',
   injected BOOLEAN NOT NULL DEFAULT FALSE,
   outreach_sent BOOLEAN NOT NULL DEFAULT FALSE,
   scraped_at TIMESTAMPTZ NOT NULL DEFAULT NOW()

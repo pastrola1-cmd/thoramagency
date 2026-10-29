@@ -164,6 +164,37 @@ export async function fetchCRMLeads(): Promise<CRMLead[]> {
   return getLocalLeads();
 }
 
+// ============================================================================
+// CONTACT FINGERPRINT & ANTI-DUPLICATE ENGINE
+// ============================================================================
+
+export function normalizePhoneKey(raw?: string): string {
+  if (!raw) return "";
+  const digits = raw.replace(/[^0-9]/g, "");
+  if (digits.length < 7) return "";
+  // Normalize Nigerian 080/081/090/070 (11 digits) -> 234...
+  if (digits.length === 11 && digits.startsWith("0")) {
+    return "234" + digits.slice(1);
+  }
+  return digits;
+}
+
+export function normalizeEmailKey(raw?: string): string {
+  if (!raw) return "";
+  const clean = raw.trim().toLowerCase();
+  if (!clean.includes("@")) return "";
+  return clean;
+}
+
+export function normalizeBusinessKey(raw?: string): string {
+  if (!raw) return "";
+  return raw
+    .toLowerCase()
+    .replace(/\([^)]*\)/g, "")
+    .replace(/[^a-z0-9]/g, "")
+    .trim();
+}
+
 export async function createCRMLead(
   data: Omit<CRMLead, "id" | "status" | "priority" | "notes" | "createdAt" | "updatedAt" | "source"> & {
     priority?: LeadPriority;
@@ -171,10 +202,64 @@ export async function createCRMLead(
     source?: string;
   }
 ): Promise<CRMLead> {
+  const now = new Date().toISOString();
+  const existing = getLocalLeads();
+
+  const phoneKey = normalizePhoneKey(data.phone);
+  const emailKey = normalizeEmailKey(data.email);
+  const nameKey = normalizeBusinessKey(data.company || data.name);
+
+  // Check if this contact/business already exists in CRM to prevent duplicates
+  const duplicateIndex = existing.findIndex((lead) => {
+    const lPhone = normalizePhoneKey(lead.phone);
+    const lEmail = normalizeEmailKey(lead.email);
+    const lName = normalizeBusinessKey(lead.company || lead.name);
+
+    if (phoneKey && lPhone && phoneKey === lPhone) return true;
+    if (
+      emailKey &&
+      lEmail &&
+      !emailKey.startsWith("contact@") &&
+      emailKey === lEmail
+    ) {
+      return true;
+    }
+    if (nameKey && nameKey.length >= 4 && lName === nameKey) return true;
+    return false;
+  });
+
+  if (duplicateIndex !== -1) {
+    // Enrich existing CRM lead instead of creating a duplicate
+    const current = existing[duplicateIndex];
+    const enriched: CRMLead = {
+      ...current,
+      phone: current.phone || data.phone || "",
+      email:
+        !current.email || current.email.startsWith("contact@")
+          ? data.email || current.email
+          : current.email,
+      company: current.company || data.company || "",
+      updatedAt: now,
+    };
+    existing[duplicateIndex] = enriched;
+    saveLocalLeads(existing);
+
+    try {
+      await fetch(`${SUPABASE_URL}/rest/v1/crm_leads?on_conflict=id`, {
+        method: "POST",
+        headers: supabaseHeaders({ Prefer: "resolution=merge-duplicates" }),
+        body: JSON.stringify(mapLeadToRow(enriched)),
+      });
+    } catch (e) {
+      console.warn("Supabase crm_leads enrich fallback:", e);
+    }
+
+    return enriched;
+  }
+
   const newId = `LD-2026-${Math.floor(100 + Math.random() * 900)}-${Date.now()
     .toString()
     .slice(-3)}`;
-  const now = new Date().toISOString();
 
   const newLead: CRMLead = {
     id: newId,
@@ -197,7 +282,6 @@ export async function createCRMLead(
   };
 
   // Save to LocalStorage immediately
-  const existing = getLocalLeads();
   const updated = [newLead, ...existing];
   saveLocalLeads(updated);
 
@@ -378,6 +462,8 @@ export interface ScrapedProspect {
   recommendedProduct: string;
   demoUrl: string;
   sourcePage: string;
+  hasMobileApp?: boolean;
+  websiteStatus?: "no_website" | "social_only" | "needs_revamp";
   injected?: boolean;
   outreachSent?: boolean;
   scrapedAt?: string;
@@ -400,6 +486,9 @@ function mapRowToProspect(row: any): ScrapedProspect {
     recommendedProduct: row.recommended_product || "",
     demoUrl: row.demo_url || "",
     sourcePage: row.source_page || "",
+    hasMobileApp: Boolean(row.has_mobile_app),
+    websiteStatus:
+      row.website_status || (row.website ? "needs_revamp" : "no_website"),
     injected: Boolean(row.injected),
     outreachSent: Boolean(row.outreach_sent),
     scrapedAt: row.scraped_at || new Date().toISOString(),
@@ -421,6 +510,8 @@ function mapProspectToRow(p: ScrapedProspect) {
     recommended_product: p.recommendedProduct || "",
     demo_url: p.demoUrl || "",
     source_page: p.sourcePage || "",
+    has_mobile_app: Boolean(p.hasMobileApp),
+    website_status: p.websiteStatus || (p.website ? "needs_revamp" : "no_website"),
     injected: Boolean(p.injected),
     outreach_sent: Boolean(p.outreachSent),
     scraped_at: p.scrapedAt || new Date().toISOString(),
@@ -498,6 +589,171 @@ export async function deleteScrapedProspectFromDB(id: string): Promise<void> {
   }
 }
 
+const SHARED_PLATFORM_DOMAINS = [
+  "instagram.com",
+  "facebook.com",
+  "fb.com",
+  "linkedin.com",
+  "twitter.com",
+  "x.com",
+  "tiktok.com",
+  "youtube.com",
+  "wa.me",
+  "whatsapp.com",
+  "linktr.ee",
+  "jiji.ng",
+  "propertypro.ng",
+  "privateproperty.com.ng",
+  "vconnect.com",
+  "businesslist.com.ng",
+  "finelib.com",
+  "ngex.com",
+];
+
+function extractStandaloneDomainKey(url?: string): string {
+  if (!url) return "";
+  const clean = url
+    .toLowerCase()
+    .replace(/^https?:\/\/(www\.)?/, "")
+    .split("/")[0]
+    .trim();
+  if (!clean || SHARED_PLATFORM_DOMAINS.some((d) => clean.includes(d))) {
+    return "";
+  }
+  return clean;
+}
+
+export function deduplicateAndMergeProspects(
+  incoming: ScrapedProspect[],
+  existing: ScrapedProspect[]
+): {
+  merged: ScrapedProspect[];
+  addedCount: number;
+  duplicateCount: number;
+  enrichedCount: number;
+  removedIds: string[];
+} {
+  const crmLeads = getLocalLeads();
+  const crmPhones = new Set(crmLeads.map((l) => normalizePhoneKey(l.phone)).filter(Boolean));
+  const crmEmails = new Set(
+    crmLeads
+      .map((l) => normalizeEmailKey(l.email))
+      .filter((e) => e && !e.startsWith("contact@"))
+  );
+  const crmNames = new Set(
+    crmLeads
+      .map((l) => normalizeBusinessKey(l.company || l.name))
+      .filter((n) => n.length >= 4)
+  );
+
+  const isAlreadyInCRM = (p: ScrapedProspect): boolean => {
+    if (p.injected) return true;
+    const pPhone = normalizePhoneKey(p.phone);
+    const pEmail = normalizeEmailKey(p.email);
+    const pName = normalizeBusinessKey(p.businessName);
+    if (pPhone && crmPhones.has(pPhone)) return true;
+    if (pEmail && crmEmails.has(pEmail)) return true;
+    if (pName && pName.length >= 4 && crmNames.has(pName)) return true;
+    return false;
+  };
+
+  const result: ScrapedProspect[] = [];
+  const removedIds: string[] = [];
+  let addedCount = 0;
+  let duplicateCount = 0;
+  let enrichedCount = 0;
+
+  // First, deduplicate existing rows themselves
+  for (const item of existing) {
+    const stamped = { ...item, injected: isAlreadyInCRM(item) };
+    const pPhone = normalizePhoneKey(stamped.phone);
+    const pEmail = normalizeEmailKey(stamped.email);
+    const pDomain = extractStandaloneDomainKey(stamped.website);
+    const pName = normalizeBusinessKey(stamped.businessName);
+
+    const matchIdx = result.findIndex((r) => {
+      const rPhone = normalizePhoneKey(r.phone);
+      const rEmail = normalizeEmailKey(r.email);
+      const rDomain = extractStandaloneDomainKey(r.website);
+      const rName = normalizeBusinessKey(r.businessName);
+
+      if (pPhone && rPhone && pPhone === rPhone) return true;
+      if (pEmail && rEmail && pEmail === rEmail) return true;
+      if (pDomain && rDomain && pDomain === rDomain) return true;
+      if (pName && pName.length >= 4 && rName === pName) return true;
+      return false;
+    });
+
+    if (matchIdx === -1) {
+      result.push(stamped);
+    } else {
+      duplicateCount++;
+      removedIds.push(stamped.id);
+      const curr = result[matchIdx];
+      result[matchIdx] = {
+        ...curr,
+        phone: curr.phone || stamped.phone,
+        email: curr.email || stamped.email,
+        website: curr.website || stamped.website,
+        hasMobileApp: Boolean(curr.hasMobileApp || stamped.hasMobileApp),
+        injected: Boolean(curr.injected || stamped.injected),
+        outreachSent: Boolean(curr.outreachSent || stamped.outreachSent),
+      };
+    }
+  }
+
+  // Next, merge incoming scraped prospects against deduplicated list
+  const newlyAdded: ScrapedProspect[] = [];
+  for (const rawItem of incoming) {
+    const item = { ...rawItem, injected: isAlreadyInCRM(rawItem) };
+    const pPhone = normalizePhoneKey(item.phone);
+    const pEmail = normalizeEmailKey(item.email);
+    const pDomain = extractStandaloneDomainKey(item.website);
+    const pName = normalizeBusinessKey(item.businessName);
+
+    const pool = [...newlyAdded, ...result];
+    const match = pool.find((r) => {
+      const rPhone = normalizePhoneKey(r.phone);
+      const rEmail = normalizeEmailKey(r.email);
+      const rDomain = extractStandaloneDomainKey(r.website);
+      const rName = normalizeBusinessKey(r.businessName);
+
+      if (pPhone && rPhone && pPhone === rPhone) return true;
+      if (pEmail && rEmail && pEmail === rEmail) return true;
+      if (pDomain && rDomain && pDomain === rDomain) return true;
+      if (pName && pName.length >= 4 && rName === pName) return true;
+      return false;
+    });
+
+    if (!match) {
+      newlyAdded.push(item);
+      addedCount++;
+    } else {
+      duplicateCount++;
+      const hadNewInfo =
+        (!match.phone && Boolean(item.phone)) ||
+        (!match.email && Boolean(item.email)) ||
+        (!match.website && Boolean(item.website));
+      if (hadNewInfo) {
+        enrichedCount++;
+        match.phone = match.phone || item.phone;
+        match.email = match.email || item.email;
+        match.website = match.website || item.website;
+        match.hasMobileApp = Boolean(match.hasMobileApp || item.hasMobileApp);
+        match.injected = Boolean(match.injected || item.injected);
+      }
+    }
+  }
+
+  return {
+    merged: [...newlyAdded, ...result],
+    addedCount,
+    duplicateCount,
+    enrichedCount,
+    removedIds,
+  };
+}
+
 export function exportProspectsToCSV(prospects: ScrapedProspect[]): void {
   const headers = [
     "ID",
@@ -507,6 +763,8 @@ export function exportProspectsToCSV(prospects: ScrapedProspect[]): void {
     "Phone_WhatsApp",
     "Email",
     "Website",
+    "WebsiteStatus",
+    "HasMobileAPK",
     "DiagnosedTechGap",
     "RecommendedProduct",
     "DemoURL",
@@ -522,6 +780,8 @@ export function exportProspectsToCSV(prospects: ScrapedProspect[]): void {
     `"${(p.phone || "").replace(/"/g, '""')}"`,
     `"${(p.email || "").replace(/"/g, '""')}"`,
     `"${(p.website || "").replace(/"/g, '""')}"`,
+    `"${p.websiteStatus || (p.website ? "needs_revamp" : "no_website")}"`,
+    `"${p.hasMobileApp ? "YES" : "NO"}"`,
     `"${(p.techGap || "").replace(/"/g, '""')}"`,
     `"${(p.recommendedProduct || "").replace(/"/g, '""')}"`,
     `"${(p.demoUrl || "").replace(/"/g, '""')}"`,

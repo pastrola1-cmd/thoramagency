@@ -9,6 +9,7 @@ import {
   fetchScrapedProspectsFromDB,
   saveScrapedProspects,
   deleteScrapedProspectFromDB,
+  deduplicateAndMergeProspects,
   exportProspectsToCSV,
   ScrapeCampaignLog,
   getScrapeCampaignLogs,
@@ -145,6 +146,75 @@ const INDUSTRY_PRESETS: IndustryPreset[] = [
   },
 ];
 
+// Multi-Platform & Social Media Target Channels
+interface PlatformChannel {
+  id: string;
+  label: string;
+  shortBadge: string;
+  siteOperator: string;
+  description: string;
+}
+
+const PLATFORM_CHANNELS: PlatformChannel[] = [
+  {
+    id: "all_web",
+    label: "🌐 All Web, Maps & Directories",
+    shortBadge: "All Web + Maps",
+    siteOperator: "",
+    description: "Scrapes Google Maps, OpenStreetMap, Web Search & Business Directories",
+  },
+  {
+    id: "instagram",
+    label: "📸 Instagram Business Bios",
+    shortBadge: "Instagram",
+    siteOperator: "site:instagram.com",
+    description: "Finds Instagram businesses posting WhatsApp numbers (080/081/+234) in their bio",
+  },
+  {
+    id: "facebook",
+    label: "📘 Facebook Business Pages",
+    shortBadge: "Facebook",
+    siteOperator: "site:facebook.com",
+    description: "Finds active Facebook business pages with phone numbers & emails",
+  },
+  {
+    id: "linkedin",
+    label: "💼 LinkedIn Founders & CEOs",
+    shortBadge: "LinkedIn",
+    siteOperator: "(site:linkedin.com/company OR site:linkedin.com/in)",
+    description: "Targets Founders, Proprietors, CEOs & Companies on LinkedIn",
+  },
+  {
+    id: "jiji_property",
+    label: "🛍️ Jiji.ng & PropertyPro Sellers",
+    shortBadge: "Jiji / PropertyPro",
+    siteOperator: "(site:jiji.ng OR site:propertypro.ng OR site:privateproperty.com.ng)",
+    description: "Targets active merchants, car dealers & realtors paying for classified ads",
+  },
+  {
+    id: "tiktok",
+    label: "🎵 TikTok Business Profiles",
+    shortBadge: "TikTok",
+    siteOperator: "site:tiktok.com",
+    description: "Finds fast-growing TikTok vendors & brands that need an official website/app",
+  },
+  {
+    id: "directories",
+    label: "🏢 Nigerian B2B Directories",
+    shortBadge: "B2B Directories",
+    siteOperator:
+      "(site:businesslist.com.ng OR site:finelib.com OR site:vconnect.com OR site:ngex.com)",
+    description: "Scrapes verified Nigerian business directories with direct phone numbers",
+  },
+  {
+    id: "youtube",
+    label: "🎥 YouTube Channels & Ministries",
+    shortBadge: "YouTube",
+    siteOperator: "site:youtube.com",
+    description: "Finds ministries, academies & realtors with active channels needing a Mobile APK",
+  },
+];
+
 // Helper to normalize phone numbers for WhatsApp wa.me links
 function formatPhoneForWhatsApp(raw: string, defaultCountryCode = "234"): string {
   const digits = raw.replace(/[^0-9+]/g, "");
@@ -156,7 +226,57 @@ function formatPhoneForWhatsApp(raw: string, defaultCountryCode = "234"): string
   return digits;
 }
 
-// Extract phones and emails from raw text/HTML
+// Classify whether a URL is a real standalone website, a social/directory page only, or missing
+const SOCIAL_OR_DIRECTORY_DOMAINS = [
+  "instagram.com",
+  "facebook.com",
+  "fb.com",
+  "linkedin.com",
+  "twitter.com",
+  "x.com",
+  "tiktok.com",
+  "youtube.com",
+  "wa.me",
+  "whatsapp.com",
+  "linktr.ee",
+  "jiji.ng",
+  "propertypro.ng",
+  "privateproperty.com.ng",
+  "vconnect.com",
+  "businesslist.com.ng",
+  "finelib.com",
+  "ngex.com",
+  "yellowpages",
+  "directory",
+];
+
+function classifyWebsiteStatus(url: string): "no_website" | "social_only" | "needs_revamp" {
+  const clean = (url || "").trim().toLowerCase();
+  if (!clean) return "no_website";
+  if (SOCIAL_OR_DIRECTORY_DOMAINS.some((d) => clean.includes(d))) {
+    return "social_only";
+  }
+  return "needs_revamp";
+}
+
+// God-Level Lead Readiness & Deal Value Scorer (0 - 100)
+function calculateLeadScore(p: ScrapedProspect): number {
+  let score = 0;
+  if (p.phone) score += 35;
+  if (p.email) score += 20;
+  const webStatus = p.websiteStatus || classifyWebsiteStatus(p.website);
+  if (webStatus === "no_website" || webStatus === "social_only") {
+    score += 25; // Urgent need for first website
+  } else {
+    score += 15; // Website revamp candidate
+  }
+  if (!p.hasMobileApp) {
+    score += 20; // Needs Mobile App / Android APK
+  }
+  return Math.min(100, score);
+}
+
+// Extract phones, emails, and mobile APK / App Store presence from raw text/HTML
 function extractContactsFromText(text: string) {
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
   const phoneRegex =
@@ -175,7 +295,13 @@ function extractContactsFromText(text: string) {
 
   const phones = Array.from(new Set(text.match(phoneRegex) || [])).map((p) => p.trim());
 
-  return { emails, phones };
+  const lower = text.toLowerCase();
+  const hasMobileApp =
+    lower.includes("play.google.com/store/apps") ||
+    lower.includes("apps.apple.com") ||
+    lower.includes(".apk");
+
+  return { emails, phones, hasMobileApp };
 }
 
 export default function LeadScraper({
@@ -190,6 +316,14 @@ export default function LeadScraper({
   const [scrapeMode, setScrapeMode] = useState<"live_search" | "xray_dork" | "url_spider">(
     "live_search"
   );
+
+  // Target Digital Gap Focus (Step 1)
+  const [targetGapMode, setTargetGapMode] = useState<
+    "all" | "no_website" | "needs_revamp" | "no_apk"
+  >("all");
+
+  // Target Platform / Social Channel (Step 1)
+  const [targetPlatformId, setTargetPlatformId] = useState<string>("all_web");
 
   // Optional API Keys (saved in localStorage so user never loses them)
   const [showApiKeys, setShowApiKeys] = useState(false);
@@ -209,16 +343,42 @@ export default function LeadScraper({
 
   // Table Filters
   const [tableFilter, setTableFilter] = useState<
-    "all" | "has_phone" | "has_email" | "pending_crm"
+    | "all"
+    | "no_website"
+    | "needs_revamp"
+    | "no_apk"
+    | "uncontacted"
+    | "has_phone"
+    | "has_email"
+    | "pending_crm"
   >("all");
   const [tableSearch, setTableSearch] = useState<string>("");
 
-  // Load persisted tables from Supabase PostgreSQL on mount
+  // Active Pitch Modal, Pitch Angle Tab & Follow-Up Stage (Day 1, Day 3, Day 7)
+  const [pitchProspect, setPitchProspect] = useState<ScrapedProspect | null>(null);
+  const [pitchAngle, setPitchAngle] = useState<
+    "no_website" | "revamp" | "mobile_apk" | "platform_crm"
+  >("platform_crm");
+  const [followUpStage, setFollowUpStage] = useState<"day1" | "day3" | "day7">("day1");
+  const [copiedPitch, setCopiedPitch] = useState(false);
+
+  // Load persisted tables from Supabase PostgreSQL on mount (and auto-deduplicate)
   useEffect(() => {
-    setProspects(getSavedScrapedProspects());
+    const local = getSavedScrapedProspects();
+    const { merged: cleanLocal } = deduplicateAndMergeProspects([], local);
+    setProspects(cleanLocal);
     setCampaignLogs(getScrapeCampaignLogs());
+
     fetchScrapedProspectsFromDB().then((remoteProspects) => {
-      setProspects(remoteProspects);
+      const { merged: cleanRemote, removedIds } = deduplicateAndMergeProspects(
+        [],
+        remoteProspects
+      );
+      setProspects(cleanRemote);
+      if (removedIds.length > 0) {
+        removedIds.forEach((id) => deleteScrapedProspectFromDB(id));
+        saveScrapedProspects(cleanRemote);
+      }
     });
     fetchScrapeCampaignsFromDB().then((remoteCampaigns) => {
       setCampaignLogs(remoteCampaigns);
@@ -234,6 +394,46 @@ export default function LeadScraper({
     });
   };
 
+  // Smart Merge Helper: Prevents duplicate contacts & enriches existing rows
+  const mergeIncomingProspects = (incoming: ScrapedProspect[]) => {
+    let stats = { addedCount: 0, duplicateCount: 0, enrichedCount: 0 };
+    setProspects((prev) => {
+      const res = deduplicateAndMergeProspects(incoming, prev);
+      stats = {
+        addedCount: res.addedCount,
+        duplicateCount: res.duplicateCount,
+        enrichedCount: res.enrichedCount,
+      };
+      if (res.removedIds.length > 0) {
+        res.removedIds.forEach((id) => deleteScrapedProspectFromDB(id));
+      }
+      saveScrapedProspects(res.merged);
+      return res.merged;
+    });
+    return stats;
+  };
+
+  // 1-Click Manual Deduplicate & Clean Table Handler
+  const handleManualDeduplicate = () => {
+    const { merged, duplicateCount, removedIds } = deduplicateAndMergeProspects([], prospects);
+    if (removedIds.length > 0) {
+      removedIds.forEach((id) => deleteScrapedProspectFromDB(id));
+    }
+    setProspects(merged);
+    saveScrapedProspects(merged);
+    setScrapeStatus(
+      duplicateCount > 0
+        ? `🧹 Cleaned & merged ${duplicateCount} duplicate contact(s)! All ${merged.length} rows are now 100% unique.`
+        : `✨ Verified! All ${merged.length} contacts in your table are already 100% unique (0 duplicates found).`
+    );
+  };
+
+  // Helper to check if a prospect has no standalone website
+  const isWithoutWebsite = (p: ScrapedProspect) => {
+    const status = p.websiteStatus || classifyWebsiteStatus(p.website);
+    return status === "no_website" || status === "social_only";
+  };
+
   // Filtered prospects for Table 1
   const filteredProspects = useMemo(() => {
     return prospects.filter((p) => {
@@ -243,9 +443,14 @@ export default function LeadScraper({
         p.location.toLowerCase().includes(tableSearch.toLowerCase()) ||
         p.phone.toLowerCase().includes(tableSearch.toLowerCase()) ||
         p.email.toLowerCase().includes(tableSearch.toLowerCase()) ||
-        p.category.toLowerCase().includes(tableSearch.toLowerCase());
+        p.category.toLowerCase().includes(tableSearch.toLowerCase()) ||
+        (p.sourcePage || "").toLowerCase().includes(tableSearch.toLowerCase());
 
       if (!matchesSearch) return false;
+      if (tableFilter === "no_website") return isWithoutWebsite(p);
+      if (tableFilter === "needs_revamp") return !isWithoutWebsite(p);
+      if (tableFilter === "no_apk") return !p.hasMobileApp;
+      if (tableFilter === "uncontacted") return !p.outreachSent;
       if (tableFilter === "has_phone") return Boolean(p.phone);
       if (tableFilter === "has_email") return Boolean(p.email);
       if (tableFilter === "pending_crm") return !p.injected;
@@ -257,12 +462,11 @@ export default function LeadScraper({
   const [rawPasteText, setRawPasteText] = useState("");
   const [urlListText, setUrlListText] = useState("");
 
-  // Active Pitch Modal
-  const [pitchProspect, setPitchProspect] = useState<ScrapedProspect | null>(null);
-  const [copiedPitch, setCopiedPitch] = useState(false);
-
   const activePreset =
     INDUSTRY_PRESETS.find((p) => p.id === selectedPresetId) || INDUSTRY_PRESETS[0];
+
+  const activePlatform =
+    PLATFORM_CHANNELS.find((c) => c.id === targetPlatformId) || PLATFORM_CHANNELS[0];
 
   const effectiveQuery =
     selectedPresetId === "custom"
@@ -280,9 +484,35 @@ export default function LeadScraper({
     }
   };
 
-  // Deep crawl a single website via Jina/AllOrigins to pull email & phone if missing
-  async function enrichWebsiteContacts(url: string): Promise<{ email: string; phone: string }> {
-    if (!url || !url.startsWith("http")) return { email: "", phone: "" };
+  // Build dynamic diagnosis string based on website & APK status
+  function buildDiagnosedGap(
+    webStatus: "no_website" | "social_only" | "needs_revamp",
+    hasApk: boolean,
+    platformLabel?: string
+  ): string {
+    if (webStatus === "no_website") {
+      return "🚫 NO WEBSITE + 📱 NO MOBILE APK — High-priority lead for first Website Build, Mobile APK & CRM";
+    }
+    if (webStatus === "social_only") {
+      return `📲 ${
+        platformLabel ? platformLabel.toUpperCase() : "SOCIAL"
+      } ONLY (No Official Website / No APK) — Pitch Website + Custom Mobile APK`;
+    }
+    if (!hasApk) {
+      return `🔧 Website Revamp + 📱 No Mobile APK — ${activePreset.defaultGap}`;
+    }
+    return `🔧 Website Revamp & AI Integration — ${activePreset.defaultGap}`;
+  }
+
+  // Deep crawl a single website via AllOrigins to pull email, phone, and check for Mobile APK / App Store links
+  async function enrichWebsiteContacts(
+    url: string
+  ): Promise<{ email: string; phone: string; hasMobileApp: boolean }> {
+    if (!url || !url.startsWith("http")) return { email: "", phone: "", hasMobileApp: false };
+    // Skip deep crawling social media walls since bio snippet already has the contact info
+    if (SOCIAL_OR_DIRECTORY_DOMAINS.some((d) => url.toLowerCase().includes(d))) {
+      return { email: "", phone: "", hasMobileApp: false };
+    }
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 6000);
@@ -290,77 +520,95 @@ export default function LeadScraper({
         signal: controller.signal,
       });
       clearTimeout(timeout);
-      if (!res.ok) return { email: "", phone: "" };
+      if (!res.ok) return { email: "", phone: "", hasMobileApp: false };
       const data = await res.json();
       const html = data.contents || "";
-      const { emails, phones } = extractContactsFromText(html);
+      const { emails, phones, hasMobileApp } = extractContactsFromText(html);
       return {
         email: emails[0] || "",
         phone: phones[0] || "",
+        hasMobileApp,
       };
     } catch {
-      return { email: "", phone: "" };
+      return { email: "", phone: "", hasMobileApp: false };
     }
   }
 
-  // ─── ENGINE 1: LIVE DEEP SEARCH & DIRECTORY SPIDER (PAGES 1 TO 10) ───
+  // ─── ENGINE 1: LIVE DEEP SEARCH, SOCIAL MEDIA & DIRECTORY SPIDER (PAGES 1 TO 10) ───
   const handleRunLiveScrape = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsScraping(true);
-    setScrapeStatus("Initializing multi-page industry discovery...");
+    setScrapeStatus(
+      `Initializing ${activePlatform.shortBadge} discovery for ${activePreset.label} in ${location}...`
+    );
     const found: ScrapedProspect[] = [];
     const seenNames = new Set<string>();
 
+    const isSocialChannel = targetPlatformId !== "all_web";
+
     try {
-      // 1A. If Serper.dev API Key is provided -> Crawl Google Places & Google Search Pages 1..maxPages!
+      // 1A. If Serper.dev API Key is provided -> Crawl Google Places & Social/Web Search Pages 1..maxPages!
       if (serperKey.trim()) {
         for (let page = 1; page <= maxPages; page++) {
           setScrapeStatus(
-            `Scanning Google Maps & Search Page ${page} of ${maxPages} for "${effectiveQuery}" in ${location}...`
+            `Scanning ${activePlatform.shortBadge} Page ${page} of ${maxPages} for "${effectiveQuery}" in ${location}...`
           );
 
-          // Query Serper Places API
-          const placesRes = await fetch("https://google.serper.dev/places", {
-            method: "POST",
-            headers: {
-              "X-API-KEY": serperKey.trim(),
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              q: `${effectiveQuery} in ${location}`,
-              page,
-            }),
-          });
+          // Query Serper Places API when on All Web mode
+          if (!isSocialChannel) {
+            const placesRes = await fetch("https://google.serper.dev/places", {
+              method: "POST",
+              headers: {
+                "X-API-KEY": serperKey.trim(),
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                q: `${effectiveQuery} in ${location}`,
+                page,
+              }),
+            });
 
-          if (placesRes.ok) {
-            const placesData = await placesRes.json();
-            const places = placesData.places || [];
-            for (const p of places) {
-              const name = (p.title || "").trim();
-              if (!name || seenNames.has(name.toLowerCase())) continue;
-              seenNames.add(name.toLowerCase());
+            if (placesRes.ok) {
+              const placesData = await placesRes.json();
+              const places = placesData.places || [];
+              for (const p of places) {
+                const name = (p.title || "").trim();
+                if (!name || seenNames.has(name.toLowerCase())) continue;
+                seenNames.add(name.toLowerCase());
 
-              const hasWebsite = Boolean(p.website);
-              found.push({
-                id: `SCR-${Date.now()}-${found.length}`,
-                businessName: name,
-                category: p.category || activePreset.label.replace(/^[^\s]+\s/, ""),
-                location: p.address || location,
-                phone: p.phoneNumber || "",
-                email: "",
-                website: p.website || "",
-                techGap: !hasWebsite
-                  ? "⚠️ NO WEBSITE — Urgent need for Web Design & WhatsApp Lead Funnel"
-                  : activePreset.defaultGap,
-                recommendedService: activePreset.service,
-                recommendedProduct: activePreset.productName,
-                demoUrl: activePreset.demoUrl,
-                sourcePage: `Google Page ${page}`,
-              });
+                const webStatus = classifyWebsiteStatus(p.website || "");
+                found.push({
+                  id: `SCR-${Date.now()}-${found.length}`,
+                  businessName: name,
+                  category: p.category || activePreset.label.replace(/^[^\s]+\s/, ""),
+                  location: p.address || location,
+                  phone: p.phoneNumber || "",
+                  email: "",
+                  website: p.website || "",
+                  websiteStatus: webStatus,
+                  hasMobileApp: false,
+                  techGap: buildDiagnosedGap(webStatus, false),
+                  recommendedService:
+                    webStatus !== "needs_revamp"
+                      ? "Web Design, Mobile APK & Custom Portal"
+                      : activePreset.service,
+                  recommendedProduct: activePreset.productName,
+                  demoUrl: activePreset.demoUrl,
+                  sourcePage: `Google Maps Page ${page}`,
+                });
+              }
             }
           }
 
-          // Also query Serper Organic Search for emails & phone numbers on deep pages
+          // Query Serper Organic Search (with Social/Platform operator if selected)
+          const platformPrefix = activePlatform.siteOperator
+            ? `${activePlatform.siteOperator} `
+            : targetGapMode === "no_website"
+            ? `(site:instagram.com OR site:facebook.com OR site:jiji.ng OR site:businesslist.com.ng) `
+            : "";
+
+          const organicQuery = `${platformPrefix}${effectiveQuery} "${location}" ("080" OR "081" OR "090" OR "070" OR "+234" OR "phone" OR "whatsapp" OR "@gmail.com")`;
+
           const searchRes = await fetch("https://google.serper.dev/search", {
             method: "POST",
             headers: {
@@ -368,7 +616,7 @@ export default function LeadScraper({
               "Content-Type": "application/json",
             },
             body: JSON.stringify({
-              q: `${effectiveQuery} ${location} contact phone OR email`,
+              q: organicQuery,
               page,
             }),
           });
@@ -377,13 +625,18 @@ export default function LeadScraper({
             const searchData = await searchRes.json();
             const organic = searchData.organic || [];
             for (const item of organic) {
-              const title = (item.title || "").split(" - ")[0].split(" | ")[0].trim();
+              const title = (item.title || "")
+                .replace(/• Instagram photos and videos/i, "")
+                .split(" - ")[0]
+                .split(" | ")[0]
+                .trim();
               if (!title || seenNames.has(title.toLowerCase())) continue;
               seenNames.add(title.toLowerCase());
 
-              const { emails, phones } = extractContactsFromText(
+              const { emails, phones, hasMobileApp } = extractContactsFromText(
                 `${item.title} ${item.snippet || ""}`
               );
+              const webStatus = classifyWebsiteStatus(item.link || "");
 
               found.push({
                 id: `SCR-${Date.now()}-${found.length}`,
@@ -393,107 +646,126 @@ export default function LeadScraper({
                 phone: phones[0] || "",
                 email: emails[0] || "",
                 website: item.link || "",
-                techGap: activePreset.defaultGap,
-                recommendedService: activePreset.service,
+                websiteStatus: webStatus,
+                hasMobileApp,
+                techGap: buildDiagnosedGap(
+                  webStatus,
+                  hasMobileApp,
+                  isSocialChannel ? activePlatform.shortBadge : undefined
+                ),
+                recommendedService:
+                  webStatus !== "needs_revamp"
+                    ? "Web Design, Mobile APK & Custom Portal"
+                    : activePreset.service,
                 recommendedProduct: activePreset.productName,
                 demoUrl: activePreset.demoUrl,
-                sourcePage: `Google Search Page ${page}`,
+                sourcePage: `${activePlatform.shortBadge} Page ${page}`,
               });
             }
           }
         }
       }
 
-      // 1B. Built-in Zero-Key OpenStreetMap + Nominatim + Overpass + Live Web Search Spider
-      setScrapeStatus(`Querying global business registries & web directories in ${location}...`);
+      // 1B. Built-in Zero-Key OpenStreetMap Registry (when on All Web mode)
+      if (!isSocialChannel) {
+        setScrapeStatus(`Querying global business registries & directories in ${location}...`);
 
-      // Geocode city bounding box via Nominatim
-      const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-        location
-      )}&limit=1`;
-      const geoRes = await fetch(geoUrl, {
-        headers: { Accept: "application/json" },
-      });
+        const geoUrl = `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          location
+        )}&limit=1`;
+        const geoRes = await fetch(geoUrl, {
+          headers: { Accept: "application/json" },
+        });
 
-      if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        if (geoData && geoData[0] && geoData[0].boundingbox) {
-          const [south, north, west, east] = geoData[0].boundingbox;
-          setScrapeStatus(
-            `Scanning mapped ${activePreset.label} across ${location} (Depth: ${maxPages * 20} records)...`
-          );
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          if (geoData && geoData[0] && geoData[0].boundingbox) {
+            const [south, north, west, east] = geoData[0].boundingbox;
+            setScrapeStatus(
+              `Scanning mapped ${activePreset.label} across ${location} (Depth: ${maxPages * 20} records)...`
+            );
 
-          // Overpass query for matching business nodes/ways in bounding box
-          const limitCount = Math.min(maxPages * 25, 150);
-          const tagQuery =
-            selectedPresetId === "schools"
-              ? `["amenity"~"school|college|university"]`
-              : selectedPresetId === "healthcare"
-              ? `["amenity"~"hospital|clinic|doctors|pharmacy"]`
-              : selectedPresetId === "hospitality"
-              ? `["tourism"~"hotel|guest_house|apartment"]`
-              : selectedPresetId === "ministry"
-              ? `["amenity"="place_of_worship"]`
-              : `["name"]`;
+            const limitCount = Math.min(maxPages * 25, 150);
+            const tagQuery =
+              selectedPresetId === "schools"
+                ? `["amenity"~"school|college|university"]`
+                : selectedPresetId === "healthcare"
+                ? `["amenity"~"hospital|clinic|doctors|pharmacy"]`
+                : selectedPresetId === "hospitality"
+                ? `["tourism"~"hotel|guest_house|apartment"]`
+                : selectedPresetId === "ministry"
+                ? `["amenity"="place_of_worship"]`
+                : `["name"]`;
 
-          const overpassQuery = `[out:json][timeout:15];(node${tagQuery}(${south},${west},${north},${east});way${tagQuery}(${south},${west},${north},${east}););out center ${limitCount};`;
-          const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
-            method: "POST",
-            body: overpassQuery,
-          });
-
-          if (overpassRes.ok) {
-            const osmData = await overpassRes.json();
-            const elements = osmData.elements || [];
-            elements.forEach((el: any, idx: number) => {
-              const tags = el.tags || {};
-              const name = (tags.name || "").trim();
-              if (!name || seenNames.has(name.toLowerCase())) return;
-
-              // If custom niche, filter by keyword if possible, or prioritize ones with contact details
-              const rawPhone =
-                tags.phone ||
-                tags["contact:phone"] ||
-                tags["contact:mobile"] ||
-                tags["contact:whatsapp"] ||
-                "";
-              const rawEmail = tags.email || tags["contact:email"] || "";
-              const rawWeb = tags.website || tags["contact:website"] || tags.url || "";
-              const street = [tags["addr:street"], tags["addr:city"] || location]
-                .filter(Boolean)
-                .join(", ");
-
-              seenNames.add(name.toLowerCase());
-              const pageNum = Math.floor(idx / 10) + 1;
-
-              found.push({
-                id: `OSM-${Date.now()}-${found.length}`,
-                businessName: name,
-                category: activePreset.label.replace(/^[^\s]+\s/, ""),
-                location: street || location,
-                phone: rawPhone,
-                email: rawEmail,
-                website: rawWeb,
-                techGap: !rawWeb
-                  ? "⚠️ NO WEBSITE LISTED — High-priority pitch for Website + Portal/CRM"
-                  : activePreset.defaultGap,
-                recommendedService: activePreset.service,
-                recommendedProduct: activePreset.productName,
-                demoUrl: activePreset.demoUrl,
-                sourcePage: `Directory Page ${pageNum}`,
-              });
+            const overpassQuery = `[out:json][timeout:15];(node${tagQuery}(${south},${west},${north},${east});way${tagQuery}(${south},${west},${north},${east}););out center ${limitCount};`;
+            const overpassRes = await fetch("https://overpass-api.de/api/interpreter", {
+              method: "POST",
+              body: overpassQuery,
             });
+
+            if (overpassRes.ok) {
+              const osmData = await overpassRes.json();
+              const elements = osmData.elements || [];
+              elements.forEach((el: any, idx: number) => {
+                const tags = el.tags || {};
+                const name = (tags.name || "").trim();
+                if (!name || seenNames.has(name.toLowerCase())) return;
+
+                const rawPhone =
+                  tags.phone ||
+                  tags["contact:phone"] ||
+                  tags["contact:mobile"] ||
+                  tags["contact:whatsapp"] ||
+                  "";
+                const rawEmail = tags.email || tags["contact:email"] || "";
+                const rawWeb = tags.website || tags["contact:website"] || tags.url || "";
+                const street = [tags["addr:street"], tags["addr:city"] || location]
+                  .filter(Boolean)
+                  .join(", ");
+
+                seenNames.add(name.toLowerCase());
+                const pageNum = Math.floor(idx / 10) + 1;
+                const webStatus = classifyWebsiteStatus(rawWeb);
+
+                found.push({
+                  id: `OSM-${Date.now()}-${found.length}`,
+                  businessName: name,
+                  category: activePreset.label.replace(/^[^\s]+\s/, ""),
+                  location: street || location,
+                  phone: rawPhone,
+                  email: rawEmail,
+                  website: rawWeb,
+                  websiteStatus: webStatus,
+                  hasMobileApp: false,
+                  techGap: buildDiagnosedGap(webStatus, false),
+                  recommendedService:
+                    webStatus !== "needs_revamp"
+                      ? "Web Design, Mobile APK & Custom Portal"
+                      : activePreset.service,
+                  recommendedProduct: activePreset.productName,
+                  demoUrl: activePreset.demoUrl,
+                  sourcePage: `Directory Page ${pageNum}`,
+                });
+              });
+            }
           }
         }
       }
 
-      // 1C. Live Web Search via CORS Proxy (DuckDuckGo HTML multi-page scrape)
-      for (let page = 1; page <= Math.min(maxPages, 3); page++) {
-        setScrapeStatus(`Crawling live web search results (Page ${page}) for contacts...`);
-        const searchQ = `${effectiveQuery} ${location} phone OR email OR contact`;
-        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(searchQ)}&s=${
-          (page - 1) * 30
-        }`;
+      // 1C. Live Web & Social Search via CORS Proxy (DuckDuckGo HTML multi-page scrape)
+      for (let page = 1; page <= Math.min(maxPages, 4); page++) {
+        setScrapeStatus(
+          `Crawling live ${activePlatform.shortBadge} results (Page ${page}) for contacts...`
+        );
+        const platformQuery = activePlatform.siteOperator
+          ? `${activePlatform.siteOperator} ${effectiveQuery} ${location} phone OR whatsapp OR 080 OR 081 OR 090`
+          : targetGapMode === "no_website"
+          ? `${effectiveQuery} ${location} (instagram OR facebook OR jiji OR directory) phone`
+          : `${effectiveQuery} ${location} phone OR email OR contact`;
+
+        const ddgUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(
+          platformQuery
+        )}&s=${(page - 1) * 30}`;
 
         try {
           const proxyRes = await fetch(
@@ -512,7 +784,11 @@ export default function LeadScraper({
                 if (!titleEl) return;
 
                 const rawTitle = (titleEl.textContent || "").trim();
-                const cleanTitle = rawTitle.split(" - ")[0].split(" | ")[0].trim();
+                const cleanTitle = rawTitle
+                  .replace(/• Instagram photos and videos/i, "")
+                  .split(" - ")[0]
+                  .split(" | ")[0]
+                  .trim();
                 if (!cleanTitle || cleanTitle.length < 3 || seenNames.has(cleanTitle.toLowerCase()))
                   return;
 
@@ -524,8 +800,11 @@ export default function LeadScraper({
                   ? `https://${linkUrl}`
                   : "";
 
-                const { emails, phones } = extractContactsFromText(`${rawTitle} ${snippet}`);
+                const { emails, phones, hasMobileApp } = extractContactsFromText(
+                  `${rawTitle} ${snippet}`
+                );
                 seenNames.add(cleanTitle.toLowerCase());
+                const webStatus = classifyWebsiteStatus(fullUrl);
 
                 found.push({
                   id: `WEB-${Date.now()}-${found.length}`,
@@ -535,11 +814,20 @@ export default function LeadScraper({
                   phone: phones[0] || "",
                   email: emails[0] || "",
                   website: fullUrl,
-                  techGap: activePreset.defaultGap,
-                  recommendedService: activePreset.service,
+                  websiteStatus: webStatus,
+                  hasMobileApp,
+                  techGap: buildDiagnosedGap(
+                    webStatus,
+                    hasMobileApp,
+                    isSocialChannel ? activePlatform.shortBadge : undefined
+                  ),
+                  recommendedService:
+                    webStatus !== "needs_revamp"
+                      ? "Web Design, Mobile APK & Custom Portal"
+                      : activePreset.service,
                   recommendedProduct: activePreset.productName,
                   demoUrl: activePreset.demoUrl,
-                  sourcePage: `Web Search Page ${page}`,
+                  sourcePage: `${activePlatform.shortBadge} Page ${page}`,
                 });
               });
             }
@@ -549,36 +837,61 @@ export default function LeadScraper({
         }
       }
 
-      // 1D. Enrich top websites that are missing phone/email by crawling their homepage
-      const toEnrich = found.filter((p) => p.website && (!p.phone || !p.email)).slice(0, 6);
+      // 1D. Enrich top standalone websites that are missing phone/email AND check if they have an Android APK / Mobile App
+      const toEnrich = found
+        .filter((p) => p.website && p.websiteStatus === "needs_revamp" && (!p.phone || !p.email))
+        .slice(0, 6);
       if (toEnrich.length > 0) {
-        setScrapeStatus(`Deep-crawling ${toEnrich.length} discovered websites for emails & phones...`);
+        setScrapeStatus(
+          `Deep-crawling ${toEnrich.length} discovered websites for emails, phones & Mobile APK status...`
+        );
         await Promise.all(
           toEnrich.map(async (item) => {
             const enriched = await enrichWebsiteContacts(item.website);
             if (!item.email && enriched.email) item.email = enriched.email;
             if (!item.phone && enriched.phone) item.phone = enriched.phone;
+            if (enriched.hasMobileApp) {
+              item.hasMobileApp = true;
+              item.techGap = buildDiagnosedGap(
+                item.websiteStatus || "needs_revamp",
+                true
+              );
+            }
           })
         );
       }
 
-      // Sort so prospects with phone or email or website appear at the very top
+      // Sort by Lead Score & user's chosen Target Digital Gap (`targetGapMode`)
       found.sort((a, b) => {
-        const scoreA = (a.phone ? 4 : 0) + (a.email ? 3 : 0) + (a.website ? 1 : 0);
-        const scoreB = (b.phone ? 4 : 0) + (b.email ? 3 : 0) + (b.website ? 1 : 0);
-        return scoreB - scoreA;
+        const aNoWeb = isWithoutWebsite(a) ? 1 : 0;
+        const bNoWeb = isWithoutWebsite(b) ? 1 : 0;
+        if (targetGapMode === "no_website" && aNoWeb !== bNoWeb) {
+          return bNoWeb - aNoWeb;
+        }
+        if (targetGapMode === "needs_revamp" && aNoWeb !== bNoWeb) {
+          return aNoWeb - bNoWeb;
+        }
+        return calculateLeadScore(b) - calculateLeadScore(a);
       });
 
+      // Automatically sync table filter with the user's chosen Target Gap Mode
+      if (targetGapMode === "no_website") setTableFilter("no_website");
+      else if (targetGapMode === "needs_revamp") setTableFilter("needs_revamp");
+      else if (targetGapMode === "no_apk") setTableFilter("no_apk");
+      else setTableFilter("all");
+
       const stamped = found.map((f) => ({ ...f, scrapedAt: new Date().toISOString() }));
-      updateAndPersistProspects((prev) => [...stamped, ...prev]);
+      const { addedCount, duplicateCount, enrichedCount } = mergeIncomingProspects(stamped);
 
       // Log campaign in `scrape_campaigns` table
       const campaignEntry = await addScrapeCampaignLog({
-        industry: activePreset.label.replace(/^[^\s]+\s/, ""),
+        industry: `${activePreset.label.replace(/^[^\s]+\s/, "")} (${activePlatform.shortBadge})`,
         location,
-        mode: serperKey.trim() ? "Google SERP API (Pages 1–10)" : "Auto-Scraper (OSM + Web)",
+        mode: serperKey.trim()
+          ? `Google SERP (${activePlatform.shortBadge})`
+          : `Auto-Scraper (${activePlatform.shortBadge})`,
         pagesScanned: maxPages,
-        leadsFound: stamped.length,
+        leadsFound: addedCount,
         phonesFound: stamped.filter((s) => Boolean(s.phone)).length,
         emailsFound: stamped.filter((s) => Boolean(s.email)).length,
       });
@@ -588,22 +901,28 @@ export default function LeadScraper({
       setSelectedIds(new Set(stamped.map((f) => f.id)));
       setScrapeStatus(
         stamped.length > 0
-          ? `✅ Discovered ${stamped.length} targeted prospects in ${location} and saved to scraped_prospects table!`
-          : `No direct public listings returned automatically. Try the Google X-Ray Dork tab to extract deep Google pages 1–10!`
+          ? `✅ Added ${addedCount} new unique prospects in ${location}${
+              duplicateCount > 0
+                ? ` (Skipped ${duplicateCount} duplicates${
+                    enrichedCount > 0 ? ` & enriched ${enrichedCount} existing contacts` : ""
+                  })`
+                : ""
+            }!`
+          : `No direct public listings returned automatically for ${activePlatform.shortBadge}. Click the "🔍 Social & Google X-Ray Ripper" tab to extract Pages 1–10 directly!`
       );
     } catch (err) {
       console.error("Scrape error:", err);
-      setScrapeStatus("Completed scan. Check results below or use Google X-Ray Dork mode.");
+      setScrapeStatus("Completed scan. Check results below or use Social & Google X-Ray mode.");
     } finally {
       setIsScraping(false);
     }
   };
 
-  // ─── ENGINE 2: GOOGLE X-RAY DORK + RAW PAGE CONTACT RIPPER ───
+  // ─── ENGINE 2: SOCIAL & GOOGLE X-RAY DORK + RAW PAGE CONTACT RIPPER ───
   const handleExtractFromRawText = async () => {
     if (!rawPasteText.trim()) return;
     setIsScraping(true);
-    setScrapeStatus("Parsing raw Google results for phones, WhatsApp numbers & emails...");
+    setScrapeStatus("Parsing raw results & deduplicating contacts...");
 
     const lines = rawPasteText
       .split(/\n+/)
@@ -611,15 +930,18 @@ export default function LeadScraper({
       .filter(Boolean);
 
     const extracted: ScrapedProspect[] = [];
-    const { emails: allEmails, phones: allPhones } = extractContactsFromText(rawPasteText);
+    const {
+      emails: allEmails,
+      phones: allPhones,
+      hasMobileApp: globalHasApp,
+    } = extractContactsFromText(rawPasteText);
 
-    // Group chunks or lines into prospects
     let usedEmails = new Set<string>();
     let usedPhones = new Set<string>();
 
     for (let i = 0; i < lines.length; i++) {
       const chunk = [lines[i - 1] || "", lines[i], lines[i + 1] || ""].join(" ");
-      const { emails, phones } = extractContactsFromText(chunk);
+      const { emails, phones, hasMobileApp } = extractContactsFromText(chunk);
       const newEmail = emails.find((e) => !usedEmails.has(e));
       const newPhone = phones.find((p) => !usedPhones.has(p));
 
@@ -627,17 +949,21 @@ export default function LeadScraper({
         if (newEmail) usedEmails.add(newEmail);
         if (newPhone) usedPhones.add(newPhone);
 
-        // Guess business name from the preceding or current line
         let titleCandidate = lines[i]
           .replace(newEmail || "", "")
           .replace(newPhone || "", "")
           .replace(/https?:\/\/[^\s]+/g, "")
+          .replace(/• Instagram photos and videos/i, "")
           .split(" - ")[0]
           .split(" | ")[0]
           .trim();
 
         if (titleCandidate.length < 4 && lines[i - 1]) {
-          titleCandidate = lines[i - 1].split(" - ")[0].split(" | ")[0].trim();
+          titleCandidate = lines[i - 1]
+            .replace(/• Instagram photos and videos/i, "")
+            .split(" - ")[0]
+            .split(" | ")[0]
+            .trim();
         }
         if (!titleCandidate || titleCandidate.length < 3 || titleCandidate.length > 75) {
           titleCandidate = newEmail
@@ -648,6 +974,8 @@ export default function LeadScraper({
         }
 
         const urlMatch = chunk.match(/https?:\/\/[^\s"<>]+/);
+        const matchedUrl = urlMatch ? urlMatch[0] : "";
+        const webStatus = classifyWebsiteStatus(matchedUrl);
 
         extracted.push({
           id: `XRAY-${Date.now()}-${extracted.length}`,
@@ -656,12 +984,17 @@ export default function LeadScraper({
           location,
           phone: newPhone || "",
           email: newEmail || "",
-          website: urlMatch ? urlMatch[0] : "",
-          techGap: activePreset.defaultGap,
-          recommendedService: activePreset.service,
+          website: matchedUrl,
+          hasMobileApp,
+          websiteStatus: webStatus,
+          techGap: buildDiagnosedGap(webStatus, hasMobileApp, activePlatform.shortBadge),
+          recommendedService:
+            webStatus !== "needs_revamp"
+              ? "Web Design, Mobile APK & Custom Software"
+              : activePreset.service,
           recommendedProduct: activePreset.productName,
           demoUrl: activePreset.demoUrl,
-          sourcePage: "Google Deep X-Ray",
+          sourcePage: `${activePlatform.shortBadge} X-Ray`,
           scrapedAt: new Date().toISOString(),
         });
       }
@@ -679,24 +1012,26 @@ export default function LeadScraper({
           phone: allPhones[i] || "",
           email: allEmails[i] || "",
           website: "",
-          techGap: activePreset.defaultGap,
-          recommendedService: activePreset.service,
+          hasMobileApp: globalHasApp,
+          websiteStatus: "no_website",
+          techGap: buildDiagnosedGap("no_website", globalHasApp, activePlatform.shortBadge),
+          recommendedService: "Web Design, Mobile APK & Custom Software",
           recommendedProduct: activePreset.productName,
           demoUrl: activePreset.demoUrl,
-          sourcePage: "Google Deep X-Ray",
+          sourcePage: `${activePlatform.shortBadge} X-Ray`,
           scrapedAt: new Date().toISOString(),
         });
       }
     }
 
-    updateAndPersistProspects((prev) => [...extracted, ...prev]);
+    const { addedCount, duplicateCount, enrichedCount } = mergeIncomingProspects(extracted);
 
     const campaignEntry = await addScrapeCampaignLog({
-      industry: activePreset.label.replace(/^[^\s]+\s/, ""),
+      industry: `${activePreset.label.replace(/^[^\s]+\s/, "")} (${activePlatform.shortBadge})`,
       location,
-      mode: "Google Deep X-Ray Ripper",
+      mode: `${activePlatform.shortBadge} X-Ray Ripper`,
       pagesScanned: maxPages,
-      leadsFound: extracted.length,
+      leadsFound: addedCount,
       phonesFound: extracted.filter((s) => Boolean(s.phone)).length,
       emailsFound: extracted.filter((s) => Boolean(s.email)).length,
     });
@@ -705,7 +1040,15 @@ export default function LeadScraper({
     setSelectedIds(new Set(extracted.map((e) => e.id)));
     setIsScraping(false);
     setScrapeStatus(
-      `✅ Extracted ${extracted.length} verified business contacts (${allPhones.length} phones, ${allEmails.length} emails) into scraped_prospects table!`
+      `✅ Added ${addedCount} unique business contacts (${allPhones.length} phones, ${
+        allEmails.length
+      } emails)${
+        duplicateCount > 0
+          ? ` · Skipped ${duplicateCount} duplicates${
+              enrichedCount > 0 ? ` & enriched ${enrichedCount} existing rows` : ""
+            }`
+          : ""
+      }!`
     );
     setRawPasteText("");
   };
@@ -725,7 +1068,8 @@ export default function LeadScraper({
     for (let i = 0; i < urls.length; i++) {
       const targetUrl = urls[i];
       setScrapeStatus(`Spidering website ${i + 1} of ${urls.length}: ${targetUrl}...`);
-      const { email, phone } = await enrichWebsiteContacts(targetUrl);
+      const { email, phone, hasMobileApp } = await enrichWebsiteContacts(targetUrl);
+      const webStatus = classifyWebsiteStatus(targetUrl);
 
       let domainName = targetUrl
         .replace(/^https?:\/\/(www\.)?/, "")
@@ -741,7 +1085,14 @@ export default function LeadScraper({
         phone,
         email,
         website: targetUrl,
-        techGap: activePreset.defaultGap,
+        hasMobileApp,
+        websiteStatus: webStatus,
+        techGap:
+          webStatus === "social_only"
+            ? `Social/directory link only — Pitch Official Website + ${activePreset.productName}`
+            : `Existing website needs modern UI/UX revamp, AI WhatsApp integration${
+                hasMobileApp ? "" : " & custom Android APK"
+              }`,
         recommendedService: activePreset.service,
         recommendedProduct: activePreset.productName,
         demoUrl: activePreset.demoUrl,
@@ -750,14 +1101,14 @@ export default function LeadScraper({
       });
     }
 
-    updateAndPersistProspects((prev) => [...crawled, ...prev]);
+    const { addedCount, duplicateCount, enrichedCount } = mergeIncomingProspects(crawled);
 
     const campaignEntry = await addScrapeCampaignLog({
       industry: activePreset.label.replace(/^[^\s]+\s/, ""),
       location,
       mode: "Website URL Spider",
       pagesScanned: crawled.length,
-      leadsFound: crawled.length,
+      leadsFound: addedCount,
       phonesFound: crawled.filter((s) => Boolean(s.phone)).length,
       emailsFound: crawled.filter((s) => Boolean(s.email)).length,
     });
@@ -765,7 +1116,15 @@ export default function LeadScraper({
 
     setSelectedIds(new Set(crawled.map((c) => c.id)));
     setIsScraping(false);
-    setScrapeStatus(`✅ Crawled ${crawled.length} websites and saved contact endpoints to table!`);
+    setScrapeStatus(
+      `✅ Crawled ${crawled.length} URLs: Added ${addedCount} unique contacts${
+        duplicateCount > 0
+          ? ` (Skipped ${duplicateCount} duplicates${
+              enrichedCount > 0 ? ` & enriched ${enrichedCount} rows` : ""
+            })`
+          : ""
+      }!`
+    );
     setUrlListText("");
   };
 
@@ -777,6 +1136,24 @@ export default function LeadScraper({
   ) => {
     updateAndPersistProspects((prev) =>
       prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
+  // Toggle whether a prospect has a mobile app/APK
+  const handleToggleMobileApp = (id: string) => {
+    updateAndPersistProspects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, hasMobileApp: !p.hasMobileApp } : p))
+    );
+  };
+
+  // Mark or toggle Outreach Sent status (so you never message the same client twice)
+  const handleMarkOutreachSent = (id: string, explicitValue?: boolean) => {
+    updateAndPersistProspects((prev) =>
+      prev.map((p) =>
+        p.id === id
+          ? { ...p, outreachSent: explicitValue !== undefined ? explicitValue : !p.outreachSent }
+          : p
+      )
     );
   };
 
@@ -793,10 +1170,12 @@ export default function LeadScraper({
       budget: "To Be Scoped",
       timeline: "Outbound Prospect",
       message: `[OUTBOUND SCRAPED LEAD — ${prospect.category}]\n📍 Location: ${prospect.location}\n🌐 Website: ${
-        prospect.website || "None listed"
-      }\n💡 Opportunity: ${prospect.techGap}\n🎯 Pitch Product: ${prospect.recommendedProduct} (${
-        prospect.demoUrl
-      })`,
+        prospect.website || "NO WEBSITE (Needs New Website Build)"
+      }\n📱 Mobile App/APK: ${
+        prospect.hasMobileApp ? "Has App" : "NO MOBILE APK (Pitch Android/iOS App)"
+      }\n🔥 Lead Score: ${calculateLeadScore(prospect)}/100\n💡 Opportunity: ${
+        prospect.techGap
+      }\n🎯 Pitch Product: ${prospect.recommendedProduct} (${prospect.demoUrl})`,
       priority: prospect.phone || prospect.email ? "urgent" : "high",
       status: "new",
       assignedTo: "Olamide (Lead Partner)",
@@ -814,7 +1193,7 @@ export default function LeadScraper({
     if (toInject.length === 0) return;
 
     setIsScraping(true);
-    setScrapeStatus(`Injecting ${toInject.length} prospects into your CRM pipeline...`);
+    setScrapeStatus(`Injecting ${toInject.length} unique prospects into your CRM pipeline...`);
     const createdList: CRMLead[] = [];
 
     for (const prospect of toInject) {
@@ -829,10 +1208,12 @@ export default function LeadScraper({
         budget: "To Be Scoped",
         timeline: "Outbound Prospect",
         message: `[OUTBOUND SCRAPED LEAD — ${prospect.category}]\n📍 Location: ${prospect.location}\n🌐 Website: ${
-          prospect.website || "None listed"
-        }\n💡 Opportunity: ${prospect.techGap}\n🎯 Pitch Product: ${prospect.recommendedProduct} (${
-          prospect.demoUrl
-        })`,
+          prospect.website || "NO WEBSITE (Needs New Website Build)"
+        }\n📱 Mobile App/APK: ${
+          prospect.hasMobileApp ? "Has App" : "NO MOBILE APK (Pitch Android/iOS App)"
+        }\n🔥 Lead Score: ${calculateLeadScore(prospect)}/100\n💡 Opportunity: ${
+          prospect.techGap
+        }\n🎯 Pitch Product: ${prospect.recommendedProduct} (${prospect.demoUrl})`,
         priority: prospect.phone || prospect.email ? "urgent" : "high",
         status: "new",
         assignedTo: "Olamide (Lead Partner)",
@@ -846,15 +1227,73 @@ export default function LeadScraper({
     );
     onLeadsInjected(createdList);
     setIsScraping(false);
-    setScrapeStatus(`🚀 Injected ${createdList.length} leads directly into your CRM Pipeline!`);
+    setScrapeStatus(
+      `🚀 Injected ${createdList.length} unique leads into your CRM Pipeline (Zero duplicates)!`
+    );
   };
 
-  // Generate personalized founder outreach message
-  const buildPersonalizedPitch = (p: ScrapedProspect) => {
+  // Generate personalized founder outreach message across 4 strategic angles AND 3 follow-up touches
+  const buildPersonalizedPitch = (
+    p: ScrapedProspect,
+    angleOverride?: "no_website" | "revamp" | "mobile_apk" | "platform_crm",
+    stageOverride?: "day1" | "day3" | "day7"
+  ) => {
+    const activeAngle =
+      angleOverride ||
+      (isWithoutWebsite(p)
+        ? "no_website"
+        : targetGapMode === "no_apk"
+        ? "mobile_apk"
+        : "revamp");
+
+    const activeStage = stageOverride || "day1";
+
+    // TOUCH 2: DAY 3 VALUE AUDIT & PROTOTYPE FOLLOW-UP
+    if (activeStage === "day3") {
+      const offerLabel =
+        activeAngle === "no_website"
+          ? "an official high-converting website + WhatsApp client funnel"
+          : activeAngle === "mobile_apk"
+          ? "a custom branded Android APK & iOS Mobile App"
+          : activeAngle === "revamp"
+          ? "a modern website revamp + 24/7 AI WhatsApp assistant"
+          : `${p.recommendedProduct}`;
+
+      return `Hi ${p.businessName} team,\n\nQuick follow-up on my note earlier this week — I actually put together a quick interactive concept showing how ${offerLabel} would work for ${p.businessName} in ${p.location}.\n\nYou can also inspect one of our live production systems here: ${p.demoUrl}\n\nShould I send the 60-second walkthrough video right here on WhatsApp?\n\nBest,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
+    }
+
+    // TOUCH 3: DAY 7 PRIORITY SLOT / BREAKUP MESSAGE
+    if (activeStage === "day7") {
+      return `Hello ${p.businessName} team,\n\nI know things get busy running operations in ${p.location}, so I won't flood your inbox.\n\nWe have one onboarding slot open this month for a ${p.category.toLowerCase()} partner in ${p.location} looking to launch ${
+        activeAngle === "no_website"
+          ? "their official web platform & client portal"
+          : activeAngle === "mobile_apk"
+          ? "their own custom Android APK & iOS mobile app"
+          : `a revamped digital platform (${p.recommendedProduct})`
+      }.\n\nIf upgrading your digital infrastructure is a priority this quarter, reply "DEMO" and I'll share a tailored rollout plan for ${p.businessName}.\n\nWarm regards,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
+    }
+
+    // TOUCH 1: DAY 1 INITIAL VALUE HOOK
+    if (activeAngle === "no_website") {
+      return `Hello ${p.businessName} team,\n\nI came across ${p.businessName} in ${p.location} today and noticed that while you have a strong local reputation${
+        p.websiteStatus === "social_only" ? " on social media" : ""
+      }, you don't currently have a dedicated official website or automated client portal.\n\nRight now, prospective clients searching Google for ${p.category.toLowerCase()} in ${p.location} are landing on competitors who have an instant web booking & WhatsApp conversion funnel.\n\nAt Thoram Group, we can launch a high-converting official website + automated WhatsApp inquiry system + ${p.recommendedProduct} for ${p.businessName} in under 7 days (see our live work at ${p.demoUrl}).\n\nAre you open to a quick 5-minute WhatsApp chat this week so I can show you a live preview for ${p.businessName}?\n\nBest regards,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
+    }
+
+    if (activeAngle === "revamp") {
+      return `Hello ${p.businessName} team,\n\nI just reviewed ${p.businessName}'s current website (${
+        p.website || "online presence"
+      }) in ${p.location} and spotted a few quick upgrades that could immediately double your inbound client inquiries.\n\nMost websites act like static brochures — visitors browse and leave without booking. At Thoram Group, we revamp existing websites into modern, ultra-fast conversion engines integrated with a 24/7 AI WhatsApp Assistant and ${p.recommendedProduct} (${p.demoUrl}).\n\nWould you be open to a 5-minute WhatsApp walkthrough showing how a revamped platform + AI integration would look for ${p.businessName}?\n\nBest regards,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
+    }
+
+    if (activeAngle === "mobile_apk") {
+      return `Hello ${p.businessName} team,\n\nI noticed ${p.businessName} in ${p.location} doesn't yet have a dedicated Android APK / iOS Mobile App for your clients.\n\nAt Thoram Group, we engineer custom branded Mobile Apps (Android APK + Google Play + Apple App Store) and management portals — like our live platforms at ${p.demoUrl} and https://thoramgroup.com/case-studies.\n\nHaving your own downloadable mobile APK puts ${p.businessName} directly on your customers' phones with push notifications, instant Paystack payments, and self-service booking.\n\nCan I share a quick 2-minute interactive mobile app demo tailored to ${p.businessName} on WhatsApp?\n\nBest regards,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
+    }
+
     return `Hello ${p.businessName} team,\n\nI came across ${p.businessName} in ${p.location} while reviewing leading ${p.category.toLowerCase()} operations.\n\nAt Thoram Group, ${activePreset.pitchHook}\n\nWe already have the core architecture built and live (${p.demoUrl}), which means we can deploy a tailored version for ${p.businessName} in days rather than months.\n\nAre you open to a quick 5-minute WhatsApp walkthrough this week?\n\nBest regards,\nOlamide\nLead Partner, Thoram Group\nhttps://thoramgroup.com`;
   };
 
-  // Build Google X-Ray Dork URL for deep pages
+  // Build Google & Social Media X-Ray Dork URL for deep pages
   const buildGoogleDorkUrl = (pageOffset: number = 0) => {
     const isNigeria =
       location.toLowerCase().includes("nigeria") ||
@@ -867,7 +1306,17 @@ export default function LeadScraper({
       ? `("080" OR "081" OR "090" OR "070" OR "+234")`
       : `("phone" OR "whatsapp" OR "call" OR "@gmail.com" OR "info@")`;
 
-    const dork = `${effectiveQuery} "${location}" ${phonePattern} ("@gmail.com" OR "info@" OR "contact" OR "whatsapp")`;
+    // If a specific Social Media / Marketplace Platform is selected, use its site: operator
+    let siteFilter = "";
+    if (activePlatform.siteOperator) {
+      siteFilter = `${activePlatform.siteOperator} `;
+    } else if (targetGapMode === "no_website") {
+      siteFilter = `(site:instagram.com OR site:facebook.com OR site:jiji.ng OR site:businesslist.com.ng OR "whatsapp") `;
+    } else if (targetGapMode === "needs_revamp") {
+      siteFilter = `-site:instagram.com -site:facebook.com -site:jiji.ng `;
+    }
+
+    const dork = `${siteFilter}${effectiveQuery} "${location}" ${phonePattern} ("@gmail.com" OR "info@" OR "contact" OR "whatsapp" OR "call")`;
     return `https://www.google.com/search?q=${encodeURIComponent(dork)}&num=100&start=${
       pageOffset * 10
     }`;
@@ -883,13 +1332,16 @@ export default function LeadScraper({
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-mono uppercase">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>Outbound B2B Client Acquisition Engine</span>
+              <span>God-Level Outbound B2B & Social Media Acquisition Engine</span>
             </div>
             <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">
-              Scrape Any Niche. Inject to CRM. Pitch Live Products.
+              Scrape Web, Instagram, LinkedIn & Jiji. Zero Duplicates.
             </h2>
             <p className="text-sm text-zinc-400 leading-relaxed">
-              Target any industry (Schools, Real Estate, Study Abroad, Clinics, Hotels) across deep search pages. Extract phone numbers, WhatsApp contacts & emails, inject them into your pipeline, and send 1-click pitches backed by your live case studies.
+              Target businesses with <strong>no website</strong>, businesses needing a{" "}
+              <strong>website revamp + AI</strong>, or companies needing a{" "}
+              <strong>custom Mobile App / Android APK</strong> across Google, Instagram, Facebook,
+              LinkedIn & Jiji — with automatic duplicate protection and 3-stage follow-up scripts.
             </p>
           </div>
 
@@ -934,14 +1386,14 @@ export default function LeadScraper({
                     type="password"
                     value={serperKey}
                     onChange={(e) => saveApiKeys(e.target.value, googlePlacesKey)}
-                    placeholder="Paste Serper API key to auto-scrape Google Pages 1 to 10..."
+                    placeholder="Paste Serper API key to auto-scrape Google, Instagram & LinkedIn Pages 1–10..."
                     className="w-full bg-zinc-950 border border-zinc-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-orange-500"
                   />
                 </div>
 
                 <div className="space-y-1.5 flex flex-col justify-end">
                   <p className="text-xs text-zinc-400 leading-relaxed bg-zinc-950/70 p-3 rounded-xl border border-zinc-800">
-                    💡 <strong>Zero-Cost Built-In Mode:</strong> Even without an API key, our engine scrapes OpenStreetMap registries, live web search pages, and includes the <strong>Google Page 1–10 X-Ray Ripper</strong> for unlimited free lead extraction!
+                    💡 <strong>Zero-Cost Built-In Mode:</strong> Even without an API key, our engine scrapes OpenStreetMap registries, live web/social search pages, and includes the <strong>Social & Google Page 1–10 X-Ray Ripper</strong> for unlimited free lead extraction!
                   </p>
                 </div>
               </div>
@@ -951,63 +1403,92 @@ export default function LeadScraper({
       </div>
 
       {/* DATABASE TABLES STATUS BAR */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5">
         <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
           <div>
             <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-orange-600" />
-              <span>Table 1 · scraped_prospects</span>
+              <span>Unique Prospects</span>
             </div>
             <div className="text-xl font-bold text-zinc-900 mt-1">
-              {prospects.length} <span className="text-xs font-normal text-zinc-500">rows</span>
+              {prospects.length} <span className="text-xs font-normal text-zinc-500">deduped</span>
             </div>
           </div>
           <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 font-semibold">
-            Active & Synced
+            0 Duplicates
           </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
+              <AlertTriangle className="w-3.5 h-3.5 text-rose-600" />
+              <span>No Website / Social Only</span>
+            </div>
+            <div className="text-xl font-bold text-zinc-900 mt-1">
+              {prospects.filter((p) => isWithoutWebsite(p)).length}{" "}
+              <span className="text-xs font-normal text-zinc-500">need new website</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTableFilter("no_website")}
+            className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-700 hover:bg-rose-500/20 font-semibold"
+          >
+            Filter 🚫
+          </button>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+              <span>No Mobile App / APK</span>
+            </div>
+            <div className="text-xl font-bold text-zinc-900 mt-1">
+              {prospects.filter((p) => !p.hasMobileApp).length}{" "}
+              <span className="text-xs font-normal text-zinc-500">need APK / App</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setTableFilter("no_apk")}
+            className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-700 hover:bg-amber-500/20 font-semibold"
+          >
+            Filter 📱
+          </button>
         </div>
 
         <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
           <div>
             <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
               <Phone className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Verified Phones / Emails</span>
+              <span>Uncontacted Ready</span>
             </div>
             <div className="text-xl font-bold text-zinc-900 mt-1">
-              {prospects.filter((p) => p.phone).length} phones ·{" "}
-              {prospects.filter((p) => p.email).length} emails
+              {prospects.filter((p) => !p.outreachSent).length}{" "}
+              <span className="text-xs font-normal text-zinc-500">to message</span>
             </div>
           </div>
-          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-700 font-semibold">
-            Ready to Pitch
-          </span>
-        </div>
-
-        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
-          <div>
-            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
-              <Layers className="w-3.5 h-3.5 text-purple-600" />
-              <span>Table 2 · scrape_campaigns</span>
-            </div>
-            <div className="text-xl font-bold text-zinc-900 mt-1">
-              {campaignLogs.length} <span className="text-xs font-normal text-zinc-500">runs</span>
-            </div>
-          </div>
-          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-700 font-semibold">
-            Logged
-          </span>
+          <button
+            type="button"
+            onClick={() => setTableFilter("uncontacted")}
+            className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-700 hover:bg-blue-500/20 font-semibold"
+          >
+            Filter 🆕
+          </button>
         </div>
       </div>
 
-      {/* STEP 1: SELECT TARGET INDUSTRY, LOCATION & SCRAPE MODE */}
+      {/* STEP 1: SELECT TARGET INDUSTRY, DIGITAL GAP FOCUS, SOCIAL PLATFORM & LOCATION */}
       <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-900/[0.08] shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-900/[0.06]">
           <div>
             <span className="text-xs font-mono uppercase tracking-wider text-orange-600 font-semibold">
-              Step 1 · Target Parameters
+              Step 1 · Target Parameters & Social Channels
             </span>
             <h3 className="text-lg font-bold text-zinc-900">
-              Choose Target Industry & Location
+              Choose Industry, Digital Gap, Social Platform & Location
             </h3>
           </div>
 
@@ -1033,7 +1514,7 @@ export default function LeadScraper({
                   : "text-zinc-500 hover:text-zinc-900"
               }`}
             >
-              🔍 Google X-Ray Ripper
+              🔍 Social & Google X-Ray Ripper
             </button>
             <button
               type="button"
@@ -1049,10 +1530,10 @@ export default function LeadScraper({
           </div>
         </div>
 
-        {/* Industry Presets Grid */}
+        {/* 1. Industry Presets Grid */}
         <div>
           <label className="block text-xs font-mono uppercase text-zinc-500 mb-2.5">
-            Select High-Value Industry (Auto-matches your live case study pitch)
+            1. Select High-Value Industry (Auto-matches your live case study pitch)
           </label>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
             {INDUSTRY_PRESETS.map((preset) => (
@@ -1069,6 +1550,119 @@ export default function LeadScraper({
                 <div className="text-xs font-bold text-zinc-900">{preset.label}</div>
                 <div className="text-[11px] font-mono text-orange-600 truncate mt-1">
                   Pitch: {preset.productName}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. Target Digital Gap / Opportunity Selector */}
+        <div>
+          <label className="block text-xs font-mono uppercase text-zinc-500 mb-2.5">
+            2. Target Digital Gap / Opportunity Focus (No Website, Website Revamp, or No Mobile APK)
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {[
+              {
+                id: "all",
+                title: "🎯 All Prospects",
+                subtitle: "Find all businesses (No Website, Revamp & APK)",
+                badge: "Recommended",
+              },
+              {
+                id: "no_website",
+                title: "🚫 No Website (Build New Site)",
+                subtitle: "Prioritize businesses with NO website or Instagram/FB only",
+                badge: "High Demand",
+              },
+              {
+                id: "needs_revamp",
+                title: "🔧 Website Revamp + AI",
+                subtitle: "Target businesses with outdated websites needing AI & UX",
+                badge: "Web Revamp",
+              },
+              {
+                id: "no_apk",
+                title: "📱 No Mobile App / APK",
+                subtitle: "Target businesses without an Android APK or iOS App",
+                badge: "Pitch APK",
+              },
+            ].map((mode) => (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => {
+                  setTargetGapMode(mode.id as any);
+                  if (mode.id === "no_website") setTableFilter("no_website");
+                  else if (mode.id === "needs_revamp") setTableFilter("needs_revamp");
+                  else if (mode.id === "no_apk") setTableFilter("no_apk");
+                  else setTableFilter("all");
+                }}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  targetGapMode === mode.id
+                    ? "bg-zinc-900 border-zinc-900 text-white shadow-sm"
+                    : "bg-zinc-50/80 border-zinc-900/[0.08] text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-xs font-bold">{mode.title}</span>
+                  <span
+                    className={`text-[10px] font-mono px-1.5 py-0.5 rounded ${
+                      targetGapMode === mode.id
+                        ? "bg-orange-500 text-white"
+                        : "bg-zinc-200/80 text-zinc-600"
+                    }`}
+                  >
+                    {mode.badge}
+                  </span>
+                </div>
+                <div
+                  className={`text-[11px] mt-1 leading-snug ${
+                    targetGapMode === mode.id ? "text-zinc-300" : "text-zinc-500"
+                  }`}
+                >
+                  {mode.subtitle}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. Target Platform / Social Media Source Selector */}
+        <div>
+          <label className="block text-xs font-mono uppercase text-zinc-500 mb-2.5">
+            3. Target Source Platform — Scrape Web, Instagram, Facebook, LinkedIn, Jiji, TikTok or Directories
+          </label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {PLATFORM_CHANNELS.map((channel) => (
+              <button
+                key={channel.id}
+                type="button"
+                onClick={() => {
+                  setTargetPlatformId(channel.id);
+                  if (
+                    channel.id === "instagram" ||
+                    channel.id === "facebook" ||
+                    channel.id === "tiktok" ||
+                    channel.id === "jiji_property"
+                  ) {
+                    setTargetGapMode("no_website");
+                    setTableFilter("no_website");
+                  }
+                }}
+                className={`p-3 rounded-xl border text-left transition-all ${
+                  targetPlatformId === channel.id
+                    ? "bg-orange-600 text-white border-orange-600 shadow-sm"
+                    : "bg-zinc-50/80 border-zinc-900/[0.08] text-zinc-700 hover:border-zinc-400"
+                }`}
+              >
+                <div className="text-xs font-bold">{channel.label}</div>
+                <div
+                  className={`text-[11px] mt-1 leading-snug ${
+                    targetPlatformId === channel.id ? "text-orange-100" : "text-zinc-500"
+                  }`}
+                >
+                  {channel.description}
                 </div>
               </button>
             ))}
@@ -1171,8 +1765,16 @@ export default function LeadScraper({
                 <>
                   <Zap className="w-4 h-4" />
                   <span>
-                    Scrape {activePreset.label.replace(/^[^\s]+\s/, "")} in {location} (Pages 1–
-                    {maxPages})
+                    Scrape {activePreset.label.replace(/^[^\s]+\s/, "")} on{" "}
+                    {activePlatform.shortBadge} in {location} (
+                    {targetGapMode === "no_website"
+                      ? "Prioritize NO WEBSITE"
+                      : targetGapMode === "needs_revamp"
+                      ? "Prioritize WEBSITE REVAMP"
+                      : targetGapMode === "no_apk"
+                      ? "Prioritize NO MOBILE APK"
+                      : `Pages 1–${maxPages}`}{" "}
+                    · Auto-Deduplicated)
                   </span>
                 </>
               )}
@@ -1180,19 +1782,19 @@ export default function LeadScraper({
           </form>
         )}
 
-        {/* MODE 2: GOOGLE X-RAY DEEP DORK + RAW CONTACT RIPPER */}
+        {/* MODE 2: SOCIAL & GOOGLE X-RAY DEEP DORK + RAW CONTACT RIPPER */}
         {scrapeMode === "xray_dork" && (
           <div className="p-5 rounded-2xl bg-zinc-50 border border-zinc-900/[0.08] space-y-5">
             <div className="space-y-2">
               <div className="text-xs font-mono font-bold uppercase text-orange-600">
-                Step A · Open Deep Google X-Ray Search (Pages 1 to 10)
+                Step A · Open Deep {activePlatform.shortBadge} X-Ray Search (Pages 1 to 10)
               </div>
               <p className="text-xs text-zinc-600 leading-relaxed">
-                Click any Google Page button below. It uses a specialized{" "}
-                <strong>X-Ray Search Formula</strong> that forces Google to display businesses in{" "}
-                <strong>{location}</strong> along with their{" "}
-                <strong>WhatsApp numbers (080/081/090/070)</strong> and{" "}
-                <strong>email addresses</strong> right in the snippets — even on Page 10!
+                Click any Page button below to X-Ray <strong>{activePlatform.label}</strong> in{" "}
+                <strong>{location}</strong>. It forces Google to surface profiles and pages that
+                publicly list their{" "}
+                <strong>WhatsApp numbers (080/081/090/070/+234)</strong> and{" "}
+                <strong>email addresses</strong> right in the search results!
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((pageIdx) => (
@@ -1203,7 +1805,9 @@ export default function LeadScraper({
                     rel="noopener noreferrer"
                     className="px-3 py-2 rounded-xl bg-white border border-zinc-300 hover:border-orange-600 hover:text-orange-600 text-xs font-mono font-semibold text-zinc-800 inline-flex items-center gap-1.5 shadow-2xs transition-all"
                   >
-                    <span>Google Page {pageIdx + 1}</span>
+                    <span>
+                      {activePlatform.shortBadge} Page {pageIdx + 1}
+                    </span>
                     <ExternalLink className="w-3 h-3" />
                   </a>
                 ))}
@@ -1212,13 +1816,13 @@ export default function LeadScraper({
 
             <div className="space-y-2 pt-4 border-t border-zinc-200">
               <div className="text-xs font-mono font-bold uppercase text-emerald-700">
-                Step B · Paste Copied Page Text (Ctrl+A, Ctrl+C) to Rip All Contacts
+                Step B · Paste Copied Page Text (Ctrl+A, Ctrl+C) to Rip & Deduplicate All Contacts
               </div>
               <textarea
                 rows={4}
                 value={rawPasteText}
                 onChange={(e) => setRawPasteText(e.target.value)}
-                placeholder="On the Google results page (or any directory/Instagram/Google Maps page), press Ctrl+A then Ctrl+C, and paste everything here. Our parser will automatically extract every Business Name, Phone/WhatsApp number, and Email..."
+                placeholder="On the Instagram/LinkedIn/Facebook/Jiji/Google results page, press Ctrl+A then Ctrl+C, and paste everything here. Our parser will automatically extract every Business Name, Phone/WhatsApp number, Email, and skip any duplicate contacts..."
                 className="w-full bg-white border border-zinc-300 rounded-xl p-3.5 text-xs text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-orange-600"
               />
               <button
@@ -1228,7 +1832,7 @@ export default function LeadScraper({
                 className="btn-solid py-3 px-6 rounded-xl text-xs font-bold inline-flex items-center gap-2"
               >
                 <Sparkles className="w-4 h-4" />
-                <span>Extract All Phones, Emails & Businesses</span>
+                <span>Extract & Deduplicate All Phones, Emails & Businesses</span>
               </button>
             </div>
           </div>
@@ -1239,10 +1843,10 @@ export default function LeadScraper({
           <div className="p-5 rounded-2xl bg-zinc-50 border border-zinc-900/[0.08] space-y-4">
             <div>
               <div className="text-xs font-mono font-bold uppercase text-orange-600">
-                Deep Website Contact Spider
+                Deep Website Contact & APK Spider
               </div>
               <p className="text-xs text-zinc-600 mt-0.5">
-                Paste 1 to 30 business website URLs (one per line). Our spider will crawl their homepage and extract their phone numbers, WhatsApp links, and email addresses.
+                Paste 1 to 30 business website URLs (one per line). Our spider will crawl their homepage, extract their phone numbers, WhatsApp links, and emails, check for Mobile APK links, and skip duplicates.
               </p>
             </div>
             <textarea
@@ -1266,7 +1870,7 @@ export default function LeadScraper({
               ) : (
                 <>
                   <Globe className="w-4 h-4" />
-                  <span>Crawl Websites & Extract Contacts</span>
+                  <span>Crawl Websites & Extract Unique Contacts</span>
                 </>
               )}
             </button>
@@ -1296,19 +1900,31 @@ export default function LeadScraper({
               <span>Table 1 · Scraped Prospects Staging Table (`scraped_prospects`)</span>
             </div>
             <h3 className="text-xl font-bold text-zinc-900 mt-0.5">
-              {prospects.length} Discovered Businesses ({selectedIds.size} Selected)
+              {filteredProspects.length} Showing of {prospects.length} Unique Businesses (
+              {selectedIds.size} Selected)
             </h3>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
             <button
               type="button"
-              onClick={() => exportProspectsToCSV(prospects)}
+              onClick={handleManualDeduplicate}
               disabled={prospects.length === 0}
+              className="btn-ghost text-xs py-2 px-3 inline-flex items-center gap-1.5 text-emerald-700 hover:bg-emerald-50"
+              title="Merge and remove any duplicate phone numbers, emails or business names"
+            >
+              <CheckCircle2 className="w-3.5 h-3.5" />
+              <span>🧹 Deduplicate Table</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => exportProspectsToCSV(filteredProspects)}
+              disabled={filteredProspects.length === 0}
               className="btn-ghost text-xs py-2 px-3 inline-flex items-center gap-1.5"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>Export Table CSV</span>
+              <span>Export CSV</span>
             </button>
 
             <button
@@ -1325,7 +1941,7 @@ export default function LeadScraper({
             >
               {selectedIds.size === filteredProspects.length && filteredProspects.length > 0
                 ? "Deselect All"
-                : "Select All"}
+                : "Select All Shown"}
             </button>
 
             <button
@@ -1355,22 +1971,40 @@ export default function LeadScraper({
           </div>
         </div>
 
-        {/* Table Filter Pills & Search */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+        {/* Table Filter Pills (Including No Website, Website Revamp, No Mobile APK, Uncontacted) & Search */}
+        <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-1.5">
             {[
               { id: "all", label: `All Rows (${prospects.length})` },
               {
+                id: "no_website",
+                label: `🚫 No Website (${prospects.filter((p) => isWithoutWebsite(p)).length})`,
+              },
+              {
+                id: "needs_revamp",
+                label: `🔧 Website Revamp (${
+                  prospects.filter((p) => !isWithoutWebsite(p)).length
+                })`,
+              },
+              {
+                id: "no_apk",
+                label: `📱 No Mobile APK (${prospects.filter((p) => !p.hasMobileApp).length})`,
+              },
+              {
+                id: "uncontacted",
+                label: `🆕 Uncontacted (${prospects.filter((p) => !p.outreachSent).length})`,
+              },
+              {
                 id: "has_phone",
-                label: `Has Phone/WhatsApp (${prospects.filter((p) => p.phone).length})`,
+                label: `📞 Has Phone (${prospects.filter((p) => p.phone).length})`,
               },
               {
                 id: "has_email",
-                label: `Has Email (${prospects.filter((p) => p.email).length})`,
+                label: `✉️ Has Email (${prospects.filter((p) => p.email).length})`,
               },
               {
                 id: "pending_crm",
-                label: `Not In CRM Yet (${prospects.filter((p) => !p.injected).length})`,
+                label: `⏳ Not In CRM (${prospects.filter((p) => !p.injected).length})`,
               },
             ].map((tab) => (
               <button
@@ -1379,7 +2013,7 @@ export default function LeadScraper({
                 onClick={() => setTableFilter(tab.id as any)}
                 className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all ${
                   tableFilter === tab.id
-                    ? "bg-zinc-900 text-white"
+                    ? "bg-zinc-900 text-white shadow-2xs"
                     : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
                 }`}
               >
@@ -1388,13 +2022,13 @@ export default function LeadScraper({
             ))}
           </div>
 
-          <div className="relative w-full md:w-72">
+          <div className="relative w-full xl:w-72">
             <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={tableSearch}
               onChange={(e) => setTableSearch(e.target.value)}
-              placeholder="Filter table by name, phone, city..."
+              placeholder="Filter table by name, phone, platform..."
               className="w-full bg-zinc-50 border border-zinc-900/[0.08] rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-orange-600"
             />
           </div>
@@ -1406,9 +2040,9 @@ export default function LeadScraper({
             <thead className="bg-zinc-50 border-b border-zinc-900/[0.06] text-[11px] font-mono uppercase text-zinc-500">
               <tr>
                 <th className="py-3 px-3 w-8">✓</th>
-                <th className="py-3 px-3">Business & Location</th>
+                <th className="py-3 px-3">Business, Score & Recon</th>
                 <th className="py-3 px-3">Phone / WhatsApp & Email (Editable)</th>
-                <th className="py-3 px-3">Website</th>
+                <th className="py-3 px-3">Website & Mobile APK Status</th>
                 <th className="py-3 px-3">Diagnosed Opportunity & Product Pitch</th>
                 <th className="py-3 px-3 text-right">Outreach & CRM Actions</th>
               </tr>
@@ -1418,8 +2052,8 @@ export default function LeadScraper({
                 <tr>
                   <td colSpan={6} className="text-center py-12 text-zinc-400 font-mono text-xs">
                     {prospects.length === 0
-                      ? "No scraped businesses in table yet. Choose an industry above and click 'Scrape' to populate this table."
-                      : "No rows match your current filter."}
+                      ? "No scraped businesses in table yet. Choose an industry or social platform above and click 'Scrape' to populate this table."
+                      : "No rows match your current filter. Click 'All Rows' above to view all prospects."}
                   </td>
                 </tr>
               ) : (
@@ -1427,6 +2061,8 @@ export default function LeadScraper({
                   const isSelected = selectedIds.has(p.id);
                   const waNumber = formatPhoneForWhatsApp(p.phone);
                   const pitchText = encodeURIComponent(buildPersonalizedPitch(p));
+                  const withoutSite = isWithoutWebsite(p);
+                  const leadScore = calculateLeadScore(p);
 
                   return (
                     <tr
@@ -1449,15 +2085,64 @@ export default function LeadScraper({
                         />
                       </td>
 
-                      <td className="py-3.5 px-3 max-w-[230px]">
+                      <td className="py-3.5 px-3 max-w-[250px] space-y-1">
                         <div className="font-bold text-zinc-900 truncate">{p.businessName}</div>
-                        <div className="text-xs text-zinc-500 truncate flex items-center gap-1 mt-0.5">
+                        <div className="text-xs text-zinc-500 truncate flex items-center gap-1">
                           <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
                           <span>{p.location}</span>
                         </div>
-                        <span className="inline-block mt-1 text-[10px] font-mono px-2 py-0.5 rounded bg-zinc-100 text-zinc-600">
-                          {p.sourcePage}
-                        </span>
+                        <div className="flex flex-wrap items-center gap-1 pt-0.5">
+                          <span
+                            className={`text-[10px] font-mono px-1.5 py-0.5 rounded font-semibold ${
+                              leadScore >= 80
+                                ? "bg-orange-500/15 text-orange-700 border border-orange-500/30"
+                                : leadScore >= 60
+                                ? "bg-emerald-500/10 text-emerald-700"
+                                : "bg-zinc-100 text-zinc-600"
+                            }`}
+                          >
+                            🔥 {leadScore}/100
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-100 text-zinc-600">
+                            {p.sourcePage}
+                          </span>
+                        </div>
+                        {/* 1-Click Live Social & Google Recon Links */}
+                        <div className="flex items-center gap-2 pt-0.5 text-[10px] font-mono">
+                          <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(
+                              `${p.businessName} ${p.location}`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-zinc-500 hover:text-orange-600 hover:underline"
+                            title="Inspect business on Google"
+                          >
+                            🔍 Google
+                          </a>
+                          <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(
+                              `site:instagram.com "${p.businessName}"`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-zinc-500 hover:text-pink-600 hover:underline"
+                            title="Find their Instagram profile"
+                          >
+                            📸 IG
+                          </a>
+                          <a
+                            href={`https://www.google.com/search?q=${encodeURIComponent(
+                              `site:linkedin.com "${p.businessName}" ${p.location}`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-zinc-500 hover:text-blue-600 hover:underline"
+                            title="Find Founder/CEO on LinkedIn"
+                          >
+                            💼 LinkedIn
+                          </a>
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-3 space-y-1.5 font-mono text-xs min-w-[210px]">
@@ -1488,24 +2173,66 @@ export default function LeadScraper({
                         </div>
                       </td>
 
-                      <td className="py-3.5 px-3 font-mono text-xs">
-                        {p.website ? (
-                          <a
-                            href={p.website}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline inline-flex items-center gap-1 text-[11px] truncate max-w-[160px]"
-                          >
-                            <Globe className="w-3 h-3 shrink-0" />
-                            <span className="truncate">
-                              {p.website.replace(/^https?:\/\/(www\.)?/, "")}
+                      <td className="py-3.5 px-3 font-mono text-xs space-y-1.5 min-w-[190px]">
+                        {/* Website Status Badge */}
+                        <div>
+                          {!p.website ? (
+                            <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-700 font-semibold border border-rose-500/20">
+                              🚫 No Website · Pitch New Site
                             </span>
-                          </a>
-                        ) : (
-                          <span className="inline-block text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-600 font-semibold">
-                            ⚠️ No Website
-                          </span>
-                        )}
+                          ) : withoutSite ? (
+                            <div className="space-y-0.5">
+                              <span className="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded bg-rose-500/10 text-rose-700 font-semibold border border-rose-500/20">
+                                📲 Social Only · Pitch Website
+                              </span>
+                              <a
+                                href={p.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="block text-[10px] text-blue-600 hover:underline truncate max-w-[170px]"
+                              >
+                                {p.website.replace(/^https?:\/\/(www\.)?/, "")}
+                              </a>
+                            </div>
+                          ) : (
+                            <div className="space-y-0.5">
+                              <a
+                                href={p.website}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline inline-flex items-center gap-1 text-[11px] truncate max-w-[170px] font-semibold"
+                              >
+                                <Globe className="w-3 h-3 shrink-0" />
+                                <span className="truncate">
+                                  {p.website.replace(/^https?:\/\/(www\.)?/, "")}
+                                </span>
+                              </a>
+                              <div>
+                                <span className="inline-block text-[10px] px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-700 font-semibold">
+                                  🔧 Pitch Website Revamp + AI
+                                </span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Mobile APK Status Badge (Clickable Toggle) */}
+                        <div>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleMobileApp(p.id)}
+                            title="Click to toggle Mobile APK status"
+                            className={`inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded font-semibold transition-colors ${
+                              p.hasMobileApp
+                                ? "bg-emerald-500/10 text-emerald-700 border border-emerald-500/20"
+                                : "bg-amber-500/15 text-amber-800 border border-amber-500/30 hover:bg-amber-500/25"
+                            }`}
+                          >
+                            {p.hasMobileApp
+                              ? "✅ Has Mobile APK"
+                              : "📱 No Mobile APK · Pitch App"}
+                          </button>
+                        </div>
                       </td>
 
                       <td className="py-3.5 px-3 max-w-[260px]">
@@ -1515,6 +2242,19 @@ export default function LeadScraper({
                         <div className="text-xs text-zinc-600 mt-0.5 leading-snug">
                           {p.techGap}
                         </div>
+                        {/* Outreach Contacted Status Toggle */}
+                        <button
+                          type="button"
+                          onClick={() => handleMarkOutreachSent(p.id)}
+                          className={`mt-1.5 inline-flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded font-semibold transition-colors ${
+                            p.outreachSent
+                              ? "bg-emerald-500/15 text-emerald-800 border border-emerald-500/30"
+                              : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                          }`}
+                          title="Click to toggle whether you have messaged this prospect"
+                        >
+                          {p.outreachSent ? "✅ Outreach Sent" : "🆕 Uncontacted"}
+                        </button>
                       </td>
 
                       <td className="py-3.5 px-3 text-right">
@@ -1522,22 +2262,33 @@ export default function LeadScraper({
                           {/* Open AI Pitch Generator Modal */}
                           <button
                             type="button"
-                            onClick={() => setPitchProspect(p)}
+                            onClick={() => {
+                              setPitchAngle(
+                                withoutSite
+                                  ? "no_website"
+                                  : targetGapMode === "no_apk"
+                                  ? "mobile_apk"
+                                  : "revamp"
+                              );
+                              setFollowUpStage("day1");
+                              setPitchProspect(p);
+                            }}
                             className="px-2.5 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-semibold inline-flex items-center gap-1 transition-colors"
-                            title="View & Send Tailored Pitch"
+                            title="View & Switch Pitch Angles + Day 1 / Day 3 / Day 7 Follow-Ups"
                           >
                             <Sparkles className="w-3.5 h-3.5 text-orange-400" />
                             <span>Pitch Script</span>
                           </button>
 
-                          {/* 1-Click Direct WhatsApp Pitch */}
+                          {/* 1-Click Direct WhatsApp Pitch (Auto-marks Outreach Sent!) */}
                           {waNumber && (
                             <a
                               href={`https://wa.me/${waNumber}?text=${pitchText}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={() => handleMarkOutreachSent(p.id, true)}
                               className="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold inline-flex items-center gap-1 transition-colors"
-                              title="Send Pitch on WhatsApp"
+                              title="Send Pitch on WhatsApp (Auto-marks as Contacted)"
                             >
                               <MessageCircle className="w-3.5 h-3.5" />
                               <span className="hidden sm:inline">WhatsApp</span>
@@ -1621,7 +2372,7 @@ export default function LeadScraper({
                 <th className="py-3 px-4">City / Location</th>
                 <th className="py-3 px-4">Engine Mode</th>
                 <th className="py-3 px-4">Depth</th>
-                <th className="py-3 px-4">Businesses & Contacts Found</th>
+                <th className="py-3 px-4">Unique Businesses & Contacts Added</th>
                 <th className="py-3 px-4 text-right">Date & Time</th>
               </tr>
             </thead>
@@ -1645,7 +2396,7 @@ export default function LeadScraper({
                       {log.pagesScanned} pages
                     </td>
                     <td className="py-3 px-4 font-mono text-xs">
-                      <span className="font-bold text-zinc-900">{log.leadsFound} leads</span>{" "}
+                      <span className="font-bold text-zinc-900">{log.leadsFound} unique leads</span>{" "}
                       <span className="text-emerald-700">({log.phonesFound} phones</span>,{" "}
                       <span className="text-orange-600">{log.emailsFound} emails)</span>
                     </td>
@@ -1660,7 +2411,7 @@ export default function LeadScraper({
         </div>
       </div>
 
-      {/* AI OUTBOUND PITCH MODAL */}
+      {/* AI OUTBOUND PITCH MODAL WITH 4-ANGLE SWITCHER + 3-STAGE FOLLOW-UP SEQUENCE */}
       <AnimatePresence>
         {pitchProspect && (
           <motion.div
@@ -1675,19 +2426,38 @@ export default function LeadScraper({
               animate={{ scale: 1 }}
               exit={{ scale: 0.95 }}
               onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-900/[0.08] space-y-5"
+              className="w-full max-w-2xl bg-white rounded-3xl p-6 sm:p-8 shadow-2xl border border-zinc-900/[0.08] space-y-5 max-h-[92vh] overflow-y-auto"
             >
               <div className="flex items-start justify-between gap-4 pb-4 border-b border-zinc-900/[0.08]">
                 <div>
                   <span className="text-xs font-mono uppercase text-orange-600 font-semibold">
-                    Tailored Founder Outreach Pitch
+                    Tailored Founder Outreach & Follow-Up Sequence
                   </span>
                   <h3 className="text-xl font-bold text-zinc-900 mt-0.5">
                     Pitching {pitchProspect.businessName}
                   </h3>
-                  <p className="text-xs text-zinc-500 mt-0.5">
-                    Product Match: <strong>{pitchProspect.recommendedProduct}</strong>
-                  </p>
+                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                    <span className="text-xs text-zinc-500">
+                      Product Match: <strong>{pitchProspect.recommendedProduct}</strong>
+                    </span>
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-orange-500/15 text-orange-700 font-semibold">
+                      🔥 Score: {calculateLeadScore(pitchProspect)}/100
+                    </span>
+                    {isWithoutWebsite(pitchProspect) ? (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-rose-500/10 text-rose-700 font-semibold">
+                        🚫 No Standalone Website
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-blue-500/10 text-blue-700 font-semibold">
+                        🔧 Has Website (Revamp Candidate)
+                      </span>
+                    )}
+                    {!pitchProspect.hasMobileApp && (
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-800 font-semibold">
+                        📱 No Mobile APK
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={() => setPitchProspect(null)}
@@ -1695,6 +2465,61 @@ export default function LeadScraper({
                 >
                   ✕
                 </button>
+              </div>
+
+              {/* 1. 4-Angle Pitch Switcher */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase text-zinc-500">
+                  1. Select What You Are Pitching:
+                </label>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {[
+                    { id: "no_website", label: "🚫 New Website Build" },
+                    { id: "revamp", label: "🔧 Website Revamp + AI" },
+                    { id: "mobile_apk", label: "📱 Mobile App / APK" },
+                    { id: "platform_crm", label: "🚀 Industry CRM / Portal" },
+                  ].map((tab) => (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setPitchAngle(tab.id as any)}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold border text-center transition-all ${
+                        pitchAngle === tab.id
+                          ? "bg-zinc-900 text-white border-zinc-900 shadow-2xs"
+                          : "bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-zinc-400"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* 2. 3-Stage Follow-Up Sequence Switcher (Day 1, Day 3, Day 7) */}
+              <div className="space-y-1.5">
+                <label className="block text-[11px] font-mono uppercase text-zinc-500">
+                  2. Select Follow-Up Cadence Touch (60% of deals close on Touch #2 & #3):
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                  {[
+                    { id: "day1", label: "1️⃣ Day 1 · Initial Hook & Live Demo" },
+                    { id: "day3", label: "2️⃣ Day 3 · Concept / Audit Follow-Up" },
+                    { id: "day7", label: "3️⃣ Day 7 · Priority Slot / Breakup" },
+                  ].map((stage) => (
+                    <button
+                      key={stage.id}
+                      type="button"
+                      onClick={() => setFollowUpStage(stage.id as any)}
+                      className={`px-3 py-2 rounded-xl text-xs font-semibold border text-center transition-all ${
+                        followUpStage === stage.id
+                          ? "bg-orange-600 text-white border-orange-600 shadow-2xs"
+                          : "bg-zinc-50 text-zinc-700 border-zinc-200 hover:border-zinc-400"
+                      }`}
+                    >
+                      {stage.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-2">
@@ -1705,7 +2530,9 @@ export default function LeadScraper({
                   <button
                     type="button"
                     onClick={() => {
-                      navigator.clipboard.writeText(buildPersonalizedPitch(pitchProspect));
+                      navigator.clipboard.writeText(
+                        buildPersonalizedPitch(pitchProspect, pitchAngle, followUpStage)
+                      );
                       setCopiedPitch(true);
                       setTimeout(() => setCopiedPitch(false), 2000);
                     }}
@@ -1725,7 +2552,7 @@ export default function LeadScraper({
                   </button>
                 </div>
                 <pre className="text-xs sm:text-sm text-zinc-800 whitespace-pre-wrap font-sans leading-relaxed">
-                  {buildPersonalizedPitch(pitchProspect)}
+                  {buildPersonalizedPitch(pitchProspect, pitchAngle, followUpStage)}
                 </pre>
               </div>
 
@@ -1735,9 +2562,12 @@ export default function LeadScraper({
                     <a
                       href={`https://wa.me/${formatPhoneForWhatsApp(
                         pitchProspect.phone
-                      )}?text=${encodeURIComponent(buildPersonalizedPitch(pitchProspect))}`}
+                      )}?text=${encodeURIComponent(
+                        buildPersonalizedPitch(pitchProspect, pitchAngle, followUpStage)
+                      )}`}
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={() => handleMarkOutreachSent(pitchProspect.id, true)}
                       className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold inline-flex items-center gap-2 shadow-sm"
                     >
                       <MessageCircle className="w-4 h-4" />
@@ -1748,8 +2578,11 @@ export default function LeadScraper({
                   {pitchProspect.email && (
                     <a
                       href={`mailto:${pitchProspect.email}?subject=${encodeURIComponent(
-                        `Software & Digital Operations Partnership — ${pitchProspect.businessName}`
-                      )}&body=${encodeURIComponent(buildPersonalizedPitch(pitchProspect))}`}
+                        `Software, Web & Mobile App Partnership — ${pitchProspect.businessName}`
+                      )}&body=${encodeURIComponent(
+                        buildPersonalizedPitch(pitchProspect, pitchAngle, followUpStage)
+                      )}`}
+                      onClick={() => handleMarkOutreachSent(pitchProspect.id, true)}
                       className="px-4 py-2.5 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold inline-flex items-center gap-2"
                     >
                       <Mail className="w-4 h-4" />
