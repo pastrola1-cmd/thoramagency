@@ -217,13 +217,26 @@ const PLATFORM_CHANNELS: PlatformChannel[] = [
 
 // Helper to normalize phone numbers for WhatsApp wa.me links
 function formatPhoneForWhatsApp(raw: string, defaultCountryCode = "234"): string {
-  const digits = raw.replace(/[^0-9+]/g, "");
+  if (!raw) return "";
+  let digits = raw.replace(/\(0\)/g, "").replace(/[^0-9+]/g, "");
   if (!digits) return "";
+  if (digits.startsWith("+2340")) digits = "+234" + digits.slice(5);
+  else if (digits.startsWith("2340")) digits = "234" + digits.slice(4);
   if (digits.startsWith("+")) return digits.slice(1);
   if (digits.startsWith("0") && digits.length === 11) {
     return defaultCountryCode + digits.slice(1);
   }
   return digits;
+}
+
+// Clean phone number into standard international format (+234...)
+function cleanPhoneNumber(raw: string): string {
+  if (!raw) return "";
+  const cleaned = raw.replace(/\(0\)/g, "").replace(/[^\d+]/g, "");
+  if (!cleaned) return "";
+  if (cleaned.startsWith("234") && !cleaned.startsWith("+234")) return "+" + cleaned;
+  if (cleaned.startsWith("0") && cleaned.length === 11) return "+234" + cleaned.slice(1);
+  return raw.trim();
 }
 
 // Classify whether a URL is a real standalone website, a social/directory page only, or missing
@@ -280,7 +293,7 @@ function calculateLeadScore(p: ScrapedProspect): number {
 function extractContactsFromText(text: string) {
   const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
   const phoneRegex =
-    /(?:\+?234|0)[789][01]\d[\s.-]?\d{3}[\s.-]?\d{4}|\+\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g;
+    /(?:\+?234[\s.-]?(?:\(0\)[\s.-]?)?|0)[789][01]\d[\s.-]?\d{3}[\s.-]?\d{4}|\+\d{1,3}[\s.-]?\(?\d{2,4}\)?[\s.-]?\d{3,4}[\s.-]?\d{3,4}/g;
 
   const emails = Array.from(new Set(text.match(emailRegex) || [])).filter(
     (e) =>
@@ -293,7 +306,10 @@ function extractContactsFromText(text: string) {
       !e.includes("wixpress.com")
   );
 
-  const phones = Array.from(new Set(text.match(phoneRegex) || [])).map((p) => p.trim());
+  const rawPhones = text.match(phoneRegex) || [];
+  const phones = Array.from(new Set(rawPhones.map(cleanPhoneNumber))).filter(
+    (p) => p.replace(/[^\d]/g, "").length >= 9
+  );
 
   const lower = text.toLowerCase();
   const hasMobileApp =
@@ -324,6 +340,9 @@ export default function LeadScraper({
 
   // Target Platform / Social Channel (Step 1)
   const [targetPlatformId, setTargetPlatformId] = useState<string>("all_web");
+
+  // Require Phone or Email Contact Toggle (Default: TRUE - skips empty map pins like AFDB HALL)
+  const [requireContact, setRequireContact] = useState<boolean>(true);
 
   // Optional API Keys (saved in localStorage so user never loses them)
   const [showApiKeys, setShowApiKeys] = useState(false);
@@ -425,6 +444,23 @@ export default function LeadScraper({
       duplicateCount > 0
         ? `🧹 Cleaned & merged ${duplicateCount} duplicate contact(s)! All ${merged.length} rows are now 100% unique.`
         : `✨ Verified! All ${merged.length} contacts in your table are already 100% unique (0 duplicates found).`
+    );
+  };
+
+  // 1-Click Purge Contactless Map Pins (Removes rows with no phone AND no email)
+  const handlePurgeEmptyPins = () => {
+    const emptyList = prospects.filter((p) => !p.phone && !p.email);
+    if (emptyList.length === 0) {
+      setScrapeStatus(
+        `✨ Verified! Every single lead in your table has a verified phone number or email address.`
+      );
+      return;
+    }
+    const kept = prospects.filter((p) => Boolean(p.phone || p.email));
+    emptyList.forEach((p) => deleteScrapedProspectFromDB(p.id));
+    updateAndPersistProspects(() => kept);
+    setScrapeStatus(
+      `🧹 Purged ${emptyList.length} bare map pin(s) that lacked contact details! All remaining ${kept.length} leads have phone numbers or emails.`
     );
   };
 
@@ -723,16 +759,22 @@ export default function LeadScraper({
                   .filter(Boolean)
                   .join(", ");
 
+                // If requireContact is active, discard bare pins that lack phone, email AND website
+                if (requireContact && !rawPhone && !rawEmail && !rawWeb) {
+                  return;
+                }
+
                 seenNames.add(name.toLowerCase());
                 const pageNum = Math.floor(idx / 10) + 1;
                 const webStatus = classifyWebsiteStatus(rawWeb);
+                const cleanedPhone = cleanPhoneNumber(rawPhone);
 
                 found.push({
                   id: `OSM-${Date.now()}-${found.length}`,
                   businessName: name,
                   category: activePreset.label.replace(/^[^\s]+\s/, ""),
                   location: street || location,
-                  phone: rawPhone,
+                  phone: cleanedPhone,
                   email: rawEmail,
                   website: rawWeb,
                   websiteStatus: webStatus,
@@ -880,7 +922,13 @@ export default function LeadScraper({
       else if (targetGapMode === "no_apk") setTableFilter("no_apk");
       else setTableFilter("all");
 
-      const stamped = found.map((f) => ({ ...f, scrapedAt: new Date().toISOString() }));
+      // Filter out contactless pins if requireContact is enabled
+      const finalProspects = requireContact
+        ? found.filter((p) => Boolean(p.phone || p.email))
+        : found;
+      const candidatesToMerge = finalProspects.length > 0 ? finalProspects : found;
+
+      const stamped = candidatesToMerge.map((f) => ({ ...f, scrapedAt: new Date().toISOString() }));
       const { addedCount, duplicateCount, enrichedCount } = mergeIncomingProspects(stamped);
 
       // Log campaign in `scrape_campaigns` table
@@ -1748,6 +1796,33 @@ export default function LeadScraper({
           </div>
         </div>
 
+        {/* Contact Guard & Key Helper Callout */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 p-3.5 rounded-xl bg-orange-50/70 border border-orange-500/20">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={requireContact}
+              onChange={(e) => setRequireContact(e.target.checked)}
+              className="w-4 h-4 accent-orange-600 rounded cursor-pointer"
+            />
+            <span className="text-xs font-bold text-zinc-900">
+              📞 Require Contact Details: Only save leads that have a verified Phone, WhatsApp or Email
+            </span>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold">
+              ✓ Skips Bare Map Pins
+            </span>
+          </label>
+
+          <button
+            type="button"
+            onClick={() => setShowApiKeys(!showApiKeys)}
+            className="text-xs font-semibold text-orange-700 hover:text-orange-900 underline inline-flex items-center gap-1.5"
+          >
+            <Key className="w-3.5 h-3.5" />
+            <span>{showApiKeys ? "Hide Key Settings" : "🔑 Connect Free Google Key (100% Verified Contacts)"}</span>
+          </button>
+        </div>
+
         {/* MODE 1: LIVE AUTO-SCRAPER */}
         {scrapeMode === "live_search" && (
           <form onSubmit={handleRunLiveScrape} className="pt-2">
@@ -1906,6 +1981,17 @@ export default function LeadScraper({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={handlePurgeEmptyPins}
+              disabled={prospects.length === 0}
+              className="btn-ghost text-xs py-2 px-3 inline-flex items-center gap-1.5 text-amber-700 hover:bg-amber-50"
+              title="Remove any scraped map pins that have neither a phone number nor an email"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>🧹 Purge Contactless Pins</span>
+            </button>
+
             <button
               type="button"
               onClick={handleManualDeduplicate}
@@ -2146,30 +2232,60 @@ export default function LeadScraper({
                       </td>
 
                       <td className="py-3.5 px-3 space-y-1.5 font-mono text-xs min-w-[210px]">
-                        <div className="flex items-center gap-1.5">
-                          <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
-                          <input
-                            type="text"
-                            value={p.phone}
-                            onChange={(e) =>
-                              handleInlineProspectEdit(p.id, "phone", e.target.value)
-                            }
-                            placeholder="+Add Phone / WhatsApp"
-                            className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-emerald-700 font-semibold placeholder-zinc-400 focus:outline-none"
-                          />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
+                            <input
+                              type="text"
+                              value={p.phone}
+                              onChange={(e) =>
+                                handleInlineProspectEdit(p.id, "phone", e.target.value)
+                              }
+                              placeholder="+Add Phone / WhatsApp"
+                              className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-emerald-700 font-semibold placeholder-zinc-400 focus:outline-none"
+                            />
+                          </div>
+                          {!p.phone && (
+                            <a
+                              href={`https://www.google.com/search?q=${encodeURIComponent(
+                                `${p.businessName} ${p.location} phone number whatsapp`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-orange-600 hover:underline flex items-center gap-1 pl-4 pt-0.5"
+                            >
+                              <span>🔍 Find Phone on Google</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
                         </div>
 
-                        <div className="flex items-center gap-1.5">
-                          <Mail className="w-3 h-3 text-orange-600 shrink-0" />
-                          <input
-                            type="text"
-                            value={p.email}
-                            onChange={(e) =>
-                              handleInlineProspectEdit(p.id, "email", e.target.value)
-                            }
-                            placeholder="+Add Email address"
-                            className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none"
-                          />
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <Mail className="w-3 h-3 text-orange-600 shrink-0" />
+                            <input
+                              type="text"
+                              value={p.email}
+                              onChange={(e) =>
+                                handleInlineProspectEdit(p.id, "email", e.target.value)
+                              }
+                              placeholder="+Add Email address"
+                              className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none"
+                            />
+                          </div>
+                          {!p.email && (
+                            <a
+                              href={`https://www.google.com/search?q=${encodeURIComponent(
+                                `${p.businessName} ${p.location} email contact address`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-blue-600 hover:underline flex items-center gap-1 pl-4 pt-0.5"
+                            >
+                              <span>🔍 Find Email on Google</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
                         </div>
                       </td>
 
