@@ -219,19 +219,20 @@ export async function deleteCRMLead(id: string): Promise<void> {
 
 // Export CSV
 export function exportLeadsToCSV(leads: CRMLead[]): void {
-  const headers = ["ID", "Name", "Email", "Phone", "Company", "Service", "Budget", "Timeline", "Status", "Priority", "AssignedTo", "CreatedAt"];
+  const headers = ["ID", "Name", "Email", "Phone", "Company", "Service", "Budget", "Timeline", "Status", "Priority", "AssignedTo", "Source", "CreatedAt"];
   const rows = leads.map((l) => [
     `"${l.id}"`,
-    `"${l.name}"`,
-    `"${l.email}"`,
-    `"${l.phone || ""}"`,
-    `"${l.company || ""}"`,
-    `"${l.service}"`,
-    `"${l.budget || ""}"`,
-    `"${l.timeline || ""}"`,
+    `"${(l.name || "").replace(/"/g, '""')}"`,
+    `"${(l.email || "").replace(/"/g, '""')}"`,
+    `"${(l.phone || "").replace(/"/g, '""')}"`,
+    `"${(l.company || "").replace(/"/g, '""')}"`,
+    `"${(l.service || "").replace(/"/g, '""')}"`,
+    `"${(l.budget || "").replace(/"/g, '""')}"`,
+    `"${(l.timeline || "").replace(/"/g, '""')}"`,
     `"${l.status}"`,
     `"${l.priority}"`,
-    `"${l.assignedTo || ""}"`,
+    `"${(l.assignedTo || "").replace(/"/g, '""')}"`,
+    `"${(l.source || "").replace(/"/g, '""')}"`,
     `"${new Date(l.createdAt).toLocaleDateString()}"`,
   ]);
 
@@ -239,8 +240,164 @@ export function exportLeadsToCSV(leads: CRMLead[]): void {
   const encodedUri = encodeURI(csvContent);
   const link = document.createElement("a");
   link.setAttribute("href", encodedUri);
-  link.setAttribute("download", `thoram_leads_${new Date().toISOString().split("T")[0]}.csv`);
+  link.setAttribute("download", `thoram_crm_leads_${new Date().toISOString().split("T")[0]}.csv`);
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
 }
+
+// ============================================================================
+// TABLE 2: SCRAPED PROSPECTS STAGING TABLE (Firestore `scraped_prospects` + LocalStorage)
+// ============================================================================
+
+export interface ScrapedProspect {
+  id: string;
+  businessName: string;
+  category: string;
+  location: string;
+  phone: string;
+  email: string;
+  website: string;
+  address?: string;
+  techGap: string;
+  recommendedService: string;
+  recommendedProduct: string;
+  demoUrl: string;
+  sourcePage: string;
+  injected?: boolean;
+  outreachSent?: boolean;
+  scrapedAt?: string;
+}
+
+const PROSPECTS_STORAGE_KEY = "thoram_scraped_prospects_v1";
+
+export function getSavedScrapedProspects(): ScrapedProspect[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(PROSPECTS_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export async function saveScrapedProspects(prospects: ScrapedProspect[]): Promise<void> {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(PROSPECTS_STORAGE_KEY, JSON.stringify(prospects));
+  }
+  try {
+    if (db && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.startsWith("mock-")) {
+      // Sync newly added prospects to Firestore `scraped_prospects` table
+      for (const p of prospects.slice(0, 25)) {
+        await addDoc(collection(db, "scraped_prospects"), p);
+      }
+    }
+  } catch {
+    // Fallback to localStorage table silently
+  }
+}
+
+export function exportProspectsToCSV(prospects: ScrapedProspect[]): void {
+  const headers = [
+    "ID",
+    "BusinessName",
+    "Category",
+    "Location",
+    "Phone_WhatsApp",
+    "Email",
+    "Website",
+    "DiagnosedTechGap",
+    "RecommendedProduct",
+    "DemoURL",
+    "Source",
+    "InjectedToCRM",
+    "ScrapedAt",
+  ];
+  const rows = prospects.map((p) => [
+    `"${p.id}"`,
+    `"${(p.businessName || "").replace(/"/g, '""')}"`,
+    `"${(p.category || "").replace(/"/g, '""')}"`,
+    `"${(p.location || "").replace(/"/g, '""')}"`,
+    `"${(p.phone || "").replace(/"/g, '""')}"`,
+    `"${(p.email || "").replace(/"/g, '""')}"`,
+    `"${(p.website || "").replace(/"/g, '""')}"`,
+    `"${(p.techGap || "").replace(/"/g, '""')}"`,
+    `"${(p.recommendedProduct || "").replace(/"/g, '""')}"`,
+    `"${(p.demoUrl || "").replace(/"/g, '""')}"`,
+    `"${(p.sourcePage || "").replace(/"/g, '""')}"`,
+    `"${p.injected ? "YES" : "NO"}"`,
+    `"${p.scrapedAt ? new Date(p.scrapedAt).toLocaleString() : new Date().toLocaleString()}"`,
+  ]);
+
+  const csvContent =
+    "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `thoram_scraped_prospects_${new Date().toISOString().split("T")[0]}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+// ============================================================================
+// TABLE 3: SCRAPE CAMPAIGNS & NICHE LOG TABLE (Firestore `scrape_campaigns` + LocalStorage)
+// ============================================================================
+
+export interface ScrapeCampaignLog {
+  id: string;
+  industry: string;
+  location: string;
+  mode: string;
+  pagesScanned: number;
+  leadsFound: number;
+  phonesFound: number;
+  emailsFound: number;
+  createdAt: string;
+}
+
+const CAMPAIGNS_STORAGE_KEY = "thoram_scrape_campaigns_v1";
+
+export function getScrapeCampaignLogs(): ScrapeCampaignLog[] {
+  if (typeof window === "undefined") return [];
+  const raw = localStorage.getItem(CAMPAIGNS_STORAGE_KEY);
+  if (!raw) return [];
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return [];
+  }
+}
+
+export async function addScrapeCampaignLog(
+  entry: Omit<ScrapeCampaignLog, "id" | "createdAt">
+): Promise<ScrapeCampaignLog> {
+  const newLog: ScrapeCampaignLog = {
+    ...entry,
+    id: `CMP-${Date.now().toString().slice(-5)}`,
+    createdAt: new Date().toISOString(),
+  };
+
+  if (typeof window !== "undefined") {
+    const existing = getScrapeCampaignLogs();
+    localStorage.setItem(CAMPAIGNS_STORAGE_KEY, JSON.stringify([newLog, ...existing.slice(0, 49)]));
+  }
+
+  try {
+    if (db && !process.env.NEXT_PUBLIC_FIREBASE_API_KEY?.startsWith("mock-")) {
+      await addDoc(collection(db, "scrape_campaigns"), newLog);
+    }
+  } catch {
+    // Fallback to localStorage table silently
+  }
+
+  return newLog;
+}
+
+export function clearScrapeCampaignLogs(): void {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem(CAMPAIGNS_STORAGE_KEY);
+  }
+}
+

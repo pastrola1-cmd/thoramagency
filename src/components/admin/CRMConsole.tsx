@@ -121,7 +121,7 @@ export default function CRMConsole() {
   const [leads, setLeads] = useState<CRMLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeSection, setActiveSection] = useState<"pipeline" | "scraper">("pipeline");
-  const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
+  const [viewMode, setViewMode] = useState<"both" | "kanban" | "table">("both");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
@@ -438,8 +438,19 @@ export default function CRMConsole() {
               {/* View Toggle */}
               <div className="flex items-center bg-zinc-100 p-0.5 rounded-xl border border-zinc-900/[0.06] shrink-0">
                 <button
+                  onClick={() => setViewMode("both")}
+                  className={`p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                    viewMode === "both"
+                      ? "bg-white text-zinc-900 shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  <Layers className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Both</span>
+                </button>
+                <button
                   onClick={() => setViewMode("kanban")}
-                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                  className={`p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                     viewMode === "kanban"
                       ? "bg-white text-zinc-900 shadow-xs"
                       : "text-zinc-500 hover:text-zinc-900"
@@ -450,7 +461,7 @@ export default function CRMConsole() {
                 </button>
                 <button
                   onClick={() => setViewMode("table")}
-                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                  className={`p-1.5 px-2.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
                     viewMode === "table"
                       ? "bg-white text-zinc-900 shadow-xs"
                       : "text-zinc-500 hover:text-zinc-900"
@@ -464,7 +475,7 @@ export default function CRMConsole() {
           </div>
 
           {/* VIEW 1: KANBAN PIPELINE BOARD */}
-          {viewMode === "kanban" && (
+          {(viewMode === "both" || viewMode === "kanban") && (
             <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 overflow-x-auto pb-6">
               {PIPELINE_ORDER.map((stage) => {
                 const cfg = STATUS_CONFIG[stage];
@@ -569,16 +580,34 @@ export default function CRMConsole() {
             </div>
           )}
 
-          {/* VIEW 2: TABLE LIST VIEW */}
-          {viewMode === "table" && (
+          {/* VIEW 2: MASTER CRM LEADS DATABASE TABLE (`crm_leads`) */}
+          {(viewMode === "both" || viewMode === "table") && (
             <div className="rounded-2xl bg-white border border-zinc-900/[0.08] overflow-hidden shadow-xs">
+              <div className="px-5 py-4 border-b border-zinc-900/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-zinc-50/40">
+                <div>
+                  <span className="text-[11px] font-mono uppercase text-orange-600 font-bold">
+                    Database Table · crm_leads
+                  </span>
+                  <h3 className="text-base font-bold text-zinc-900">
+                    Master Client & Scraped Leads Table ({filteredLeads.length} records)
+                  </h3>
+                </div>
+                <button
+                  onClick={() => exportLeadsToCSV(filteredLeads)}
+                  className="btn-ghost text-xs py-1.5 px-3 inline-flex items-center gap-1.5 self-start sm:self-auto"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export Table CSV</span>
+                </button>
+              </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-xs sm:text-sm">
                   <thead className="bg-zinc-50/80 border-b border-zinc-900/[0.06] text-zinc-500 font-mono uppercase text-[11px]">
                     <tr>
                       <th className="py-3 px-4">Client / Company</th>
-                      <th className="py-3 px-4">Capability & Requirements</th>
-                      <th className="py-3 px-4">Budget / Timeline</th>
+                      <th className="py-3 px-4">Phone / WhatsApp & Email</th>
+                      <th className="py-3 px-4">Capability & Opportunity</th>
+                      <th className="py-3 px-4">Source</th>
                       <th className="py-3 px-4">Stage</th>
                       <th className="py-3 px-4">Priority</th>
                       <th className="py-3 px-4">Assignee</th>
@@ -588,8 +617,8 @@ export default function CRMConsole() {
                   <tbody className="divide-y divide-zinc-900/[0.06]">
                     {filteredLeads.length === 0 ? (
                       <tr>
-                        <td colSpan={7} className="text-center py-12 text-zinc-400 font-mono">
-                          No matching leads found.
+                        <td colSpan={8} className="text-center py-12 text-zinc-400 font-mono">
+                          No leads in table yet. Click &quot;🎯 Outbound Lead Scraper&quot; above to scrape and inject targeted businesses, or click &quot;+ Add Lead&quot;.
                         </td>
                       </tr>
                     ) : (
@@ -601,10 +630,18 @@ export default function CRMConsole() {
                         >
                           <td className="py-3.5 px-4">
                             <div className="font-bold text-zinc-900">{lead.name}</div>
-                            <div className="text-xs text-zinc-500">{lead.email}</div>
                             {lead.company && (
-                              <div className="text-[11px] text-zinc-400 mt-0.5">{lead.company}</div>
+                              <div className="text-[11px] text-zinc-500 mt-0.5">{lead.company}</div>
                             )}
+                            <div className="text-[10px] font-mono text-zinc-400 mt-0.5">{lead.id}</div>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-xs">
+                            {lead.phone ? (
+                              <div className="text-emerald-700 font-semibold">{lead.phone}</div>
+                            ) : (
+                              <div className="text-zinc-400 text-[11px]">No phone</div>
+                            )}
+                            <div className="text-zinc-600 truncate max-w-[190px]">{lead.email}</div>
                           </td>
                           <td className="py-3.5 px-4 max-w-[260px]">
                             <div className="font-semibold text-zinc-800 truncate">{lead.service}</div>
@@ -613,8 +650,9 @@ export default function CRMConsole() {
                             </div>
                           </td>
                           <td className="py-3.5 px-4 font-mono text-xs">
-                            <div className="text-emerald-700 font-semibold">{lead.budget || "N/A"}</div>
-                            <div className="text-zinc-400">{lead.timeline || "Flexible"}</div>
+                            <span className="px-2 py-0.5 rounded bg-zinc-100 text-zinc-700 text-[11px]">
+                              {lead.source || "Direct"}
+                            </span>
                           </td>
                           <td className="py-3.5 px-4">
                             <span

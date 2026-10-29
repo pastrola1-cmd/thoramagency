@@ -1,7 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { CRMLead, createCRMLead } from "@/lib/crm";
+import { useState, useEffect, useMemo } from "react";
+import {
+  CRMLead,
+  createCRMLead,
+  ScrapedProspect,
+  getSavedScrapedProspects,
+  saveScrapedProspects,
+  exportProspectsToCSV,
+  ScrapeCampaignLog,
+  getScrapeCampaignLogs,
+  addScrapeCampaignLog,
+  clearScrapeCampaignLogs,
+} from "@/lib/crm";
 import {
   Search,
   Globe,
@@ -25,25 +36,12 @@ import {
   AlertTriangle,
   SlidersHorizontal,
   Trash2,
+  Download,
+  Database,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-export interface ScrapedProspect {
-  id: string;
-  businessName: string;
-  category: string;
-  location: string;
-  phone: string;
-  email: string;
-  website: string;
-  address?: string;
-  techGap: string;
-  recommendedService: string;
-  recommendedProduct: string;
-  demoUrl: string;
-  sourcePage: string;
-  injected?: boolean;
-}
+export type { ScrapedProspect };
 
 interface IndustryPreset {
   id: string;
@@ -144,7 +142,7 @@ const INDUSTRY_PRESETS: IndustryPreset[] = [
   },
 ];
 
-// Helper to normalize phone numbers for WhatsAppwa.me links
+// Helper to normalize phone numbers for WhatsApp wa.me links
 function formatPhoneForWhatsApp(raw: string, defaultCountryCode = "234"): string {
   const digits = raw.replace(/[^0-9+]/g, "");
   if (!digits) return "";
@@ -199,11 +197,53 @@ export default function LeadScraper({
     typeof window !== "undefined" ? localStorage.getItem("thoram_gplaces_key") || "" : ""
   );
 
-  // Scraper State
+  // Scraper State + Persistent Tables
   const [isScraping, setIsScraping] = useState(false);
   const [scrapeStatus, setScrapeStatus] = useState<string>("");
   const [prospects, setProspects] = useState<ScrapedProspect[]>([]);
+  const [campaignLogs, setCampaignLogs] = useState<ScrapeCampaignLog[]>([]);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  // Table Filters
+  const [tableFilter, setTableFilter] = useState<
+    "all" | "has_phone" | "has_email" | "pending_crm"
+  >("all");
+  const [tableSearch, setTableSearch] = useState<string>("");
+
+  // Load persisted tables on mount
+  useEffect(() => {
+    const savedProspects = getSavedScrapedProspects();
+    setProspects(savedProspects);
+    setCampaignLogs(getScrapeCampaignLogs());
+  }, []);
+
+  // Helper to update prospects state + persist to `scraped_prospects` table
+  const updateAndPersistProspects = (updater: (prev: ScrapedProspect[]) => ScrapedProspect[]) => {
+    setProspects((prev) => {
+      const next = updater(prev);
+      saveScrapedProspects(next);
+      return next;
+    });
+  };
+
+  // Filtered prospects for Table 1
+  const filteredProspects = useMemo(() => {
+    return prospects.filter((p) => {
+      const matchesSearch =
+        !tableSearch.trim() ||
+        p.businessName.toLowerCase().includes(tableSearch.toLowerCase()) ||
+        p.location.toLowerCase().includes(tableSearch.toLowerCase()) ||
+        p.phone.toLowerCase().includes(tableSearch.toLowerCase()) ||
+        p.email.toLowerCase().includes(tableSearch.toLowerCase()) ||
+        p.category.toLowerCase().includes(tableSearch.toLowerCase());
+
+      if (!matchesSearch) return false;
+      if (tableFilter === "has_phone") return Boolean(p.phone);
+      if (tableFilter === "has_email") return Boolean(p.email);
+      if (tableFilter === "pending_crm") return !p.injected;
+      return true;
+    });
+  }, [prospects, tableFilter, tableSearch]);
 
   // Bulk Paste / URL inputs
   const [rawPasteText, setRawPasteText] = useState("");
@@ -521,12 +561,26 @@ export default function LeadScraper({
         return scoreB - scoreA;
       });
 
-      setProspects((prev) => [...found, ...prev]);
+      const stamped = found.map((f) => ({ ...f, scrapedAt: new Date().toISOString() }));
+      updateAndPersistProspects((prev) => [...stamped, ...prev]);
+
+      // Log campaign in `scrape_campaigns` table
+      const campaignEntry = await addScrapeCampaignLog({
+        industry: activePreset.label.replace(/^[^\s]+\s/, ""),
+        location,
+        mode: serperKey.trim() ? "Google SERP API (Pages 1–10)" : "Auto-Scraper (OSM + Web)",
+        pagesScanned: maxPages,
+        leadsFound: stamped.length,
+        phonesFound: stamped.filter((s) => Boolean(s.phone)).length,
+        emailsFound: stamped.filter((s) => Boolean(s.email)).length,
+      });
+      setCampaignLogs((prev) => [campaignEntry, ...prev]);
+
       // Auto-select newly found prospects
-      setSelectedIds(new Set(found.map((f) => f.id)));
+      setSelectedIds(new Set(stamped.map((f) => f.id)));
       setScrapeStatus(
-        found.length > 0
-          ? `✅ Discovered ${found.length} targeted prospects in ${location}!`
+        stamped.length > 0
+          ? `✅ Discovered ${stamped.length} targeted prospects in ${location} and saved to scraped_prospects table!`
           : `No direct public listings returned automatically. Try the Google X-Ray Dork tab to extract deep Google pages 1–10!`
       );
     } catch (err) {
@@ -538,7 +592,7 @@ export default function LeadScraper({
   };
 
   // ─── ENGINE 2: GOOGLE X-RAY DORK + RAW PAGE CONTACT RIPPER ───
-  const handleExtractFromRawText = () => {
+  const handleExtractFromRawText = async () => {
     if (!rawPasteText.trim()) return;
     setIsScraping(true);
     setScrapeStatus("Parsing raw Google results for phones, WhatsApp numbers & emails...");
@@ -600,6 +654,7 @@ export default function LeadScraper({
           recommendedProduct: activePreset.productName,
           demoUrl: activePreset.demoUrl,
           sourcePage: "Google Deep X-Ray",
+          scrapedAt: new Date().toISOString(),
         });
       }
     }
@@ -621,15 +676,28 @@ export default function LeadScraper({
           recommendedProduct: activePreset.productName,
           demoUrl: activePreset.demoUrl,
           sourcePage: "Google Deep X-Ray",
+          scrapedAt: new Date().toISOString(),
         });
       }
     }
 
-    setProspects((prev) => [...extracted, ...prev]);
+    updateAndPersistProspects((prev) => [...extracted, ...prev]);
+
+    const campaignEntry = await addScrapeCampaignLog({
+      industry: activePreset.label.replace(/^[^\s]+\s/, ""),
+      location,
+      mode: "Google Deep X-Ray Ripper",
+      pagesScanned: maxPages,
+      leadsFound: extracted.length,
+      phonesFound: extracted.filter((s) => Boolean(s.phone)).length,
+      emailsFound: extracted.filter((s) => Boolean(s.email)).length,
+    });
+    setCampaignLogs((prev) => [campaignEntry, ...prev]);
+
     setSelectedIds(new Set(extracted.map((e) => e.id)));
     setIsScraping(false);
     setScrapeStatus(
-      `✅ Extracted ${extracted.length} verified business contacts (${allPhones.length} phones, ${allEmails.length} emails)!`
+      `✅ Extracted ${extracted.length} verified business contacts (${allPhones.length} phones, ${allEmails.length} emails) into scraped_prospects table!`
     );
     setRawPasteText("");
   };
@@ -670,14 +738,38 @@ export default function LeadScraper({
         recommendedProduct: activePreset.productName,
         demoUrl: activePreset.demoUrl,
         sourcePage: "Direct Website Spider",
+        scrapedAt: new Date().toISOString(),
       });
     }
 
-    setProspects((prev) => [...crawled, ...prev]);
+    updateAndPersistProspects((prev) => [...crawled, ...prev]);
+
+    const campaignEntry = await addScrapeCampaignLog({
+      industry: activePreset.label.replace(/^[^\s]+\s/, ""),
+      location,
+      mode: "Website URL Spider",
+      pagesScanned: crawled.length,
+      leadsFound: crawled.length,
+      phonesFound: crawled.filter((s) => Boolean(s.phone)).length,
+      emailsFound: crawled.filter((s) => Boolean(s.email)).length,
+    });
+    setCampaignLogs((prev) => [campaignEntry, ...prev]);
+
     setSelectedIds(new Set(crawled.map((c) => c.id)));
     setIsScraping(false);
-    setScrapeStatus(`✅ Crawled ${crawled.length} websites and extracted contact endpoints!`);
+    setScrapeStatus(`✅ Crawled ${crawled.length} websites and saved contact endpoints to table!`);
     setUrlListText("");
+  };
+
+  // Inline edit phone or email on a scraped prospect row
+  const handleInlineProspectEdit = (
+    id: string,
+    field: "phone" | "email" | "businessName",
+    value: string
+  ) => {
+    updateAndPersistProspects((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
   };
 
   // ─── INJECT SINGLE OR BULK PROSPECTS INTO CRM PIPELINE ───
@@ -703,7 +795,7 @@ export default function LeadScraper({
       source: `Outbound Scraper (${prospect.sourcePage})`,
     });
 
-    setProspects((prev) =>
+    updateAndPersistProspects((prev) =>
       prev.map((p) => (p.id === prospect.id ? { ...p, injected: true } : p))
     );
     onLeadsInjected([created]);
@@ -741,7 +833,7 @@ export default function LeadScraper({
       createdList.push(created);
     }
 
-    setProspects((prev) =>
+    updateAndPersistProspects((prev) =>
       prev.map((p) => (selectedIds.has(p.id) ? { ...p, injected: true } : p))
     );
     onLeadsInjected(createdList);
@@ -848,6 +940,55 @@ export default function LeadScraper({
             </motion.div>
           )}
         </AnimatePresence>
+      </div>
+
+      {/* DATABASE TABLES STATUS BAR */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5 text-orange-600" />
+              <span>Table 1 · scraped_prospects</span>
+            </div>
+            <div className="text-xl font-bold text-zinc-900 mt-1">
+              {prospects.length} <span className="text-xs font-normal text-zinc-500">rows</span>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 font-semibold">
+            Active & Synced
+          </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
+              <Phone className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Verified Phones / Emails</span>
+            </div>
+            <div className="text-xl font-bold text-zinc-900 mt-1">
+              {prospects.filter((p) => p.phone).length} phones ·{" "}
+              {prospects.filter((p) => p.email).length} emails
+            </div>
+          </div>
+          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-700 font-semibold">
+            Ready to Pitch
+          </span>
+        </div>
+
+        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] flex items-center justify-between">
+          <div>
+            <div className="text-[11px] font-mono uppercase text-zinc-500 flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5 text-purple-600" />
+              <span>Table 2 · scrape_campaigns</span>
+            </div>
+            <div className="text-xl font-bold text-zinc-900 mt-1">
+              {campaignLogs.length} <span className="text-xs font-normal text-zinc-500">runs</span>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-purple-500/10 text-purple-700 font-semibold">
+            Logged
+          </span>
+        </div>
       </div>
 
       {/* STEP 1: SELECT TARGET INDUSTRY, LOCATION & SCRAPE MODE */}
@@ -1036,10 +1177,14 @@ export default function LeadScraper({
           <div className="p-5 rounded-2xl bg-zinc-50 border border-zinc-900/[0.08] space-y-5">
             <div className="space-y-2">
               <div className="text-xs font-mono font-bold uppercase text-orange-600">
-                 Step A · Open Deep Google X-Ray Search (Pages 1 to 10)
+                Step A · Open Deep Google X-Ray Search (Pages 1 to 10)
               </div>
               <p className="text-xs text-zinc-600 leading-relaxed">
-                Click any Google Page button below. It uses a specialized <strong>X-Ray Search Formula</strong> that forces Google to display businesses in <strong>{location}</strong> along with their <strong>WhatsApp numbers (080/081/090/070)</strong> and <strong>email addresses</strong> right in the snippets — even on Page 10!
+                Click any Google Page button below. It uses a specialized{" "}
+                <strong>X-Ray Search Formula</strong> that forces Google to display businesses in{" "}
+                <strong>{location}</strong> along with their{" "}
+                <strong>WhatsApp numbers (080/081/090/070)</strong> and{" "}
+                <strong>email addresses</strong> right in the snippets — even on Page 10!
               </p>
               <div className="flex flex-wrap gap-2 pt-1">
                 {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((pageIdx) => (
@@ -1134,69 +1279,143 @@ export default function LeadScraper({
         )}
       </div>
 
-      {/* STEP 2: SCRAPED PROSPECTS REVIEW QUEUE & 1-CLICK CRM INJECTION */}
-      {prospects.length > 0 && (
-        <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-900/[0.08] shadow-xs space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-900/[0.06]">
-            <div>
-              <div className="text-xs font-mono uppercase text-emerald-600 font-bold">
-                Step 2 · Prospect Review & Pitch Queue
-              </div>
-              <h3 className="text-xl font-bold text-zinc-900">
-                {prospects.length} Discovered Businesses ({selectedIds.size} Selected)
-              </h3>
+      {/* STEP 2: SCRAPED PROSPECTS STAGING TABLE (`scraped_prospects`) — ALWAYS VISIBLE */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-900/[0.08] shadow-xs space-y-6">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-zinc-900/[0.06]">
+          <div>
+            <div className="text-xs font-mono uppercase text-emerald-600 font-bold flex items-center gap-1.5">
+              <Database className="w-3.5 h-3.5" />
+              <span>Table 1 · Scraped Prospects Staging Table (`scraped_prospects`)</span>
             </div>
-
-            <div className="flex flex-wrap items-center gap-2.5">
-              <button
-                type="button"
-                onClick={() => {
-                  if (selectedIds.size === prospects.length) {
-                    setSelectedIds(new Set());
-                  } else {
-                    setSelectedIds(new Set(prospects.map((p) => p.id)));
-                  }
-                }}
-                className="btn-ghost text-xs py-2 px-3"
-              >
-                {selectedIds.size === prospects.length ? "Deselect All" : "Select All"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setProspects([])}
-                className="btn-ghost text-xs py-2 px-3 text-rose-600 hover:bg-rose-50"
-              >
-                <Trash2 className="w-3.5 h-3.5" />
-                <span>Clear Queue</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleInjectSelected}
-                disabled={selectedIds.size === 0 || isScraping}
-                className="btn-solid text-xs py-2.5 px-5 font-bold inline-flex items-center gap-2 shadow-md shadow-orange-600/15"
-              >
-                <Plus className="w-4 h-4" />
-                <span>Inject {selectedIds.size} Selected into CRM Pipeline</span>
-              </button>
-            </div>
+            <h3 className="text-xl font-bold text-zinc-900 mt-0.5">
+              {prospects.length} Discovered Businesses ({selectedIds.size} Selected)
+            </h3>
           </div>
 
-          {/* Prospects Table */}
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-zinc-50 border-b border-zinc-900/[0.06] text-[11px] font-mono uppercase text-zinc-500">
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => exportProspectsToCSV(prospects)}
+              disabled={prospects.length === 0}
+              className="btn-ghost text-xs py-2 px-3 inline-flex items-center gap-1.5"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export Table CSV</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (selectedIds.size === filteredProspects.length && filteredProspects.length > 0) {
+                  setSelectedIds(new Set());
+                } else {
+                  setSelectedIds(new Set(filteredProspects.map((p) => p.id)));
+                }
+              }}
+              disabled={filteredProspects.length === 0}
+              className="btn-ghost text-xs py-2 px-3"
+            >
+              {selectedIds.size === filteredProspects.length && filteredProspects.length > 0
+                ? "Deselect All"
+                : "Select All"}
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                if (confirm("Clear all scraped prospects from the staging table?")) {
+                  updateAndPersistProspects(() => []);
+                  setSelectedIds(new Set());
+                }
+              }}
+              disabled={prospects.length === 0}
+              className="btn-ghost text-xs py-2 px-3 text-rose-600 hover:bg-rose-50 inline-flex items-center gap-1"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>Clear Table</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleInjectSelected}
+              disabled={selectedIds.size === 0 || isScraping}
+              className="btn-solid text-xs py-2.5 px-5 font-bold inline-flex items-center gap-2 shadow-md shadow-orange-600/15"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Inject {selectedIds.size} Selected into CRM Pipeline</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Table Filter Pills & Search */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-1.5">
+            {[
+              { id: "all", label: `All Rows (${prospects.length})` },
+              {
+                id: "has_phone",
+                label: `Has Phone/WhatsApp (${prospects.filter((p) => p.phone).length})`,
+              },
+              {
+                id: "has_email",
+                label: `Has Email (${prospects.filter((p) => p.email).length})`,
+              },
+              {
+                id: "pending_crm",
+                label: `Not In CRM Yet (${prospects.filter((p) => !p.injected).length})`,
+              },
+            ].map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setTableFilter(tab.id as any)}
+                className={`px-3 py-1.5 rounded-xl text-xs font-mono font-semibold transition-all ${
+                  tableFilter === tab.id
+                    ? "bg-zinc-900 text-white"
+                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative w-full md:w-72">
+            <Search className="w-3.5 h-3.5 text-zinc-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={tableSearch}
+              onChange={(e) => setTableSearch(e.target.value)}
+              placeholder="Filter table by name, phone, city..."
+              className="w-full bg-zinc-50 border border-zinc-900/[0.08] rounded-xl pl-8 pr-3 py-1.5 text-xs text-zinc-900 focus:outline-none focus:border-orange-600"
+            />
+          </div>
+        </div>
+
+        {/* Prospects Data Table */}
+        <div className="overflow-x-auto rounded-2xl border border-zinc-900/[0.08]">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-zinc-50 border-b border-zinc-900/[0.06] text-[11px] font-mono uppercase text-zinc-500">
+              <tr>
+                <th className="py-3 px-3 w-8">✓</th>
+                <th className="py-3 px-3">Business & Location</th>
+                <th className="py-3 px-3">Phone / WhatsApp & Email (Editable)</th>
+                <th className="py-3 px-3">Website</th>
+                <th className="py-3 px-3">Diagnosed Opportunity & Product Pitch</th>
+                <th className="py-3 px-3 text-right">Outreach & CRM Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900/[0.06]">
+              {filteredProspects.length === 0 ? (
                 <tr>
-                  <th className="py-3 px-3 w-8">✓</th>
-                  <th className="py-3 px-3">Business & Location</th>
-                  <th className="py-3 px-3">Scraped Contacts</th>
-                  <th className="py-3 px-3">Diagnosed Opportunity & Product Pitch</th>
-                  <th className="py-3 px-3 text-right">Outreach & CRM Actions</th>
+                  <td colSpan={6} className="text-center py-12 text-zinc-400 font-mono text-xs">
+                    {prospects.length === 0
+                      ? "No scraped businesses in table yet. Choose an industry above and click 'Scrape' to populate this table."
+                      : "No rows match your current filter."}
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900/[0.06]">
-                {prospects.map((p) => {
+              ) : (
+                filteredProspects.map((p) => {
                   const isSelected = selectedIds.has(p.id);
                   const waNumber = formatPhoneForWhatsApp(p.phone);
                   const pitchText = encodeURIComponent(buildPersonalizedPitch(p));
@@ -1222,7 +1441,7 @@ export default function LeadScraper({
                         />
                       </td>
 
-                      <td className="py-3.5 px-3 max-w-[240px]">
+                      <td className="py-3.5 px-3 max-w-[230px]">
                         <div className="font-bold text-zinc-900 truncate">{p.businessName}</div>
                         <div className="text-xs text-zinc-500 truncate flex items-center gap-1 mt-0.5">
                           <MapPin className="w-3 h-3 text-zinc-400 shrink-0" />
@@ -1233,29 +1452,41 @@ export default function LeadScraper({
                         </span>
                       </td>
 
-                      <td className="py-3.5 px-3 space-y-1 font-mono text-xs">
-                        {p.phone ? (
-                          <div className="text-emerald-700 font-semibold flex items-center gap-1.5">
-                            <Phone className="w-3 h-3" />
-                            <span>{p.phone}</span>
-                          </div>
-                        ) : (
-                          <div className="text-zinc-400 text-[11px]">No public phone</div>
-                        )}
+                      <td className="py-3.5 px-3 space-y-1.5 font-mono text-xs min-w-[210px]">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3 h-3 text-emerald-600 shrink-0" />
+                          <input
+                            type="text"
+                            value={p.phone}
+                            onChange={(e) =>
+                              handleInlineProspectEdit(p.id, "phone", e.target.value)
+                            }
+                            placeholder="+Add Phone / WhatsApp"
+                            className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-emerald-700 font-semibold placeholder-zinc-400 focus:outline-none"
+                          />
+                        </div>
 
-                        {p.email ? (
-                          <div className="text-zinc-700 flex items-center gap-1.5 truncate max-w-[200px]">
-                            <Mail className="w-3 h-3 text-orange-600 shrink-0" />
-                            <span className="truncate">{p.email}</span>
-                          </div>
-                        ) : null}
+                        <div className="flex items-center gap-1.5">
+                          <Mail className="w-3 h-3 text-orange-600 shrink-0" />
+                          <input
+                            type="text"
+                            value={p.email}
+                            onChange={(e) =>
+                              handleInlineProspectEdit(p.id, "email", e.target.value)
+                            }
+                            placeholder="+Add Email address"
+                            className="w-full bg-zinc-50/80 hover:bg-white focus:bg-white border border-transparent hover:border-zinc-200 focus:border-orange-500 rounded px-1.5 py-0.5 text-xs text-zinc-700 placeholder-zinc-400 focus:outline-none"
+                          />
+                        </div>
+                      </td>
 
+                      <td className="py-3.5 px-3 font-mono text-xs">
                         {p.website ? (
                           <a
                             href={p.website}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline inline-flex items-center gap-1 text-[11px] truncate max-w-[190px]"
+                            className="text-blue-600 hover:underline inline-flex items-center gap-1 text-[11px] truncate max-w-[160px]"
                           >
                             <Globe className="w-3 h-3 shrink-0" />
                             <span className="truncate">
@@ -1269,7 +1500,7 @@ export default function LeadScraper({
                         )}
                       </td>
 
-                      <td className="py-3.5 px-3 max-w-[280px]">
+                      <td className="py-3.5 px-3 max-w-[260px]">
                         <div className="text-xs font-semibold text-orange-600">
                           Pitch: {p.recommendedProduct}
                         </div>
@@ -1279,7 +1510,7 @@ export default function LeadScraper({
                       </td>
 
                       <td className="py-3.5 px-3 text-right">
-                        <div className="flex items-center justify-end gap-2">
+                        <div className="flex items-center justify-end gap-1.5">
                           {/* Open AI Pitch Generator Modal */}
                           <button
                             type="button"
@@ -1318,19 +1549,107 @@ export default function LeadScraper({
                               className="px-2.5 py-1.5 rounded-lg bg-orange-600/10 hover:bg-orange-600 hover:text-white text-orange-600 border border-orange-500/20 text-xs font-semibold inline-flex items-center gap-1 transition-colors"
                             >
                               <Plus className="w-3.5 h-3.5" />
-                              <span>Add to CRM</span>
+                              <span>+ CRM</span>
                             </button>
                           )}
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              updateAndPersistProspects((prev) =>
+                                prev.filter((item) => item.id !== p.id)
+                              )
+                            }
+                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50"
+                            title="Remove row"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
                         </div>
                       </td>
                     </tr>
                   );
-                })}
-              </tbody>
-            </table>
-          </div>
+                })
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
+      </div>
+
+      {/* STEP 3: SCRAPE CAMPAIGNS & NICHE HISTORY TABLE (`scrape_campaigns`) */}
+      <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-900/[0.08] shadow-xs space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-zinc-900/[0.06]">
+          <div>
+            <div className="text-xs font-mono uppercase text-purple-600 font-bold flex items-center gap-1.5">
+              <Layers className="w-3.5 h-3.5" />
+              <span>Table 2 · Scrape Campaigns History Table (`scrape_campaigns`)</span>
+            </div>
+            <h3 className="text-lg font-bold text-zinc-900 mt-0.5">
+              Recent Outbound Niche Runs ({campaignLogs.length})
+            </h3>
+          </div>
+
+          {campaignLogs.length > 0 && (
+            <button
+              type="button"
+              onClick={() => {
+                clearScrapeCampaignLogs();
+                setCampaignLogs([]);
+              }}
+              className="btn-ghost text-xs py-1.5 px-3 text-zinc-500 hover:text-rose-600"
+            >
+              Clear History
+            </button>
+          )}
+        </div>
+
+        <div className="overflow-x-auto rounded-2xl border border-zinc-900/[0.08]">
+          <table className="w-full text-left text-xs sm:text-sm">
+            <thead className="bg-zinc-50 border-b border-zinc-900/[0.06] text-[11px] font-mono uppercase text-zinc-500">
+              <tr>
+                <th className="py-3 px-4">Campaign ID</th>
+                <th className="py-3 px-4">Target Industry / Niche</th>
+                <th className="py-3 px-4">City / Location</th>
+                <th className="py-3 px-4">Engine Mode</th>
+                <th className="py-3 px-4">Depth</th>
+                <th className="py-3 px-4">Businesses & Contacts Found</th>
+                <th className="py-3 px-4 text-right">Date & Time</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-zinc-900/[0.06]">
+              {campaignLogs.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-zinc-400 font-mono text-xs">
+                    No scrape campaigns logged yet. Every scrape run is automatically recorded here.
+                  </td>
+                </tr>
+              ) : (
+                campaignLogs.map((log) => (
+                  <tr key={log.id} className="hover:bg-zinc-50/80">
+                    <td className="py-3 px-4 font-mono text-xs text-orange-600 font-semibold">
+                      {log.id}
+                    </td>
+                    <td className="py-3 px-4 font-bold text-zinc-900">{log.industry}</td>
+                    <td className="py-3 px-4 text-zinc-600">{log.location}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-zinc-600">{log.mode}</td>
+                    <td className="py-3 px-4 font-mono text-xs text-zinc-600">
+                      {log.pagesScanned} pages
+                    </td>
+                    <td className="py-3 px-4 font-mono text-xs">
+                      <span className="font-bold text-zinc-900">{log.leadsFound} leads</span>{" "}
+                      <span className="text-emerald-700">({log.phonesFound} phones</span>,{" "}
+                      <span className="text-orange-600">{log.emailsFound} emails)</span>
+                    </td>
+                    <td className="py-3 px-4 text-right font-mono text-xs text-zinc-400">
+                      {new Date(log.createdAt).toLocaleString()}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       {/* AI OUTBOUND PITCH MODAL */}
       <AnimatePresence>
