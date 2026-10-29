@@ -39,8 +39,11 @@ import {
   TrendingUp,
   Briefcase,
   Flame,
+  Sparkles,
+  Crosshair,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import LeadScraper from "./LeadScraper";
 
 const STATUS_CONFIG: Record<
   LeadStatus,
@@ -117,6 +120,7 @@ const PIPELINE_ORDER: LeadStatus[] = [
 export default function CRMConsole() {
   const [leads, setLeads] = useState<CRMLead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<"pipeline" | "scraper">("pipeline");
   const [viewMode, setViewMode] = useState<"kanban" | "table">("kanban");
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -255,23 +259,49 @@ export default function CRMConsole() {
   return (
     <div className="space-y-8">
       {/* Top Header & Fast Actions */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-zinc-900/[0.08]">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-zinc-900/[0.08]">
         <div>
           <div className="flex items-center gap-2">
             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
             <span className="text-xs font-mono font-semibold uppercase tracking-wider text-orange-600">
-              Agency Internal Ops
+              Agency Internal Ops & Growth Engine
             </span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-zinc-900 tracking-tight mt-1">
-            Client Inquiries & Lead Pipeline
+            Client Inquiries, Outbound Scraper & Pipeline
           </h1>
           <p className="text-sm text-zinc-500">
-            Real-time prospective client briefing logs, stage progression, and follow-up routing.
+            Scrape targeted B2B industry contacts across deep pages, pitch tailored products, and manage follow-ups.
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+          {/* Primary Section Switcher */}
+          <div className="flex items-center bg-zinc-100 p-1 rounded-xl border border-zinc-900/[0.08]">
+            <button
+              onClick={() => setActiveSection("pipeline")}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                activeSection === "pipeline"
+                  ? "bg-white text-zinc-900 shadow-xs"
+                  : "text-zinc-600 hover:text-zinc-900"
+              }`}
+            >
+              <Kanban className="w-3.5 h-3.5 text-orange-600" />
+              <span>CRM Pipeline ({stats.total})</span>
+            </button>
+            <button
+              onClick={() => setActiveSection("scraper")}
+              className={`px-3.5 py-2 rounded-lg text-xs font-bold flex items-center gap-1.5 transition-all ${
+                activeSection === "scraper"
+                  ? "bg-orange-600 text-white shadow-sm"
+                  : "text-orange-700 hover:bg-orange-500/10"
+              }`}
+            >
+              <Crosshair className="w-3.5 h-3.5" />
+              <span>🎯 Outbound Lead Scraper</span>
+            </button>
+          </div>
+
           <button
             onClick={() => exportLeadsToCSV(leads)}
             className="btn-ghost text-xs py-2.5 px-3.5 inline-flex items-center gap-1.5 font-medium"
@@ -290,324 +320,363 @@ export default function CRMConsole() {
         </div>
       </div>
 
-      {/* Metric Cards Row */}
-      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
-        <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] shadow-xs">
-          <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1">
-            Total Inquiries
-          </div>
-          <div className="text-2xl font-bold text-zinc-900">{stats.total}</div>
-        </div>
-        <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-xs">
-          <div className="text-xs font-mono text-amber-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-            <Flame className="w-3.5 h-3.5" />
-            <span>New Leads</span>
-          </div>
-          <div className="text-2xl font-bold text-amber-600">{stats.newCount}</div>
-        </div>
-        <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 shadow-xs">
-          <div className="text-xs font-mono text-blue-600 uppercase tracking-wider mb-1">
-            Active Discussions
-          </div>
-          <div className="text-2xl font-bold text-blue-600">{stats.active}</div>
-        </div>
-        <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 shadow-xs">
-          <div className="text-xs font-mono text-rose-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>Urgent Action</span>
-          </div>
-          <div className="text-2xl font-bold text-rose-600">{stats.urgentCount}</div>
-        </div>
-        <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 shadow-xs col-span-2 sm:col-span-1">
-          <div className="text-xs font-mono text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>Deals Won</span>
-          </div>
-          <div className="text-2xl font-bold text-emerald-600">{stats.wonCount}</div>
-        </div>
-      </div>
-
-      {/* Control Bar: Search, Filters, View Switcher */}
-      <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 p-3 rounded-2xl bg-white border border-zinc-900/[0.08]">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search leads by name, email, company, service..."
-            className="w-full bg-zinc-50 border border-zinc-900/[0.06] rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-orange-600 transition-colors"
-          />
-        </div>
-
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
-          {/* Status Filter */}
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-zinc-50 border border-zinc-900/[0.06] rounded-xl px-3 py-2 text-xs text-zinc-700 focus:outline-none focus:border-orange-600"
-          >
-            <option value="all">All Stages</option>
-            {PIPELINE_ORDER.map((st) => (
-              <option key={st} value={st}>
-                {STATUS_CONFIG[st].label}
-              </option>
-            ))}
-          </select>
-
-          {/* Priority Filter */}
-          <select
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value)}
-            className="bg-zinc-50 border border-zinc-900/[0.06] rounded-xl px-3 py-2 text-xs text-zinc-700 focus:outline-none focus:border-orange-600"
-          >
-            <option value="all">All Priorities</option>
-            <option value="urgent">Urgent</option>
-            <option value="high">High</option>
-            <option value="medium">Medium</option>
-            <option value="low">Low</option>
-          </select>
-
-          {/* View Toggle */}
-          <div className="flex items-center bg-zinc-100 p-0.5 rounded-xl border border-zinc-900/[0.06] shrink-0">
-            <button
-              onClick={() => setViewMode("kanban")}
-              className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                viewMode === "kanban"
-                  ? "bg-white text-zinc-900 shadow-xs"
-                  : "text-zinc-500 hover:text-zinc-900"
-              }`}
-            >
-              <Kanban className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Pipeline</span>
-            </button>
-            <button
-              onClick={() => setViewMode("table")}
-              className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
-                viewMode === "table"
-                  ? "bg-white text-zinc-900 shadow-xs"
-                  : "text-zinc-500 hover:text-zinc-900"
-              }`}
-            >
-              <TableIcon className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Table</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* VIEW 1: KANBAN PIPELINE BOARD */}
-      {viewMode === "kanban" && (
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 overflow-x-auto pb-6">
-          {PIPELINE_ORDER.map((stage) => {
-            const cfg = STATUS_CONFIG[stage];
-            const stageLeads = filteredLeads.filter((l) => l.status === stage);
-
-            return (
-              <div
-                key={stage}
-                className="flex flex-col rounded-2xl bg-zinc-100/70 border border-zinc-900/[0.06] p-3 min-w-[260px] xl:min-w-0"
-              >
-                {/* Column Header */}
-                <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-900/[0.06]">
-                  <div className="flex items-center gap-1.5">
-                    <span
-                      className={`w-2 h-2 rounded-full ${cfg.bg.replace("/10", "")}`}
-                    />
-                    <span className="text-xs font-mono font-bold text-zinc-800">
-                      {cfg.label}
-                    </span>
-                  </div>
-                  <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-zinc-600 border border-zinc-900/[0.06]">
-                    {stageLeads.length}
-                  </span>
-                </div>
-
-                {/* Column Cards */}
-                <div className="space-y-3 flex-1 overflow-y-auto max-h-[700px]">
-                  {stageLeads.length === 0 ? (
-                    <div className="text-center py-8 text-[11px] text-zinc-400 font-mono">
-                      No leads
-                    </div>
-                  ) : (
-                    stageLeads.map((lead) => (
-                      <div
-                        key={lead.id}
-                        onClick={() => setActiveLead(lead)}
-                        className="p-3.5 rounded-xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-md transition-all cursor-pointer space-y-2.5 group"
-                      >
-                        <div className="flex items-start justify-between gap-1">
-                          <span
-                            className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
-                              PRIORITY_BADGES[lead.priority].cls
-                            }`}
-                          >
-                            {lead.priority}
-                          </span>
-                          <span className="text-[10px] font-mono text-zinc-400">
-                            {new Date(lead.createdAt).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </span>
-                        </div>
-
-                        <div>
-                          <h4 className="text-sm font-bold text-zinc-900 group-hover:text-orange-600 transition-colors">
-                            {lead.name}
-                          </h4>
-                          {lead.company && (
-                            <div className="text-xs text-zinc-500 truncate flex items-center gap-1 mt-0.5">
-                              <Building2 className="w-3 h-3 text-zinc-400" />
-                              <span>{lead.company}</span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="text-[11px] font-mono text-zinc-600 bg-zinc-50 p-1.5 rounded-lg border border-zinc-900/[0.04] truncate">
-                          {lead.service}
-                        </div>
-
-                        {lead.budget && (
-                          <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
-                            <DollarSign className="w-3 h-3" />
-                            <span>{lead.budget}</span>
-                          </div>
-                        )}
-
-                        <div className="flex items-center justify-between pt-2 border-t border-zinc-900/[0.04] text-[11px] text-zinc-400">
-                          <span className="truncate max-w-[120px]">
-                            {lead.assignedTo || "Unassigned"}
-                          </span>
-                          {lead.phone && (
-                            <a
-                              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              className="text-emerald-600 hover:text-emerald-700 p-1 rounded hover:bg-emerald-50"
-                              title="Chat WhatsApp"
-                            >
-                              <MessageCircle className="w-3.5 h-3.5" />
-                            </a>
-                          )}
-                        </div>
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
+      {/* SECTION A: OUTBOUND LEAD SCRAPER & PITCH ENGINE */}
+      {activeSection === "scraper" && (
+        <LeadScraper
+          onLeadsInjected={(newLeads) => {
+            setLeads((prev) => [...newLeads, ...prev]);
+          }}
+        />
       )}
 
-      {/* VIEW 2: TABLE LIST VIEW */}
-      {viewMode === "table" && (
-        <div className="rounded-2xl bg-white border border-zinc-900/[0.08] overflow-hidden shadow-xs">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs sm:text-sm">
-              <thead className="bg-zinc-50/80 border-b border-zinc-900/[0.06] text-zinc-500 font-mono uppercase text-[11px]">
-                <tr>
-                  <th className="py-3 px-4">Client / Company</th>
-                  <th className="py-3 px-4">Capability & Requirements</th>
-                  <th className="py-3 px-4">Budget / Timeline</th>
-                  <th className="py-3 px-4">Stage</th>
-                  <th className="py-3 px-4">Priority</th>
-                  <th className="py-3 px-4">Assignee</th>
-                  <th className="py-3 px-4 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-900/[0.06]">
-                {filteredLeads.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="text-center py-12 text-zinc-400 font-mono">
-                      No matching leads found.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredLeads.map((lead) => (
-                    <tr
-                      key={lead.id}
-                      onClick={() => setActiveLead(lead)}
-                      className="hover:bg-orange-50/30 transition-colors cursor-pointer"
-                    >
-                      <td className="py-3.5 px-4">
-                        <div className="font-bold text-zinc-900">{lead.name}</div>
-                        <div className="text-xs text-zinc-500">{lead.email}</div>
-                        {lead.company && (
-                          <div className="text-[11px] text-zinc-400 mt-0.5">{lead.company}</div>
-                        )}
-                      </td>
-                      <td className="py-3.5 px-4 max-w-[260px]">
-                        <div className="font-semibold text-zinc-800 truncate">{lead.service}</div>
-                        <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
-                          {lead.message}
-                        </div>
-                      </td>
-                      <td className="py-3.5 px-4 font-mono text-xs">
-                        <div className="text-emerald-700 font-semibold">{lead.budget || "N/A"}</div>
-                        <div className="text-zinc-400">{lead.timeline || "Flexible"}</div>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`text-[11px] font-mono px-2.5 py-1 rounded-full border font-semibold inline-block ${
-                            STATUS_CONFIG[lead.status].bg
-                          } ${STATUS_CONFIG[lead.status].color} ${
-                            STATUS_CONFIG[lead.status].border
-                          }`}
-                        >
-                          {STATUS_CONFIG[lead.status].label}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4">
-                        <span
-                          className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
-                            PRIORITY_BADGES[lead.priority].cls
-                          }`}
-                        >
-                          {lead.priority}
-                        </span>
-                      </td>
-                      <td className="py-3.5 px-4 text-xs text-zinc-600">
-                        {lead.assignedTo || "Unassigned"}
-                      </td>
-                      <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
-                        <div className="flex items-center justify-end gap-1">
-                          {lead.phone && (
-                            <a
-                              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
-                              title="WhatsApp"
-                            >
-                              <MessageCircle className="w-4 h-4" />
-                            </a>
-                          )}
-                          <a
-                            href={`mailto:${lead.email}`}
-                            className="p-1.5 rounded-lg text-orange-600 hover:bg-orange-50 transition-colors"
-                            title="Email"
-                          >
-                            <Mail className="w-4 h-4" />
-                          </a>
-                          <button
-                            onClick={() => handleDelete(lead.id)}
-                            className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+      {/* SECTION B: CRM PIPELINE & FOLLOW-UP BOARD */}
+      {activeSection === "pipeline" && (
+        <>
+          {/* Metric Cards Row */}
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-3.5">
+            <div className="p-4 rounded-2xl bg-white border border-zinc-900/[0.08] shadow-xs">
+              <div className="text-xs font-mono text-zinc-500 uppercase tracking-wider mb-1">
+                Total Inquiries
+              </div>
+              <div className="text-2xl font-bold text-zinc-900">{stats.total}</div>
+            </div>
+            <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 shadow-xs">
+              <div className="text-xs font-mono text-amber-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <Flame className="w-3.5 h-3.5" />
+                <span>New Leads</span>
+              </div>
+              <div className="text-2xl font-bold text-amber-600">{stats.newCount}</div>
+            </div>
+            <div className="p-4 rounded-2xl bg-blue-500/5 border border-blue-500/20 shadow-xs">
+              <div className="text-xs font-mono text-blue-600 uppercase tracking-wider mb-1">
+                Active Discussions
+              </div>
+              <div className="text-2xl font-bold text-blue-600">{stats.active}</div>
+            </div>
+            <div className="p-4 rounded-2xl bg-rose-500/5 border border-rose-500/20 shadow-xs">
+              <div className="text-xs font-mono text-rose-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <AlertCircle className="w-3.5 h-3.5" />
+                <span>Urgent Action</span>
+              </div>
+              <div className="text-2xl font-bold text-rose-600">{stats.urgentCount}</div>
+            </div>
+            <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 shadow-xs col-span-2 sm:col-span-1">
+              <div className="text-xs font-mono text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>Deals Won</span>
+              </div>
+              <div className="text-2xl font-bold text-emerald-600">{stats.wonCount}</div>
+            </div>
           </div>
-        </div>
+
+          {/* Empty State Outbound Callout Banner */}
+          {leads.length === 0 && (
+            <div className="p-5 rounded-2xl bg-gradient-to-r from-zinc-900 via-zinc-900 to-zinc-800 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
+              <div className="space-y-1">
+                <div className="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-orange-400">
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span>Solo-Founder Growth Engine Ready</span>
+                </div>
+                <h3 className="text-base sm:text-lg font-bold">
+                  Need B2B clients right now? Scrape targeted businesses & inject them into your CRM
+                </h3>
+                <p className="text-xs text-zinc-300 max-w-2xl">
+                  Search any industry (Schools, Real Estate, Study Abroad, Clinics, Hotels) across Pages 1–10, extract phone/WhatsApp & email contacts, and pitch them your live platforms in 1 click.
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveSection("scraper")}
+                className="px-4 py-2.5 rounded-xl bg-orange-600 hover:bg-orange-500 text-white text-xs font-bold inline-flex items-center gap-2 shrink-0 shadow-sm transition-all"
+              >
+                <Crosshair className="w-4 h-4" />
+                <span>Launch Outbound Lead Scraper</span>
+              </button>
+            </div>
+          )}
+
+          {/* Control Bar: Search, Filters, View Switcher */}
+          <div className="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3.5 p-3 rounded-2xl bg-white border border-zinc-900/[0.08]">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-zinc-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search leads by name, email, company, service..."
+                className="w-full bg-zinc-50 border border-zinc-900/[0.06] rounded-xl pl-9 pr-4 py-2 text-xs sm:text-sm text-zinc-900 placeholder-zinc-400 focus:outline-none focus:border-orange-600 transition-colors"
+              />
+            </div>
+
+            <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
+              {/* Status Filter */}
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="bg-zinc-50 border border-zinc-900/[0.06] rounded-xl px-3 py-2 text-xs text-zinc-700 focus:outline-none focus:border-orange-600"
+              >
+                <option value="all">All Stages</option>
+                {PIPELINE_ORDER.map((st) => (
+                  <option key={st} value={st}>
+                    {STATUS_CONFIG[st].label}
+                  </option>
+                ))}
+              </select>
+
+              {/* Priority Filter */}
+              <select
+                value={priorityFilter}
+                onChange={(e) => setPriorityFilter(e.target.value)}
+                className="bg-zinc-50 border border-zinc-900/[0.06] rounded-xl px-3 py-2 text-xs text-zinc-700 focus:outline-none focus:border-orange-600"
+              >
+                <option value="all">All Priorities</option>
+                <option value="urgent">Urgent</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+
+              {/* View Toggle */}
+              <div className="flex items-center bg-zinc-100 p-0.5 rounded-xl border border-zinc-900/[0.06] shrink-0">
+                <button
+                  onClick={() => setViewMode("kanban")}
+                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                    viewMode === "kanban"
+                      ? "bg-white text-zinc-900 shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  <Kanban className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Pipeline</span>
+                </button>
+                <button
+                  onClick={() => setViewMode("table")}
+                  className={`p-1.5 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all ${
+                    viewMode === "table"
+                      ? "bg-white text-zinc-900 shadow-xs"
+                      : "text-zinc-500 hover:text-zinc-900"
+                  }`}
+                >
+                  <TableIcon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Table</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* VIEW 1: KANBAN PIPELINE BOARD */}
+          {viewMode === "kanban" && (
+            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-4 overflow-x-auto pb-6">
+              {PIPELINE_ORDER.map((stage) => {
+                const cfg = STATUS_CONFIG[stage];
+                const stageLeads = filteredLeads.filter((l) => l.status === stage);
+
+                return (
+                  <div
+                    key={stage}
+                    className="flex flex-col rounded-2xl bg-zinc-100/70 border border-zinc-900/[0.06] p-3 min-w-[260px] xl:min-w-0"
+                  >
+                    {/* Column Header */}
+                    <div className="flex items-center justify-between pb-3 mb-3 border-b border-zinc-900/[0.06]">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className={`w-2 h-2 rounded-full ${cfg.bg.replace("/10", "")}`}
+                        />
+                        <span className="text-xs font-mono font-bold text-zinc-800">
+                          {cfg.label}
+                        </span>
+                      </div>
+                      <span className="text-[11px] font-mono font-semibold px-2 py-0.5 rounded-full bg-white text-zinc-600 border border-zinc-900/[0.06]">
+                        {stageLeads.length}
+                      </span>
+                    </div>
+
+                    {/* Column Cards */}
+                    <div className="space-y-3 flex-1 overflow-y-auto max-h-[700px]">
+                      {stageLeads.length === 0 ? (
+                        <div className="text-center py-8 text-[11px] text-zinc-400 font-mono">
+                          No leads
+                        </div>
+                      ) : (
+                        stageLeads.map((lead) => (
+                          <div
+                            key={lead.id}
+                            onClick={() => setActiveLead(lead)}
+                            className="p-3.5 rounded-xl bg-white border border-zinc-900/[0.08] hover:border-orange-600/40 hover:shadow-md transition-all cursor-pointer space-y-2.5 group"
+                          >
+                            <div className="flex items-start justify-between gap-1">
+                              <span
+                                className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
+                                  PRIORITY_BADGES[lead.priority].cls
+                                }`}
+                              >
+                                {lead.priority}
+                              </span>
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {new Date(lead.createdAt).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </span>
+                            </div>
+
+                            <div>
+                              <h4 className="text-sm font-bold text-zinc-900 group-hover:text-orange-600 transition-colors">
+                                {lead.name}
+                              </h4>
+                              {lead.company && (
+                                <div className="text-xs text-zinc-500 truncate flex items-center gap-1 mt-0.5">
+                                  <Building2 className="w-3 h-3 text-zinc-400" />
+                                  <span>{lead.company}</span>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="text-[11px] font-mono text-zinc-600 bg-zinc-50 p-1.5 rounded-lg border border-zinc-900/[0.04] truncate">
+                              {lead.service}
+                            </div>
+
+                            {lead.budget && (
+                              <div className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                                <DollarSign className="w-3 h-3" />
+                                <span>{lead.budget}</span>
+                              </div>
+                            )}
+
+                            <div className="flex items-center justify-between pt-2 border-t border-zinc-900/[0.04] text-[11px] text-zinc-400">
+                              <span className="truncate max-w-[120px]">
+                                {lead.assignedTo || "Unassigned"}
+                              </span>
+                              {lead.phone && (
+                                <a
+                                  href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-emerald-600 hover:text-emerald-700 p-1 rounded hover:bg-emerald-50"
+                                  title="Chat WhatsApp"
+                                >
+                                  <MessageCircle className="w-3.5 h-3.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* VIEW 2: TABLE LIST VIEW */}
+          {viewMode === "table" && (
+            <div className="rounded-2xl bg-white border border-zinc-900/[0.08] overflow-hidden shadow-xs">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs sm:text-sm">
+                  <thead className="bg-zinc-50/80 border-b border-zinc-900/[0.06] text-zinc-500 font-mono uppercase text-[11px]">
+                    <tr>
+                      <th className="py-3 px-4">Client / Company</th>
+                      <th className="py-3 px-4">Capability & Requirements</th>
+                      <th className="py-3 px-4">Budget / Timeline</th>
+                      <th className="py-3 px-4">Stage</th>
+                      <th className="py-3 px-4">Priority</th>
+                      <th className="py-3 px-4">Assignee</th>
+                      <th className="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-900/[0.06]">
+                    {filteredLeads.length === 0 ? (
+                      <tr>
+                        <td colSpan={7} className="text-center py-12 text-zinc-400 font-mono">
+                          No matching leads found.
+                        </td>
+                      </tr>
+                    ) : (
+                      filteredLeads.map((lead) => (
+                        <tr
+                          key={lead.id}
+                          onClick={() => setActiveLead(lead)}
+                          className="hover:bg-orange-50/30 transition-colors cursor-pointer"
+                        >
+                          <td className="py-3.5 px-4">
+                            <div className="font-bold text-zinc-900">{lead.name}</div>
+                            <div className="text-xs text-zinc-500">{lead.email}</div>
+                            {lead.company && (
+                              <div className="text-[11px] text-zinc-400 mt-0.5">{lead.company}</div>
+                            )}
+                          </td>
+                          <td className="py-3.5 px-4 max-w-[260px]">
+                            <div className="font-semibold text-zinc-800 truncate">{lead.service}</div>
+                            <div className="text-xs text-zinc-500 line-clamp-1 mt-0.5">
+                              {lead.message}
+                            </div>
+                          </td>
+                          <td className="py-3.5 px-4 font-mono text-xs">
+                            <div className="text-emerald-700 font-semibold">{lead.budget || "N/A"}</div>
+                            <div className="text-zinc-400">{lead.timeline || "Flexible"}</div>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`text-[11px] font-mono px-2.5 py-1 rounded-full border font-semibold inline-block ${
+                                STATUS_CONFIG[lead.status].bg
+                              } ${STATUS_CONFIG[lead.status].color} ${
+                                STATUS_CONFIG[lead.status].border
+                              }`}
+                            >
+                              {STATUS_CONFIG[lead.status].label}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4">
+                            <span
+                              className={`text-[10px] font-mono px-2 py-0.5 rounded border uppercase font-semibold ${
+                                PRIORITY_BADGES[lead.priority].cls
+                              }`}
+                            >
+                              {lead.priority}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-4 text-xs text-zinc-600">
+                            {lead.assignedTo || "Unassigned"}
+                          </td>
+                          <td className="py-3.5 px-4 text-right" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-end gap-1">
+                              {lead.phone && (
+                                <a
+                                  href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, "")}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-1.5 rounded-lg text-emerald-600 hover:bg-emerald-50 transition-colors"
+                                  title="WhatsApp"
+                                >
+                                  <MessageCircle className="w-4 h-4" />
+                                </a>
+                              )}
+                              <a
+                                href={`mailto:${lead.email}`}
+                                className="p-1.5 rounded-lg text-orange-600 hover:bg-orange-50 transition-colors"
+                                title="Email"
+                              >
+                                <Mail className="w-4 h-4" />
+                              </a>
+                              <button
+                                onClick={() => handleDelete(lead.id)}
+                                className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </>
       )}
 
       {/* LEAD DETAILS & NOTES DRAWER (MODAL) */}
