@@ -6,10 +6,13 @@ import {
   createCRMLead,
   ScrapedProspect,
   getSavedScrapedProspects,
+  fetchScrapedProspectsFromDB,
   saveScrapedProspects,
+  deleteScrapedProspectFromDB,
   exportProspectsToCSV,
   ScrapeCampaignLog,
   getScrapeCampaignLogs,
+  fetchScrapeCampaignsFromDB,
   addScrapeCampaignLog,
   clearScrapeCampaignLogs,
 } from "@/lib/crm";
@@ -210,11 +213,16 @@ export default function LeadScraper({
   >("all");
   const [tableSearch, setTableSearch] = useState<string>("");
 
-  // Load persisted tables on mount
+  // Load persisted tables from Supabase PostgreSQL on mount
   useEffect(() => {
-    const savedProspects = getSavedScrapedProspects();
-    setProspects(savedProspects);
+    setProspects(getSavedScrapedProspects());
     setCampaignLogs(getScrapeCampaignLogs());
+    fetchScrapedProspectsFromDB().then((remoteProspects) => {
+      setProspects(remoteProspects);
+    });
+    fetchScrapeCampaignsFromDB().then((remoteCampaigns) => {
+      setCampaignLogs(remoteCampaigns);
+    });
   }, []);
 
   // Helper to update prospects state + persist to `scraped_prospects` table
@@ -1555,13 +1563,14 @@ export default function LeadScraper({
 
                           <button
                             type="button"
-                            onClick={() =>
+                            onClick={() => {
+                              deleteScrapedProspectFromDB(p.id);
                               updateAndPersistProspects((prev) =>
                                 prev.filter((item) => item.id !== p.id)
-                              )
-                            }
+                              );
+                            }}
                             className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50"
-                            title="Remove row"
+                            title="Remove row from Supabase"
                           >
                             <Trash2 className="w-3.5 h-3.5" />
                           </button>

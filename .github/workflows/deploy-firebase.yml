@@ -33,6 +33,8 @@ jobs:
           NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "1234567890"
           NEXT_PUBLIC_FIREBASE_APP_ID: "1:1234567890:web:1234567890abcdef"
           NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY: "pk_test_mockpaystackkey1234567890"
+          NEXT_PUBLIC_SUPABASE_URL: "https://cvhopmfoklijshhlmcbi.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN2aG9wbWZva2xpanNoaGxtY2JpIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODM2MjQxODksImV4cCI6MjA5OTIwMDE4OX0.CKMU6Ha7DoI9CqiSfpTSy3Bq55x-VUzfhc3NH-HkbfM"
         run: npm run build
 
       - name: Deploy to Firebase Hosting
